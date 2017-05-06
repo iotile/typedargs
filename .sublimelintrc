@@ -1,0 +1,11 @@
+{
+	"@python": "C:\\Arch\\env\\coretools-dev\\Scripts\\python",
+
+	"linters":
+	{
+		"pylint":
+		{
+			"show-codes": true,
+		}
+	}
+}
