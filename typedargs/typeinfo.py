@@ -260,7 +260,7 @@ class TypeSystem(object):
         """
 
         name = self._canonicalize_type(name)
-        base,is_complex,subs = self.split_type(name)
+        _, is_complex, _ = self.split_type(name)
 
         if self.is_known_type(name):
             raise ArgumentError("attempting to inject a type that is already defined", type=name)
@@ -282,7 +282,7 @@ class TypeSystem(object):
         do not start with _ and attempt to import them as types.
         """
 
-        for name in filter(lambda x: not x.startswith('_'), dir(module)):
+        for name in (x for x in dir(module) if not x.startswith('_')):
             typeobj = getattr(module, name)
 
             try:
@@ -298,13 +298,13 @@ class TypeSystem(object):
         it should not contain the trailing .py since this is added automatically by the python import system
         """
 
-        d,p = os.path.split(path)
+        d, p = os.path.split(path)
 
         try:
-            fileobj,pathname,description = imp.find_module(p, [d])
+            fileobj, pathname, description = imp.find_module(p, [d])
             mod = imp.load_module(p, fileobj, pathname, description)
-        except ImportError as e:
-            raise ArgumentError("could not import module in order to load external types", module_path=path, parent_directory=d, module_name=p, error=str(e))
+        except ImportError, exc:
+            raise ArgumentError("could not import module in order to load external types", module_path=path, parent_directory=d, module_name=p, error=str(exc))
 
         self.load_type_module(mod, verbose)
 
@@ -322,7 +322,7 @@ class TypeSystem(object):
         reg = ComponentRegistry()
         modules = reg.list_components()
 
-        typelibs = reduce(lambda x,y: x+y, [reg.find_component(x).type_packages() for x in modules], [])
+        typelibs = reduce(lambda x, y: x + y, [reg.find_component(x).type_packages() for x in modules], [])
         for lib in typelibs:
             if lib.endswith('.py'):
                 lib = lib[:-2]

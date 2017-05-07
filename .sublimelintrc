@@ -1,5 +1,5 @@
 {
-	"@python": "C:\\Arch\\env\\coretools-dev\\Scripts\\python",
+	"@python": "./env/bin/python",
 
 	"linters":
 	{

@@ -126,15 +126,15 @@ def _do_help(context, line):
 def deferred_add(add_action):
     """
     Perform a lazy import of a context so that we don't have a huge initial startup time
-    loading all of the modules that someone might want even though they probably only 
+    loading all of the modules that someone might want even though they probably only
     will use a few of them.
     """
 
-    module, sep, obj = add_action.partition(',')
+    module, _, obj = add_action.partition(',')
 
     mod = importlib.import_module(module)
     if obj == "":
-        name, con = annotate.context_from_module(mod)
+        _, con = annotate.context_from_module(mod)
         return con
 
     if hasattr(mod, obj):
