@@ -3,20 +3,20 @@
 # info@welldone.org
 # http://welldone.org
 #
-# Modifications to this file from the original created at WellDone International 
+# Modifications to this file from the original created at WellDone International
 # are copyright Arch Systems Inc.
 
-#annotate.py
-from decorator import decorator
 from builtins import range
-from typedargs.exceptions import KeyValueException, ValidationError
 import inspect
-from typedargs.typeinfo import type_system
 from collections import namedtuple
-import sys
+from decorator import decorator
+from typedargs.exceptions import ValidationError
+from typedargs.typeinfo import type_system
+
 
 class BasicContext(dict):
     pass
+
 
 def _check_and_execute(f, *args, **kwargs):
     """
@@ -40,7 +40,8 @@ def _check_and_execute(f, *args, **kwargs):
     retval = f(*convargs, **convkw)
     return retval
 
-def _process_arg(f, arg, value):
+
+def _process_arg(func, arg, value):
     """
     Ensure that value is a valid argument for the named 
     parameter arg based on the annotated type and validator
@@ -48,20 +49,21 @@ def _process_arg(f, arg, value):
     ConversionError or ValidationError exceptions.
     """
 
-    if arg in f.params:
-        val = type_system.convert_to_type(value, f.types[arg])
+    if arg in func.params:
+        val = type_system.convert_to_type(value, func.types[arg])
     else:
         val = value
 
-    #Run all of the validators
+    # Run all of the validators
     try:
-        if arg in f.valids:
-            for valid in f.valids[arg]:
+        if arg in func.valids:
+            for valid in func.valids[arg]:
                 valid[0](val, *valid[1])
-    except (ValueError,TypeError) as e:
-        raise ValidationError(e.args[0], argument=arg, value=val)
+    except (ValueError, TypeError) as exc:
+        raise ValidationError(exc.args[0], argument=arg, value=val)
 
     return val
+
 
 def _parse_validators(type, valids):
     """
@@ -91,6 +93,7 @@ def _parse_validators(type, valids):
 
     return outvals
 
+
 def get_spec(f):
     if inspect.isclass(f):
         f = f.__init__
@@ -112,6 +115,7 @@ def get_spec(f):
 
     return reqargs, optargs
 
+
 def spec_filled(req, opt, pos, kw):
     left = filter(lambda x: x not in kw, pos)
     left = req[len(left):]
@@ -120,6 +124,7 @@ def spec_filled(req, opt, pos, kw):
         return True
 
     return False
+
 
 def get_signature(f):
     """
@@ -160,6 +165,7 @@ def get_signature(f):
             args.append(typestr + str(spec.args[i]))
 
     return "%s(%s)" % (name, ", ".join(args))
+
 
 def print_help(f):
     """
@@ -202,6 +208,7 @@ def print_help(f):
 
         print(" - %s (%s): %s" % (key, type, desc))
 
+
 def print_retval(f, value):
     if hasattr(f, 'typed_retval') and f.typed_retval == True:
         print(type_system.format_return_value(f, value))
@@ -217,12 +224,13 @@ def print_retval(f, value):
     else:
         print(str(value))
 
+
 def find_all(container):
     if isinstance(container, dict):
         names = container.keys()
     else:
         names = dir(container)
-    
+
     context = BasicContext()
 
     for name in names:
@@ -235,18 +243,19 @@ def find_all(container):
         else:
             obj = getattr(container, name)
 
-        #Check if this is an annotated object that should be included.  Check the type of
-        #annotated to avoid issues with module imports where someone did from annotate import *
-        #into the module causing an annotated symbol to be defined as a decorator
+        # Check if this is an annotated object that should be included.  Check the type of
+        # annotated to avoid issues with module imports where someone did from annotate import *
+        # into the module causing an annotated symbol to be defined as a decorator
         
-        #If we are in a dict context then strings point to lazily loaded modules so include them
-        #too.
+        # If we are in a dict context then strings point to lazily loaded modules so include them
+        # too.
         if isinstance(container, dict) and isinstance(obj, str):
             context[name] = obj
         elif hasattr(obj, 'annotated') and isinstance(getattr(obj, 'annotated'), int):
             context[name] = obj
 
     return context
+
 
 def context_from_module(module):
     """

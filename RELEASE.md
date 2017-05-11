@@ -1,5 +1,9 @@
 # Release Notes
 
+## 0.9.1
+
+- Remove unnecessary pyparsing dependency
+
 ## 0.9.0
 
 - Initial release after being broken out of IOTile CoreTools
