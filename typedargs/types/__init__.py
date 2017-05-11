@@ -7,13 +7,13 @@
 # are copyright Arch Systems Inc.
 
 #Known Types
-import integer
-import string
-import path
-import bool
-import float
-import bytes
-import basic_dict
+from . import integer
+from . import string
+from . import path
+from . import bool
+from . import float
+from . import bytes
+from . import basic_dict
 
-from map import map
-from list import list
+from .map import map
+from .list import list

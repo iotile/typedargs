@@ -10,7 +10,7 @@ def convert(arg):
 	if arg is None:
 		return None
 
-	if isinstance(arg, basestring) or isinstance(arg, int) or isinstance(arg, long) or isinstance(arg, float):
+	if isinstance(arg, str) or isinstance(arg, int) or isinstance(arg, long) or isinstance(arg, float):
 		return float(arg)
 	
 	raise TypeError("Unknown argument type")

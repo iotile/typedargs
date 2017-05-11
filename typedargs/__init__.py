@@ -8,7 +8,7 @@
 
 #External API functions from this package
 
-from annotate import param, returns, context, finalizer, takes_cmdline, annotated, return_type, stringable
-from typeinfo import type_system, iprint
+from typedargs.annotate import param, returns, context, finalizer, takes_cmdline, annotated, return_type, stringable
+from typedargs.typeinfo import type_system, iprint
 
 __version__ = "0.9.0"

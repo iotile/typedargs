@@ -4,7 +4,7 @@ def convert(arg, **kwargs):
 	if arg is None:
 		return None
 
-	if isinstance(arg, basestring):
+	if isinstance(arg, str):
 		return json.loads(arg)
 	elif isinstance(arg, dict):
 		return arg

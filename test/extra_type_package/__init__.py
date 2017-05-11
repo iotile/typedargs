@@ -7,4 +7,4 @@
 # are copyright Arch Systems Inc.
 
 
-import extra_type as new_pkg_type
+from . import extra_type as new_pkg_type

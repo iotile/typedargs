@@ -8,6 +8,7 @@
 
 #annotate.py
 from decorator import decorator
+from builtins import range
 from typedargs.exceptions import KeyValueException, ValidationError
 import inspect
 from typedargs.typeinfo import type_system
@@ -27,7 +28,7 @@ def _check_and_execute(f, *args, **kwargs):
     spec = inspect.getargspec(f)
 
     #Convert and validate all arguments
-    for i in xrange(0, len(args)):
+    for i in range(0, len(args)):
         arg = spec.args[i]
         val = _process_arg(f, arg, args[i])
         convargs.append(val)
@@ -72,7 +73,7 @@ def _parse_validators(type, valids):
     outvals = []
 
     for val in valids:
-        if isinstance(val, basestring):
+        if isinstance(val, str):
             args = []
         elif len(val) > 1:
             args = val[1:]
@@ -141,7 +142,7 @@ def get_signature(f):
     num_no_def = num_args - num_def
 
     args = []
-    for i in xrange(0, len(spec.args)):
+    for i in range(0, len(spec.args)):
         typestr = ""
         if i == 0 and spec.args[i] == 'self':
             continue
@@ -152,7 +153,7 @@ def get_signature(f):
         if i >= num_no_def:
             default = str(spec.defaults[i-num_no_def])
             if len(default) == 0:
-                default="''"
+                default = "''"
 
             args.append("%s%s=%s" % (typestr, str(spec.args[i]), default))
         else:
@@ -172,11 +173,11 @@ def print_help(f):
     if isinstance(f, BasicContext):
         name = context_name(f)
 
-        print "\n" + name + "\n"
+        print("\n" + name + "\n")
         doc = inspect.getdoc(f)
         if doc is not None:
             doc = inspect.cleandoc(doc)
-            print doc
+            print(doc)
 
         return
 
@@ -185,21 +186,21 @@ def print_help(f):
     if doc is not None:
         doc = inspect.cleandoc(doc)
 
-    print "\n" + sig + "\n"
+    print("\n" + sig + "\n")
     if doc is not None:
-        print doc
+        print(doc)
 
     if inspect.isclass(f):
         f = f.__init__
 
-    print "\nArguments:"
+    print("\nArguments:")
     for key in f.params.iterkeys():
         type = f.types[key]
         desc = ""
         if key in f.param_descs:
             desc = f.param_descs[key]
 
-        print " - %s (%s): %s" % (key, type, desc)
+        print(" - %s (%s): %s" % (key, type, desc))
 
 def print_retval(f, value):
     if hasattr(f, 'typed_retval') and f.typed_retval == True:
@@ -240,7 +241,7 @@ def find_all(container):
         
         #If we are in a dict context then strings point to lazily loaded modules so include them
         #too.
-        if isinstance(container, dict) and isinstance(obj, basestring):
+        if isinstance(container, dict) and isinstance(obj, str):
             context[name] = obj
         elif hasattr(obj, 'annotated') and isinstance(getattr(obj, 'annotated'), int):
             context[name] = obj

@@ -141,7 +141,7 @@ class TypeSystem(object):
         Returns boolean indicating if type is known.
         """
 
-        if not isinstance(type, basestring):
+        if not isinstance(type, str):
             raise ArgumentError("type must be a string naming a known type", type=type)
 
         if type in self.known_types:
@@ -181,7 +181,7 @@ class TypeSystem(object):
         for sub_type in subtypes:
             try:
                 self.get_type(sub_type)
-            except KeyValueException, exc:
+            except KeyValueException as exc:
                 raise ArgumentError("could not instantiate subtype for complex type", passed_type=typename, sub_type=sub_type, error=exc)
 
         typeobj = base_type.Build(*subtypes, type_system=self)
@@ -288,7 +288,7 @@ class TypeSystem(object):
         try:
             fileobj, pathname, description = imp.find_module(p, [d])
             mod = imp.load_module(p, fileobj, pathname, description)
-        except ImportError, exc:
+        except ImportError as exc:
             raise ArgumentError("could not import module in order to load external types", module_path=path, parent_directory=d, module_name=p, error=str(exc))
 
         self.load_type_module(mod, verbose)
@@ -302,7 +302,7 @@ def iprint(stringable):
     """
 
     if type_system.interactive:
-        print str(stringable)
+        print(stringable)
 
 
 #In order to support function annotations that must be resolved to types when modules

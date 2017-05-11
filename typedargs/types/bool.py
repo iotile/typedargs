@@ -13,7 +13,7 @@ def convert(arg, **kwargs):
 	if arg is None:
 		return arg
 
-	if isinstance(arg, basestring):
+	if isinstance(arg, str):
 		comp = arg.lower()
 		if comp == 'true':
 			return True
