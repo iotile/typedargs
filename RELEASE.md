@@ -1,5 +1,9 @@
 # Release Notes
 
+## 0.9.2
+
+- Update unicode compatibility
+
 ## 0.9.1
 
 - Remove unnecessary pyparsing dependency

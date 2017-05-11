@@ -4,6 +4,9 @@
 #bytes.py
 #Simple bytearray type
 
+from builtins import str
+
+
 def convert(arg, **kwargs):
     if isinstance(arg, bytearray):
         return arg

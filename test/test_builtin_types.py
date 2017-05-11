@@ -59,25 +59,25 @@ def test_annotation_validation():
 
 def test_bool_valid():
     val = type_system.convert_to_type('True', 'bool')
-    assert val == True
+    assert val is True
 
     val = type_system.convert_to_type('false', 'bool')
-    assert val == False
+    assert val is False
 
     val = type_system.convert_to_type(True, 'bool')
-    assert val == True
+    assert val is True
 
     val = type_system.convert_to_type(False, 'bool')
-    assert val == False
+    assert val is False
 
     val = type_system.convert_to_type(None, 'bool')
     assert val is None
 
     val = type_system.convert_to_type(0, 'bool')
-    assert val == False
-    
+    assert val is False
+
     val = type_system.convert_to_type(1, 'bool')
-    assert val == True
+    assert val is True
 
 
 def test_format_bool():
@@ -86,3 +86,22 @@ def test_format_bool():
 
     val = type_system.format_value(False, 'bool')
     assert val == 'False'
+
+
+def test_unicode_conversion():
+    """Make sure that converting to builtin types from unicode works."""
+
+    # Test bool
+    val = type_system.convert_to_type(u'True', 'bool')
+    assert val is True
+
+    val = type_system.convert_to_type(u'False', 'bool')
+    assert val is False
+
+    # Test int
+    val = type_system.convert_to_type(u'42', 'integer')
+    assert val == 42
+
+    # Test float
+    val = type_system.convert_to_type(u'42.5', 'float')
+    assert val == 42.5

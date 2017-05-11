@@ -6,6 +6,9 @@
 # Modifications to this file from the original created at WellDone International 
 # are copyright Arch Systems Inc.
 
+from builtins import str
+
+
 def convert(arg):
     if arg is None:
         return None

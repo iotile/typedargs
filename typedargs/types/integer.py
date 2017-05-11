@@ -8,15 +8,18 @@
 
 #integer type
 
+from past.builtins import basestring
+
+
 def convert(arg):
     if arg is None:
         return None
 
-    if isinstance(arg, str):
+    if isinstance(arg, basestring):
         return int(arg, 0)
     elif isinstance(arg, int) or isinstance(arg, long):
         return arg
-    
+
     raise TypeError("Unknown argument type")
 
 #Validation Functions
