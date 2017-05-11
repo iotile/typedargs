@@ -6,9 +6,7 @@
 # Modifications to this file from the original created at WellDone International 
 # are copyright Arch Systems Inc.
 
-#External API functions from this package
+# External API functions from this package
 
 from typedargs.annotate import param, returns, context, finalizer, takes_cmdline, annotated, return_type, stringable
 from typedargs.typeinfo import type_system, iprint
-
-__version__ = "0.9.0"

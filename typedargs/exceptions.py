@@ -81,7 +81,8 @@ class KeyValueException(Exception):
 
 
 class ArgumentError(KeyValueException):
-    """
+    """There is a problem with one of the arguments to the function.
+
     The method could not be called with the arguments passed.  This
     differs from InternalError in that when ArgumentError is returned,
     it is known that these arguments can never work for this function.
@@ -94,7 +95,8 @@ class ArgumentError(KeyValueException):
 
 
 class ValidationError(KeyValueException):
-    """
+    """The type validators attached to a parameter failed.
+
     API routines can impose validation criteria on` their arguments in
     addition to requiring simply a certain type of argument.  A clasic
     example is the "path" type which can have validators like "readable"
@@ -105,7 +107,8 @@ class ValidationError(KeyValueException):
 
 
 class ConversionError(KeyValueException):
-    """
+    """An error occurred converted an argument to its specified type.
+
     All API functions take typed parameters.  Each type defines conversion
     operators for python types that are logically related to it.  When no
     valid conversion exists for the data type passed, this error is thrown.
@@ -115,7 +118,8 @@ class ConversionError(KeyValueException):
 
 
 class NotFoundError(KeyValueException):
-    """
+    """A method was invoked by name that does not exist.
+
     Thrown when an attempt to execute an API method is made and the API
     method does not exist.
     """
@@ -124,16 +128,19 @@ class NotFoundError(KeyValueException):
 
 
 class TypeSystemError(KeyValueException):
-    """
-    There was an error with the IOTile type system.  This can be due to improperly
+    """An unspecified internal error occurred in the typedargs type system.
+
+    There was an error with the type system.  This can be due to improperly
     specifying an unknown type or because the required type was not properly loaded
     from an external module before a function that used that type was needed.
     """
 
     pass
 
+
 class InternalError(KeyValueException):
-    """
+    """An unexpected internal error prevented method completion.
+
     The method could not be completed with the user input passed for
     an unexpected reason.  This does not signify a bug in the API
     method code.  More details should be passed in the arguments.
