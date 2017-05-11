@@ -4,7 +4,7 @@ python:
 - '2.7'
 - '3.6'
 install:
-- pip install --upgrade tox-travis -r requirements-build.txt
+- pip install --upgrade tox-travis -r requirements_build.txt
 script:
 - tox
 deploy:
