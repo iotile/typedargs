@@ -8,7 +8,7 @@
 
 #annotate.py
 from decorator import decorator
-from typedargs.exceptions import KeyValueException
+from typedargs.exceptions import KeyValueException, ValidationError
 import inspect
 from typedargs.typeinfo import type_system
 from collections import namedtuple
@@ -36,14 +36,7 @@ def _check_and_execute(f, *args, **kwargs):
     for key, val in kwargs:
         convkw[key] = _process_arg(f, key, val)
 
-    #Ensure that only IOTileException subclasses are passed by the caller
-    try:
-        retval = f(*convargs, **convkw)
-    except KeyValueException:
-        raise
-    except Exception as unknown:
-        raise APIError(str(unknown.args)), None, sys.exc_info()[2]
-
+    retval = f(*convargs, **convkw)
     return retval
 
 def _process_arg(f, arg, value):

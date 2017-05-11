@@ -80,6 +80,19 @@ class KeyValueException(Exception):
         return self.format()
 
 
+class ArgumentError(KeyValueException):
+    """
+    The method could not be called with the arguments passed.  This
+    differs from InternalError in that when ArgumentError is returned,
+    it is known that these arguments can never work for this function.
+
+    An example would be passing three arguments to a function requiring
+    4 arguments.
+    """
+
+    pass
+
+
 class ValidationError(KeyValueException):
     """
     API routines can impose validation criteria on` their arguments in
@@ -115,6 +128,15 @@ class TypeSystemError(KeyValueException):
     There was an error with the IOTile type system.  This can be due to improperly
     specifying an unknown type or because the required type was not properly loaded
     from an external module before a function that used that type was needed.
+    """
+
+    pass
+
+class InternalError(KeyValueException):
+    """
+    The method could not be completed with the user input passed for
+    an unexpected reason.  This does not signify a bug in the API
+    method code.  More details should be passed in the arguments.
     """
 
     pass

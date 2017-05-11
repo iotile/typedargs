@@ -3,35 +3,19 @@
 # info@welldone.org
 # http://welldone.org
 #
-# Modifications to this file from the original created at WellDone International 
+# Modifications to this file from the original created at WellDone International
 # are copyright Arch Systems Inc.
 
 #typeinfo.py
 #Basic routines for converting information from string or other binary
-#formats to python types and for displaying those types in supported 
+#formats to python types and for displaying those types in supported
 #formats
-#TODO: 
-#- Extend the type system to use a recursive parser to allow complex
-#  types to be built from other complex types.
 
-import pkg_resources
-from iotile.core.exceptions import *
-import types
 import os.path
 import imp
+from typedargs.exceptions import ValidationError, ArgumentError, KeyValueException
+import typedargs.types as types
 
-#Start working on recursive parser
-#import pyparsing
-#symbolchars = pyparsing.Regex('[_a-zA-Z][_a-zA-Z0-9]*')
-#typename = pyparsing.Word(symbolchars)
-
-#simpletype = typename
-#complextype = pyparsing.Forward()
-
-#typelist = pyparsing.delimitedList(simpletype | complextype, ',')
-#complextype << typename + pyparsing.Literal('(').suppress() + typelist + pyparsing.Literal(')').suppress()
-
-#statement = 
 
 class TypeSystem(object):
     """
@@ -52,9 +36,9 @@ class TypeSystem(object):
         for arg in args:
             self.load_type_module(arg)
 
-    def convert_to_type(self, value, type, **kwargs):
+    def convert_to_type(self, value, typename, **kwargs):
         """
-        Convert value to type 'type'
+        Convert value to type 'typename'
 
         If the conversion routine takes various kwargs to 
         modify the conversion process, **kwargs is passed
@@ -62,14 +46,14 @@ class TypeSystem(object):
         """
         try:
             if isinstance(value, bytearray):
-                return self.convert_from_binary(value, type, **kwargs)
+                return self.convert_from_binary(value, typename, **kwargs)
 
-            typeobj = self.get_type(type)
+            typeobj = self.get_type(typename)
 
             conv = typeobj.convert(value, **kwargs)
             return conv
         except (ValueError, TypeError) as exc:
-            raise ValidationError("Could not convert value", type=type, value=value, error_message=str(exc))
+            raise ValidationError("Could not convert value", type=typename, value=value, error_message=str(exc))
 
     def convert_from_binary(self, binvalue, type, **kwargs):
         """
@@ -132,7 +116,8 @@ class TypeSystem(object):
         format_func = getattr(typeobj, formatter)
         return format_func(typed_val, **kwargs)
 
-    def _validate_type(self, typeobj):
+    @classmethod
+    def _validate_type(cls, typeobj):
         """
         Validate that all required type methods are implemented.
 
@@ -173,7 +158,7 @@ class TypeSystem(object):
         if '(' not in name:
             return name, False, []
 
-        base,sub = name.split('(')
+        base, sub = name.split('(')
         if len(sub) == 0 or sub[-1] != ')':
             raise ArgumentError("syntax error in complex type, no matching ) found", passed_type=typename, basetype=base, subtype_string=sub)
         
@@ -190,16 +175,16 @@ class TypeSystem(object):
         if base not in self.type_factories:
             raise ArgumentError("unknown complex base type specified", passed_type=typename, base_type=base)
 
-        BaseType = self.type_factories[base]
+        base_type = self.type_factories[base]
 
         #Make sure all of the subtypes are valid
-        for s in subtypes:
+        for sub_type in subtypes:
             try:
-                self.get_type(s)
-            except IOTileException as e:
-                raise ArgumentError("could not instantiate subtype for complex type", passed_type=typename, sub_type=s, error=e)
+                self.get_type(sub_type)
+            except KeyValueException, exc:
+                raise ArgumentError("could not instantiate subtype for complex type", passed_type=typename, sub_type=sub_type, error=exc)
 
-        typeobj = BaseType.Build(*subtypes, type_system=self)
+        typeobj = base_type.Build(*subtypes, type_system=self)
         self.inject_type(typename, typeobj)
 
     def _canonicalize_type(self, typename):
@@ -310,39 +295,6 @@ class TypeSystem(object):
 
         #TODO add checking for types that could not be injected and report them
 
-    def load_all_components(self):
-        """
-        Allow all registered iotile components that have associated type libraries to 
-        add themselves to the global type system.
-        """
-
-        # Find all of the registered IOTile components and see if we need to add any type libraries for them
-        from iotile.core.dev.registry import ComponentRegistry
-
-        reg = ComponentRegistry()
-        modules = reg.list_components()
-
-        typelibs = reduce(lambda x, y: x + y, [reg.find_component(x).type_packages() for x in modules], [])
-        for lib in typelibs:
-            if lib.endswith('.py'):
-                lib = lib[:-2]
-
-            self.load_external_types(lib)
-
-        #Also search through install distributions for type libraries
-        for entry in pkg_resources.iter_entry_points('iotile.type_package'):
-            mod = entry.load()
-            self.load_type_module(mod) 
-
-
-#In order to support function annotations that must be resolved to types when modules
-#are imported, create a default TypeSystem object that is used globally to store type
-#information
-
-type_system = TypeSystem(types)
-
-#Allow iotile plugins to register themselves and include their types
-type_system.load_all_components()
 
 def iprint(stringable):
     """
@@ -351,3 +303,10 @@ def iprint(stringable):
 
     if type_system.interactive:
         print str(stringable)
+
+
+#In order to support function annotations that must be resolved to types when modules
+#are imported, create a default TypeSystem object that is used globally to store type
+#information
+
+type_system = TypeSystem(types)

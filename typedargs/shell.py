@@ -10,12 +10,11 @@
 #Given a command line string, attempt to map it to a function and fill in 
 #the parameters based on that function's annotated type information.
 
-from iotile.core.exceptions import *
-import annotate
+from typedargs.exceptions import InternalError, ArgumentError, NotFoundError
+import typedargs.annotate as annotate
 import inspect
 import shlex
-from typeinfo import type_system
-from iotile.core.utilities.rcfile import RCFile
+from typedargs.typeinfo import type_system
 import os.path
 import platform
 import importlib
@@ -165,17 +164,11 @@ class InitialContext(dict):
     pass
 
 class HierarchicalShell:
-    def __init__(self, name, no_rc=False):
-        """
-        Create a new HierarchicalShell, optionally loading initialization
-        statements from an RCFile based on the passed identifier 'name'.
-        """
+    """A hierarchical shell for navigating through python package API functions."""
 
+    def __init__(self, name):
         self.name = name
         self.init_commands = {}
-
-        if not no_rc:
-            self._load_rc()
 
         self.root = InitialContext()
         self.contexts = [self.root]
@@ -224,53 +217,6 @@ class HierarchicalShell:
         funcs = annotate.find_all(self.contexts[-1]).keys() + builtin_help.keys()
         return funcs
 
-    def _load_rc(self):
-        """
-        Load context initialization commands from a configuration file.  The 
-        file should have the format:
-        [Context1]
-        <list of commands>
-
-        [OldContext1.Subcontext1]
-        <list of commands>
-
-        where list of commands is a list of lines that are executed using invoke
-        whenever a context matching the identifier inside of the brackets is created
-        for the first time.  This lets you run custom configuration routines to take 
-        care of tiresome initialization calls automatically.
-        """
-
-        rcfile = RCFile(self.name)
-        context = None
-        cmds = []
-
-        for line in rcfile.contents:
-            line = line.strip()
-
-            if len(line) == 0:
-                continue
-
-            if line[0] == '[':
-                lasti = line.find(']')
-                if lasti == -1:
-                    raise InternalError("Syntax Error in rcfile, missing closing ]", line=line, name=self.name, path=rcfile.path)
-
-                if context is not None:
-                    self.init_commands[context] = cmds
-                
-                #Start a new context
-                context = line[1:lasti].strip()
-                cmds = []
-            else:
-                #Process a command line
-                if context is None:
-                    raise InternalError("Syntax Error in rcfile, command given before a context was specified", line=line, name=self.name, path=rcfile.path)
-
-                cmds.append(line)
-
-        if context is not None:
-            self.init_commands[context] = cmds
-
     def _check_initialize_context(self):
         """
         Check if our context matches something that we have initialization commands
@@ -285,7 +231,7 @@ class HierarchicalShell:
         old_interactive = type_system.interactive
         type_system.interactive = False
 
-        for key,cmds in self.init_commands.iteritems():
+        for key, cmds in self.init_commands.iteritems():
             if path.endswith(key):
                 for cmd in cmds:
                     line = shlex.split(cmd, posix=posix_lex)
@@ -333,10 +279,10 @@ class HierarchicalShell:
             return line[1:], False
 
         #find out how many position and kw args this function takes
-        posset,kwset = annotate.get_spec(func)
+        posset, kwset = annotate.get_spec(func)
 
         #If the function wants arguments directly, do not parse them
-        if func.takes_cmdline == True:
+        if func.takes_cmdline is True:
             val = func(line[1:])
         else:
             arg_it = (x for x in line[1:])
@@ -345,7 +291,7 @@ class HierarchicalShell:
 
             i = 1
             for arg in arg_it:
-                if arg.startswith('--') or ((arg.startswith('-') and len(arg)==2)):
+                if arg.startswith('--') or ((arg.startswith('-') and len(arg) == 2)):
                     name, val, skip = process_kwarg(arg, arg_it)
                     kwargs[name] = val
                     i += skip
@@ -362,10 +308,10 @@ class HierarchicalShell:
 
             val = func(*posargs, **kwargs)
 
-        #Update our current context if this function destroyed it or returned a new one.
+        # Update our current context if this function destroyed it or returned a new one.
         finished = True
 
-        if func.finalizer == True:
+        if func.finalizer is True:
             self.contexts.pop()
         elif val is not None:
             if annotate.check_returns_data(func):

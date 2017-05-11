@@ -6,9 +6,8 @@
 # Modifications to this file from the original created at WellDone International 
 # are copyright Arch Systems Inc.
 
-from iotile.core.utilities.typedargs import type_system
-from iotile.core.utilities import typedargs
-from iotile.core.exceptions import *
+import typedargs
+from typedargs import type_system
 
 def test_simplereturntype():
 	@typedargs.return_type("string")
@@ -19,6 +18,7 @@ def test_simplereturntype():
 	formed = type_system.format_return_value(returns_string, val)
 
 	assert formed == "hello"
+
 
 def test_complexreturntype():
 	@typedargs.return_type("map(string, integer)")
