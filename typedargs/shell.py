@@ -10,6 +10,10 @@
 #Given a command line string, attempt to map it to a function and fill in 
 #the parameters based on that function's annotated type information.
 
+from __future__ import (absolute_import, division,
+                        print_function, unicode_literals)
+from builtins import str
+from future.utils import itervalues, iteritems
 from typedargs.exceptions import InternalError, ArgumentError, NotFoundError
 import typedargs.annotate as annotate
 import inspect
@@ -27,6 +31,7 @@ builtin_help = {
     'quit': "quit: quit the momo shell"
 }
 
+
 def process_kwarg(flag, arg_it):
     flag = flag[2:]
     skip = 0
@@ -40,6 +45,7 @@ def process_kwarg(flag, arg_it):
         skip = 1
 
     return name, value, skip
+
 
 @annotate.param("package", "path", "exists", desc="Path to the python package containing the types")
 @annotate.param("module", "string", desc="The name of the submodule to load from package, if applicable")
@@ -67,17 +73,18 @@ def import_types(package, module=None):
 
     type_system.load_external_types(path)
 
+
 def print_dir(context):
     doc = inspect.getdoc(context)
     
-    print ""
-    print annotate.context_name(context)
+    print("")
+    print(annotate.context_name(context))
 
     if doc is not None:
         doc = inspect.cleandoc(doc)
-        print doc
+        print(doc)
     
-    print "\nDefined Functions:"
+    print("\nDefined Functions:")
 
     if isinstance(context, dict):
         funs = context.keys()
@@ -87,28 +94,30 @@ def print_dir(context):
     for fun in funs:
         fun = find_function(context, fun)
         if isinstance(fun, annotate.BasicContext):
-            print " - " + fun._annotated_name
+            print(" - " + fun._annotated_name)
         else:
-            print " - " + annotate.get_signature(fun)
+            print(" - " + annotate.get_signature(fun))
 
         if annotate.short_description(fun) != "":
-            print "   " + annotate.short_description(fun) + '\n'
+            print("   " + annotate.short_description(fun) + '\n')
         else:
-            print ""
+            print("")
 
-    print "\nBuiltin Functions"
+    print("\nBuiltin Functions")
     for bi in builtin_help.values():
-        print ' - ' + bi
+        print(' - ' + bi)
 
-    print ""
+    print("")
+
 
 def print_help(context, fname):
     if fname in builtin_help:
-        print builtin_help[fname]
+        print(builtin_help[fname])
         return
 
     func = find_function(context, fname)
     annotate.print_help(func)
+
 
 def _do_help(context, line):
     args = line[1:]
@@ -117,10 +126,11 @@ def _do_help(context, line):
     elif len(args) == 1:
         print_help(context, args[0])
     else:
-        print "Too many arguments:", args
-        print "Usage: help [function]"
+        print("Too many arguments:", args)
+        print("Usage: help [function]")
 
     return [], True
+
 
 def deferred_add(add_action):
     """
@@ -141,6 +151,7 @@ def deferred_add(add_action):
 
     raise ArgumentError("Attempted to import nonexistent object from module", module=module, object=obj)
 
+
 def find_function(context, funname):
     func = None
     if isinstance(context, dict):
@@ -148,7 +159,7 @@ def find_function(context, funname):
             func = context[funname]
 
             #Allowed lazy loading of functions
-            if isinstance(func, basestring):
+            if isinstance(func, str):
                 func = deferred_add(func)
                 context[funname] = func
     elif hasattr(context, funname):
@@ -159,9 +170,11 @@ def find_function(context, funname):
 
     return func
 
+
 @annotate.context("root")
 class InitialContext(dict):
     pass
+
 
 class HierarchicalShell:
     """A hierarchical shell for navigating through python package API functions."""
@@ -231,7 +244,7 @@ class HierarchicalShell:
         old_interactive = type_system.interactive
         type_system.interactive = False
 
-        for key, cmds in self.init_commands.iteritems():
+        for key, cmds in iteritems(self.init_commands):
             if path.endswith(key):
                 for cmd in cmds:
                     line = shlex.split(cmd, posix=posix_lex)

@@ -6,7 +6,7 @@
 # Modifications to this file from the original created at WellDone International
 # are copyright Arch Systems Inc.
 
-from builtins import range
+from builtins import range, str
 import inspect
 from collections import namedtuple
 from decorator import decorator
@@ -117,7 +117,7 @@ def get_spec(f):
 
 
 def spec_filled(req, opt, pos, kw):
-    left = filter(lambda x: x not in kw, pos)
+    left = [x for x in pos if x not in kw]
     left = req[len(left):]
 
     if len(left) == 0:
