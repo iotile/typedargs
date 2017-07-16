@@ -13,7 +13,7 @@ import pytest
 import typedargs.typeinfo as typeinfo
 import typedargs.types as types
 from typedargs import param
-from typedargs.exceptions import ArgumentError, ValidationError
+from typedargs.exceptions import ArgumentError
 
 
 @pytest.fixture(scope="function")
@@ -66,10 +66,10 @@ def test_lazy_type_loading(clean_typesystem):
     """Make sure type information is loaded lazily."""
 
     @param("param1", "new_type")
-    def inner_function(param1):
+    def inner_function(param1):  # pylint: disable=C0111
         assert isinstance(param1, int)
 
-    with pytest.raises(ValidationError):
+    with pytest.raises(ArgumentError):
         inner_function('1')
 
     path = os.path.join(os.path.dirname(__file__), 'extra_types')

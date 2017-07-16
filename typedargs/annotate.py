@@ -10,11 +10,10 @@ from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 from builtins import range, str
 import inspect
-from collections import namedtuple
 from decorator import decorate
-from typedargs.exceptions import ValidationError
-from typedargs.typeinfo import type_system
-from typedargs.utils import _check_and_execute
+from typedargs.exceptions import ArgumentError
+from typedargs.utils import find_all, _check_and_execute, _parse_validators, context_name
+from typedargs.metadata import AnnotatedMetadata
 
 
 class BasicContext(dict):
@@ -44,55 +43,40 @@ def get_spec(func):
     return reqargs, optargs
 
 
-def spec_filled(req, opt, pos, kw):
-    left = [x for x in pos if x not in kw]
-    left = req[len(left):]
-
-    if len(left) == 0:
-        return True
-
-    return False
-
-
 def get_signature(func):
     """
     Return the pretty signature for this function:
     foobar(type arg, type arg=val, ...)
     """
 
-    name = func.__name__
-
     if inspect.isclass(func):
         func = func.__init__
 
-    spec = inspect.getargspec(func)
-    num_args = len(spec.args)
+    if not hasattr(func, 'metadata'):
+        raise ArgumentError("Cannot print signature for function without annotation information", name=func.__name__)
 
-    num_def = 0
-    if spec.defaults is not None:
-        num_def = len(spec.defaults)
+    return func.metadata.signature()
 
-    num_no_def = num_args - num_def
 
-    args = []
-    for i in range(0, len(spec.args)):
-        typestr = ""
-        if i == 0 and spec.args[i] == 'self':
-            continue
+def context_from_module(module):
+    """
+    Given a module, create a context from all of the top level annotated
+    symbols in that module.
+    """
 
-        if spec.args[i] in func.type_info:
-            typestr = "%s " % func.type_info[spec.args[i]]
+    con = find_all(module)
 
-        if i >= num_no_def:
-            default = str(spec.defaults[i-num_no_def])
-            if len(default) == 0:
-                default = "''"
+    if hasattr(module, "__doc__"):
+        setattr(con, "__doc__", module.__doc__)
 
-            args.append("%s%s=%s" % (typestr, str(spec.args[i]), default))
-        else:
-            args.append(typestr + str(spec.args[i]))
+    name = module.__name__
+    if hasattr(module, "_name_"):
+        name = module._name_
 
-    return "%s(%s)" % (name, ", ".join(args))
+    con = annotated(con, name)
+    setattr(con, 'context', True)
+
+    return name, con
 
 
 def print_help(func):
@@ -138,113 +122,16 @@ def print_help(func):
 
 
 def print_retval(func, value):
-    if hasattr(func, 'typed_retval') and func.typed_retval is True:
-        print(type_system.format_return_value(func, value))
-        return
-
-    if not hasattr(func, 'retval'):
-        print(str(value))
-
-    elif func.retval.printer[0] is not None:
-        func.retval.printer[0](value)
-    elif func.retval.desc != "":
-        print("%s: %s" % (func.retval.desc, str(value)))
-    else:
-        print(str(value))
-
-
-def find_all(container):
-    if isinstance(container, dict):
-        names = container.keys()
-    else:
-        names = dir(container)
-
-    built_context = BasicContext()
-
-    for name in names:
-        #Ignore _ and __ names
-        if name.startswith('_'):
-            continue
-
-        if isinstance(container, dict):
-            obj = container[name]
-        else:
-            obj = getattr(container, name)
-
-        # Check if this is an annotated object that should be included.  Check the type of
-        # annotated to avoid issues with module imports where someone did from annotate import *
-        # into the module causing an annotated symbol to be defined as a decorator
-
-        # If we are in a dict context then strings point to lazily loaded modules so include them
-        # too.
-        if isinstance(container, dict) and isinstance(obj, str):
-            built_context[name] = obj
-        elif hasattr(obj, 'annotated') and isinstance(getattr(obj, 'annotated'), int):
-            built_context[name] = obj
-
-    return built_context
-
-
-def context_from_module(module):
-    """
-    Given a module, create a context from all of the top level annotated
-    symbols in that module.
-    """
-
-    con = find_all(module)
-
-    if hasattr(module, "__doc__"):
-        setattr(con, "__doc__", module.__doc__)
-
-    if hasattr(module, "_name_"):
-        name = module._name_
-    else:
-        name = module.__name__
-
-    setattr(con, '_annotated_name', name)
-    setattr(con, 'context', True)
-
-    con = annotated(con)
-
-    return name, con
+    """Print the return value for a function."""
+    print(func.metadata.format_returnvalue(value))
 
 
 def check_returns_data(func):
-    if hasattr(func, 'typed_retval') and func.typed_retval is True:
-        return True
-
-    if not hasattr(func, 'retval'):
-        return False
-
-    return func.retval.data
+    return func.metadata.returns_data()
 
 
-def _parse_validators(valids):
-    """Parse a list of validator names or n-tuples, checking for errors.
+# Decorators
 
-    Returns:
-        list((func_name, [args...])): A list of validator function names and a
-            potentially empty list of optional parameters for each function.
-    """
-
-    outvals = []
-
-    for val in valids:
-        if isinstance(val, str):
-            args = []
-        elif len(val) > 1:
-            args = val[1:]
-            val = val[0]
-        else:
-            raise ValidationError("You must pass either an n-tuple or a string to define a validator", validator=val)
-
-        name = "validate_%s" % str(val)
-        outvals.append((name, args))
-
-    return outvals
-
-
-#Decorators
 def param(name, type_name, *validators, **kwargs):
     """Decorate a function to give type information about its parameters.
 
@@ -275,11 +162,8 @@ def param(name, type_name, *validators, **kwargs):
     def _param(func):
         func = annotated(func)
 
-        func.type_info[name] = type_name
-        func.validator_info[name] = _parse_validators(validators)
-
-        if 'desc' in kwargs:
-            func.param_descs[name] = kwargs['desc']
+        valids = _parse_validators(validators)
+        func.metadata.add_param(name, type_name, valids, **kwargs)
 
         # Only decorate the function once even if we have multiple param decorators
         if func.decorated:
@@ -292,72 +176,69 @@ def param(name, type_name, *validators, **kwargs):
 
 
 def returns(desc=None, printer=None, data=True):
-    """
-    Specify how the return value of this function should be handled
+    """Specify how the return value of this function should be handled.
 
-    If data == True, then this function just returns data and does
-    not return a context so that the context for future calls remains
-    unchanged.
+    Args:
+        desc (str): A deprecated description of the return value
+        printer (callable): A callable function that can format this return value
+        data (bool): A deprecated parameter for specifying that this function
+            returns data.
     """
+
+    if data is False:
+        raise ArgumentError("Specifying non data return type in returns is no longer supported")
 
     def _returns(func):
         annotated(func)
-
-        func.retval = namedtuple("ReturnValue", ["desc", "printer", "data"])
-        func.retval.desc = desc
-        func.retval.printer = (printer,)
-        func.retval.data = data
-
+        func.custom_returnvalue(printer, desc)
         return func
 
     return _returns
 
 
 def stringable(func):
-    """Specify that the return value for this function should just be printed as a string
+    """Specify that the return value should just be printed as a string.
+
+    Args:
+        func (callable): The function that we wish to annotate.
     """
 
-    func.retval = namedtuple("ReturnValue", ["desc", "printer", "data"])
-    func.retval.desc = ""
-    func.retval.printer = (None,)
-    func.retval.data = True
+    func = annotated(func)
+    func.metadata.string_returnvalue()
     return func
 
 
-def return_type(type, formatter=None):
-    """
-    Specify that this function returns a typed value
+def return_type(type_name, formatter=None):
+    """Specify that this function returns a typed value.
 
-    type must be a type known to the MoMo type system and formatter
-    must be a valid formatter for that type
+    Args:
+        type_name (str): A type name known to the global typedargs type system
+        formatter (str): An optional name of a formatting function specified
+            for the type given in type_name.
     """
 
     def _returns(func):
         annotated(func)
-        func.typed_retval = True
-        func.retval_type = type_system.get_type(type)
-        func.retval_typename = type
-        func.retval_formatter = formatter
-
+        func.metadata.typed_returnvalue(type_name, formatter)
         return func
 
     return _returns
 
 
 def context(name=None):
-    """
-    Declare that a class defines a MoMo context for use with the momo function for discovering
-    and using functionality.
+    """Declare that a class defines a context.
+
+    Contexts are for use with HierarchicalShell for discovering
+    and using functionality from the command line.
+
+    Args:
+        name (str): Optional name for this context if you don't want
+            to just use the class name.
     """
 
     def _context(cls):
-        annotated(cls)
+        annotated(cls, name)
         cls.context = True
-
-        if name is not None:
-            cls._annotated_name = name
-        else:
-            cls._annotated_name = cls.__name__
 
         return cls
 
@@ -375,27 +256,15 @@ def finalizer(func):
     return func
 
 
-def context_name(context):
-    """
-    Given a context, return its proper name
-    """
-
-    if hasattr(context, "_annotated_name"):
-        return context._annotated_name
-    elif inspect.isclass(context):
-        return context.__class__.__name__
-
-    return str(context)
-
-
 def takes_cmdline(func):
+    """Annotate that a function should take the entire command line."""
     func = annotated(func)
     func.takes_cmdline = True
 
     return func
 
 
-def annotated(func):
+def annotated(func, name=None):
     """Mark a function as callable from the command line.
 
     This function is meant to be called as decorator.  This function
@@ -405,19 +274,19 @@ def annotated(func):
     Args:
         func (callable): The function that we wish to mark as callable
             from the command line.
+        name (str): Optional string that will override the function's
+            built-in name.
     """
 
-    if hasattr(func, 'annotated'):
+    if hasattr(func, 'metadata'):
         return func
 
-    func.validator_info = {}
-    func.type_info = {}
-    func.param_descs = {}
+    func.metadata = AnnotatedMetadata(func, name)
 
-    func.annotated = True
     func.finalizer = False
     func.takes_cmdline = False
     func.decorated = False
+    func.context = False
 
     return func
 

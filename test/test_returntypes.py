@@ -19,8 +19,7 @@ def test_simplereturntype():
         return "hello"
 
     val = returns_string()
-    formed = type_system.format_return_value(returns_string, val)
-
+    formed = returns_string.metadata.format_returnvalue(val)
     assert formed == "hello"
 
 
@@ -32,6 +31,17 @@ def test_complexreturntype():
         return {"hello": 5}
 
     val = returns_map()
-    formed = type_system.format_return_value(returns_map, val)
-
+    formed = returns_map.metadata.format_returnvalue(val)
     assert formed == "hello: 5"
+
+
+def test_stringable_returnvalue():
+    """Make sure stringable works."""
+
+    @typedargs.stringable
+    def returns_stringable(): # pylint: disable=C0111,W0613
+        return True
+
+    val = returns_stringable()
+    formed = returns_stringable.metadata.format_returnvalue(val)
+    assert formed == "True"

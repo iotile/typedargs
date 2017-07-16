@@ -237,14 +237,6 @@ class TypeSystem(object):
 
         return True
 
-
-    def format_return_value(self, function, value):
-        """
-        Format the return value of a function based on the annotated type information
-        """
-
-        return self.format_value(value, function.retval_typename, function.retval_formatter)
-
     def inject_type(self, name, typeobj):
         """
         Given a module-like object that defines a type, add it to our type system so that
@@ -290,17 +282,15 @@ class TypeSystem(object):
         it should not contain the trailing .py since this is added automatically by the python import system
         """
 
-        d, p = os.path.split(path)
+        folder, filename = os.path.split(path)
 
         try:
-            fileobj, pathname, description = imp.find_module(p, [d])
-            mod = imp.load_module(p, fileobj, pathname, description)
+            fileobj, pathname, description = imp.find_module(filename, [folder])
+            mod = imp.load_module(filename, fileobj, pathname, description)
         except ImportError as exc:
-            raise ArgumentError("could not import module in order to load external types", module_path=path, parent_directory=d, module_name=p, error=str(exc))
+            raise ArgumentError("could not import module in order to load external types", module_path=path, parent_directory=folder, module_name=filename, error=str(exc))
 
         self.load_type_module(mod, verbose)
-
-        #TODO add checking for types that could not be injected and report them
 
 
 def iprint(stringable):
