@@ -16,48 +16,6 @@ from typedargs.utils import find_all, _check_and_execute, _parse_validators, con
 from typedargs.metadata import AnnotatedMetadata
 
 
-class BasicContext(dict):
-    """A Basic context for holding functions in a Hierarchical Shell."""
-    pass
-
-
-def get_spec(func):
-    if inspect.isclass(func):
-        func = func.__init__
-
-    spec = inspect.getargspec(func)
-
-    if spec.defaults is None:
-        numreq = len(spec.args)
-    else:
-        numreq = len(spec.args) - len(spec.defaults)
-
-    #If the first argument is self, don't return it
-    start = 0
-    if numreq > 0 and spec.args[0] == 'self':
-        start = 1
-
-    reqargs = spec.args[start:numreq]
-    optargs = set(spec.args[numreq:])
-
-    return reqargs, optargs
-
-
-def get_signature(func):
-    """
-    Return the pretty signature for this function:
-    foobar(type arg, type arg=val, ...)
-    """
-
-    if inspect.isclass(func):
-        func = func.__init__
-
-    if not hasattr(func, 'metadata'):
-        raise ArgumentError("Cannot print signature for function without annotation information", name=func.__name__)
-
-    return func.metadata.signature()
-
-
 def context_from_module(module):
     """
     Given a module, create a context from all of the top level annotated
@@ -71,7 +29,7 @@ def context_from_module(module):
 
     name = module.__name__
     if hasattr(module, "_name_"):
-        name = module._name_
+        name = module._name_  # pylint: disable=W0212
 
     con = annotated(con, name)
     setattr(con, 'context', True)
@@ -80,15 +38,14 @@ def context_from_module(module):
 
 
 def print_help(func):
-    """
-    Print usage information about a context or function.
+    """Print usage information about a context or function.
 
     For contexts, just print the context name and its docstring
     For functions, print the function signature as well as its
     argument types.
     """
 
-    if isinstance(func, BasicContext):
+    if isinstance(func, dict):
         name = context_name(func)
 
         print("\n" + name + "\n")
@@ -99,7 +56,7 @@ def print_help(func):
 
         return
 
-    sig = get_signature(func)
+    sig = func.metadata.get_signature()
     doc = inspect.getdoc(func)
     if doc is not None:
         doc = inspect.cleandoc(doc)
@@ -119,15 +76,6 @@ def print_help(func):
             desc = func.param_descs[key]
 
         print(" - %s (%s): %s" % (key, type, desc))
-
-
-def print_retval(func, value):
-    """Print the return value for a function."""
-    print(func.metadata.format_returnvalue(value))
-
-
-def check_returns_data(func):
-    return func.metadata.returns_data()
 
 
 # Decorators

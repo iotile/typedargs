@@ -239,7 +239,7 @@ class AnnotatedMetadata(object):
             arg_value (object): The value to convert and validate
 
         Returns:
-            object: The converted value
+            object: The converted value.
         """
 
         type_name = self.param_type(arg_name)

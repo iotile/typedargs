@@ -5,6 +5,11 @@ from .exceptions import ValidationError
 from .metadata import AnnotatedMetadata
 
 
+class BasicContext(dict):
+    """A Basic context for holding functions in a Hierarchical Shell."""
+    pass
+
+
 def _check_and_execute(func, *args, **kwargs):
     """
     Check the type of all parameters with type information, converting
@@ -72,7 +77,7 @@ def find_all(container):
         container (object): The container to search for annotated functions.
 
     Returns:
-        BasicContext: A context with all of the found functions in it.
+        dict: A dict with all of the found functions in it.
     """
 
     if isinstance(container, dict):

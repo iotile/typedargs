@@ -1,3 +1,5 @@
+"""Hierarchical Shell provides as REPL like environment for executing commmands."""
+
 # This file is adapted from python code released by WellDone International
 # under the terms of the LGPLv3.  WellDone International's contact information is
 # info@welldone.org
@@ -18,41 +20,19 @@ import os.path
 import platform
 import importlib
 from builtins import str
-from future.utils import iteritems
+from future.utils import iteritems, iterkeys
 from typedargs.exceptions import ArgumentError, NotFoundError
 import typedargs.annotate as annotate
 import typedargs.utils as utils
 from typedargs.typeinfo import type_system
 
-builtin_help = {
-    'help': "help [function]: print help information about the current context or a function",
-    'back': "back: replace the current context with its parent",
-    'quit': "quit: quit the momo shell"
-}
-
-
-def process_kwarg(flag, arg_it):
-    flag = flag[2:]
-    skip = 0
-
-    #Check if of the form name=value
-    if '=' in flag:
-        name, value = flag.split('=')
-    else:
-        name = flag
-        value = next(arg_it)
-        skip = 1
-
-    return name, value, skip
-
 
 @annotate.param("package", "path", "exists", desc="Path to the python package containing the types")
 @annotate.param("module", "string", desc="The name of the submodule to load from package, if applicable")
 def import_types(package, module=None):
-    """
-    Add externally defined types from a python package or module
+    """Add externally defined types from a python package or module.
 
-    The MoMo type system is built on the typedargs package, which defines what kinds of types
+    The type system is based on type objects that define what kinds of types
     can be used for function arguments as well as how those types should be displayed and
     converted from binary representations or strings.  This function allows you to define external
     types in a separate package and import them into the MoMo type system so that they can be used.
@@ -71,102 +51,6 @@ def import_types(package, module=None):
         path = os.path.join(package, module)
 
     type_system.load_external_types(path)
-
-
-def print_dir(context):
-    doc = inspect.getdoc(context)
-
-    print("")
-    print(annotate.context_name(context))
-
-    if doc is not None:
-        doc = inspect.cleandoc(doc)
-        print(doc)
-
-    print("\nDefined Functions:")
-
-    if isinstance(context, dict):
-        funs = context.keys()
-    else:
-        funs = annotate.find_all(context)
-
-    for fun in funs:
-        fun = find_function(context, fun)
-        if isinstance(fun, annotate.BasicContext):
-            print(" - " + fun.metadata.name)
-        else:
-            print(" - " + annotate.get_signature(fun))
-
-        if annotate.short_description(fun) != "":
-            print("   " + annotate.short_description(fun) + '\n')
-        else:
-            print("")
-
-    print("\nBuiltin Functions")
-    for bif in builtin_help.values():
-        print(' - ' + bif)
-
-    print("")
-
-
-def print_help(context, fname):
-    if fname in builtin_help:
-        print(builtin_help[fname])
-        return
-
-    func = find_function(context, fname)
-    annotate.print_help(func)
-
-
-def _do_help(context, args):
-    if len(args) == 0:
-        print_dir(context)
-    elif len(args) == 1:
-        print_help(context, args[0])
-    else:
-        print("Too many arguments:", args)
-        print("Usage: help [function]")
-
-    return [], True
-
-
-def deferred_add(add_action):
-    """
-    Perform a lazy import of a context so that we don't have a huge initial startup time
-    loading all of the modules that someone might want even though they probably only
-    will use a few of them.
-    """
-
-    module, _, obj = add_action.partition(',')
-
-    mod = importlib.import_module(module)
-    if obj == "":
-        _, con = annotate.context_from_module(mod)
-        return con
-
-    if hasattr(mod, obj):
-        return getattr(mod, obj)
-
-    raise ArgumentError("Attempted to import nonexistent object from module", module=module, object=obj)
-
-
-def find_function(context, funname):
-    func = None
-    if isinstance(context, dict):
-        if funname in context:
-            func = context[funname]
-
-            #Allowed lazy loading of functions
-            if isinstance(func, str):
-                func = deferred_add(func)
-                context[funname] = func
-    elif hasattr(context, funname):
-        func = getattr(context, funname)
-
-    if func is None:
-        raise NotFoundError("Function not found", function=funname)
-
-    return func
 
 
 @annotate.context("root")
@@ -193,6 +77,25 @@ class HierarchicalShell(object):
 
         #Initialize the root context if required
         self._check_initialize_context()
+
+        # Initialize our builtin functions
+        self.builtins = {}
+        self.add_builtin('back', self._builtin_back)
+        self.add_builtin('help', self._builtin_help)
+        self.add_builtin('quit', self._builtin_quit)
+
+    def add_builtin(self, name, callable):
+        """Add a builtin function callable from all contexts.
+
+        Callable should be an annotated function like any other that you
+        want to call from a HierarchicalShell
+
+        Args:
+            name (str): The name of the function
+            callable (callable): The annotated function that we should call
+        """
+
+        self.builtins[name] = callable
 
     def root_update(self, dict_like):
         """Add entries to root from a dict_line object."""
@@ -229,8 +132,29 @@ class HierarchicalShell(object):
             list(str): A list of all of the valid identifiers for this context
         """
 
-        funcs = annotate.find_all(self.contexts[-1]).keys() + builtin_help.keys()
+        funcs = annotate.find_all(self.contexts[-1]).keys() + self.builtins.keys()
         return funcs
+
+    @classmethod
+    def _deferred_add(cls, add_action):
+        """Lazily load a callable.
+
+        Perform a lazy import of a context so that we don't have a huge initial startup time
+        loading all of the modules that someone might want even though they probably only
+        will use a few of them.
+        """
+
+        module, _, obj = add_action.partition(',')
+
+        mod = importlib.import_module(module)
+        if obj == "":
+            _, con = annotate.context_from_module(mod)
+            return con
+
+        if hasattr(mod, obj):
+            return getattr(mod, obj)
+
+        raise ArgumentError("Attempted to import nonexistent object from module", module=module, object=obj)
 
     @classmethod
     def _remove_quotes(cls, word):
@@ -269,6 +193,105 @@ class HierarchicalShell(object):
                     self.invoke(line)
 
         type_system.interactive = old_interactive
+
+    @annotate.finalizer
+    def _builtin_back(self):
+        """Pop the current context and return to its parent."""
+        pass  # Popping the context is handled by invoke since this is marked as a finalizer
+
+    @annotate.takes_cmdline
+    def _builtin_quit(self):
+        """Quit this hierarchical shell."""
+        del self.contexts[:]
+
+    @annotate.takes_cmdline
+    def _builtin_help(self, args):
+        """Display help information for a context or function."""
+
+        if len(args) == 0:
+            self.print_dir(self.contexts[-1])
+        elif len(args) == 1:
+            func = self.find_function(self.contexts[-1], args[0])
+            annotate.print_help(func)
+        else:
+            print("Too many arguments:", args)
+            print("Usage: help [function]")
+
+    def find_function(self, context, funname):
+        """Find a function in the given context by name.
+
+        This function will first search the list of builtins and if the
+        desired function is not a builtin, it will continue to search
+        the given context.
+
+        Args:
+            context (object): A dict or class that is a typedargs context
+            funname (str): The name of the function to find
+
+        Returns:
+            callable: The found function.
+        """
+
+        if funname in self.builtins:
+            return self.builtins[funname]
+
+        func = None
+        if isinstance(context, dict):
+            if funname in context:
+                func = context[funname]
+
+                #Allowed lazy loading of functions
+                if isinstance(func, str):
+                    func = self._deferred_add(func)
+                    context[funname] = func
+        elif hasattr(context, funname):
+            func = getattr(context, funname)
+
+        if func is None:
+            raise NotFoundError("Function not found", function=funname)
+
+        return func
+
+    def print_dir(self, context):
+        """Print a listing of all of the functions in this context including builtins.
+
+        Args:
+            context (object): The context to print a directory for.
+        """
+
+        doc = inspect.getdoc(context)
+
+        print("")
+        print(annotate.context_name(context))
+
+        if doc is not None:
+            doc = inspect.cleandoc(doc)
+            print(doc)
+
+        print("\nDefined Functions:")
+
+        if isinstance(context, dict):
+            funs = context.keys()
+        else:
+            funs = annotate.find_all(context)
+
+        for fun in funs:
+            fun = self.find_function(context, fun)
+            if isinstance(fun, dict):
+                print(" - " + fun.metadata.name)
+            else:
+                print(" - " + fun.metadata.get_signature())
+
+            if annotate.short_description(fun) != "":
+                print("   " + annotate.short_description(fun) + '\n')
+            else:
+                print("")
+
+        print("\nBuiltin Functions")
+        for bif in iterkeys(self.builtins):
+            print(' - ' + bif)
+
+        print("")
 
     def process_arguments(self, func, args):
         """Process arguments from the command line into positional and kw args.
@@ -382,22 +405,11 @@ class HierarchicalShell(object):
         funname = line.pop(0)
 
         context = self.contexts[-1]
-
-        #Check if we are asked for help
-        if funname == 'help':
-            return _do_help(context, line)
-        if funname == 'quit':
-            del self.contexts[:]
-            return [], True
-        if funname == 'back':
-            self.contexts.pop()
-            return line, True
-
-        func = find_function(context, funname)
+        func = self.find_function(context, funname)
 
         #If this is a context derived from a module or package, just jump to it
         #since there is no initialization function
-        if isinstance(func, annotate.BasicContext):
+        if isinstance(func, dict):
             self.contexts.append(func)
             self._check_initialize_context()
             return line, False
@@ -406,6 +418,7 @@ class HierarchicalShell(object):
         # into positional and kw arguments
         if func.takes_cmdline is True:
             val = func(line[1:])
+            line = []
         else:
             posargs, kwargs, line = self.process_arguments(func, line)
             val = func(*posargs, **kwargs)
@@ -416,9 +429,9 @@ class HierarchicalShell(object):
         if func.finalizer is True:
             self.contexts.pop()
         elif val is not None:
-            if annotate.check_returns_data(func):
+            if func.metadata.returns_data():
                 if type_system.interactive:
-                    annotate.print_retval(func, val)
+                    print(func.metadata.format_returnvalue(val))
             else:
                 self.contexts.append(val)
                 self._check_initialize_context()
