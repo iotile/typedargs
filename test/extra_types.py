@@ -3,14 +3,17 @@
 # info@welldone.org
 # http://welldone.org
 #
-# Modifications to this file from the original created at WellDone International 
+# Modifications to this file from the original created at WellDone International
 # are copyright Arch Systems Inc.
 
 
-class new_type:
-	def convert(cls, value):
-		pass
+class new_type(object):
+    """Basic new type."""
 
-	def default_formatter(cls, value):
-		pass
+    @classmethod
+    def convert(cls, value):
+        return int(value)
 
+    @classmethod
+    def default_formatter(cls, value):
+        pass

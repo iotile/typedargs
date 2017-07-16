@@ -3,25 +3,25 @@
 # info@welldone.org
 # http://welldone.org
 #
-# Modifications to this file from the original created at WellDone International 
+# Modifications to this file from the original created at WellDone International
 # are copyright Arch Systems Inc.
 
 #shell.py
-#Given a command line string, attempt to map it to a function and fill in 
+#Given a command line string, attempt to map it to a function and fill in
 #the parameters based on that function's annotated type information.
 
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
-from builtins import str
-from future.utils import itervalues, iteritems
-from typedargs.exceptions import InternalError, ArgumentError, NotFoundError
-import typedargs.annotate as annotate
 import inspect
 import shlex
-from typedargs.typeinfo import type_system
 import os.path
 import platform
 import importlib
+from builtins import str
+from future.utils import iteritems
+from typedargs.exceptions import ArgumentError, NotFoundError
+import typedargs.annotate as annotate
+from typedargs.typeinfo import type_system
 
 posix_lex = platform.system() != 'Windows'
 
@@ -54,15 +54,15 @@ def import_types(package, module=None):
     Add externally defined types from a python package or module
 
     The MoMo type system is built on the typedargs package, which defines what kinds of types
-    can be used for function arguments as well as how those types should be displayed and 
+    can be used for function arguments as well as how those types should be displayed and
     converted from binary representations or strings.  This function allows you to define external
     types in a separate package and import them into the MoMo type system so that they can be used.
     You might want to do this if you have custom firmware objects that you would like to interact with
-    or that are returned in a syslog entry, for example.  
+    or that are returned in a syslog entry, for example.
 
-    All objects defined in the global namespace of package (if module is None) or package.module if 
+    All objects defined in the global namespace of package (if module is None) or package.module if
     module is specified that define valid types will be imported and can from this point on be used
-    just like any primitive type defined in typedargs itself.  Imported types are indistinguishable 
+    just like any primitive type defined in typedargs itself.  Imported types are indistinguishable
     from primivtive types like string, integer and path.
     """
 
@@ -76,21 +76,21 @@ def import_types(package, module=None):
 
 def print_dir(context):
     doc = inspect.getdoc(context)
-    
+
     print("")
     print(annotate.context_name(context))
 
     if doc is not None:
         doc = inspect.cleandoc(doc)
         print(doc)
-    
+
     print("\nDefined Functions:")
 
     if isinstance(context, dict):
         funs = context.keys()
     else:
         funs = annotate.find_all(context)
-    
+
     for fun in funs:
         fun = find_function(context, fun)
         if isinstance(fun, annotate.BasicContext):
@@ -173,10 +173,11 @@ def find_function(context, funname):
 
 @annotate.context("root")
 class InitialContext(dict):
+    """A basic context for holding the root callable functions for a shell."""
     pass
 
 
-class HierarchicalShell:
+class HierarchicalShell(object):
     """A hierarchical shell for navigating through python package API functions."""
 
     def __init__(self, name):
@@ -194,7 +195,7 @@ class HierarchicalShell:
     def root_update(self, dict_like):
         """
         Add all of the entries in the dictionary like object dict_like to the root
-        context 
+        context
         """
 
         self.root.update(dict_like)
@@ -250,14 +251,14 @@ class HierarchicalShell:
                     line = shlex.split(cmd, posix=posix_lex)
 
                     #Automatically remove enclosing double quotes on windows since they are not removed by shlex in nonposix mode
-                    def remove_quotes(x):
-                        if len(x) > 0 and x.startswith(("'", '"')) and x[0] == x[-1]:
-                            return x[1:-1]
+                    def _remove_quotes(word):
+                        if len(word) > 0 and word.startswith(("'", '"')) and word[0] == word[-1]:
+                            return word[1:-1]
 
-                        return x
+                        return word
 
                     if not posix_lex:
-                        line = map(remove_quotes, line)
+                        line = map(_remove_quotes, line)
 
                     self.invoke(line)
 
@@ -266,7 +267,7 @@ class HierarchicalShell:
     def invoke(self, line):
         """
         Given a list of command line arguments, attempt to find the function being specified
-        and map the passed arguments to that function based on its annotated type information. 
+        and map the passed arguments to that function based on its annotated type information.
         """
 
         funname = line[0]

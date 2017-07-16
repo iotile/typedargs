@@ -6,99 +6,27 @@
 # Modifications to this file from the original created at WellDone International
 # are copyright Arch Systems Inc.
 
+from __future__ import (absolute_import, division,
+                        print_function, unicode_literals)
 from builtins import range, str
 import inspect
 from collections import namedtuple
-from decorator import decorator
+from decorator import decorate
 from typedargs.exceptions import ValidationError
 from typedargs.typeinfo import type_system
+from typedargs.utils import _check_and_execute
 
 
 class BasicContext(dict):
+    """A Basic context for holding functions in a Hierarchical Shell."""
     pass
 
 
-def _check_and_execute(f, *args, **kwargs):
-    """
-    Check the type of all parameters with type information, converting 
-    as appropriate and then execute the function.
-    """
+def get_spec(func):
+    if inspect.isclass(func):
+        func = func.__init__
 
-    convargs = []
-    spec = inspect.getargspec(f)
-
-    #Convert and validate all arguments
-    for i in range(0, len(args)):
-        arg = spec.args[i]
-        val = _process_arg(f, arg, args[i])
-        convargs.append(val)
-
-    convkw = {}
-    for key, val in kwargs:
-        convkw[key] = _process_arg(f, key, val)
-
-    retval = f(*convargs, **convkw)
-    return retval
-
-
-def _process_arg(func, arg, value):
-    """
-    Ensure that value is a valid argument for the named 
-    parameter arg based on the annotated type and validator
-    information.  Any errors are raised as either 
-    ConversionError or ValidationError exceptions.
-    """
-
-    if arg in func.params:
-        val = type_system.convert_to_type(value, func.types[arg])
-    else:
-        val = value
-
-    # Run all of the validators
-    try:
-        if arg in func.valids:
-            for valid in func.valids[arg]:
-                valid[0](val, *valid[1])
-    except (ValueError, TypeError) as exc:
-        raise ValidationError(exc.args[0], argument=arg, value=val)
-
-    return val
-
-
-def _parse_validators(type, valids):
-    """
-    Given a list of validator names or n-tuples, map the name to 
-    a validation function given the type and return a list of 
-    validation function, arguments tuples
-    """
-
-    outvals = []
-
-    for val in valids:
-        if isinstance(val, str):
-            args = []
-        elif len(val) > 1:
-            args = val[1:]
-            val = val[0]
-        else:
-            raise ValueError("You must pass either a n-tuple or a string to define a validator")
-
-        name = "validate_%s" % str(val)
-
-        if not hasattr(type, name):
-            raise ValidationError("Cannot resolve validator", typename=str(type), method_name=name, methods=dir(type))
-
-        func = getattr(type, name)
-        outvals.append((func, args))
-
-    return outvals
-
-
-def get_spec(f):
-    if inspect.isclass(f):
-        f = f.__init__
-
-    spec = inspect.getargspec(f)
+    spec = inspect.getargspec(func)
 
     if spec.defaults is None:
         numreq = len(spec.args)
@@ -126,24 +54,24 @@ def spec_filled(req, opt, pos, kw):
     return False
 
 
-def get_signature(f):
+def get_signature(func):
     """
     Return the pretty signature for this function:
     foobar(type arg, type arg=val, ...)
     """
 
-    name = f.__name__
+    name = func.__name__
 
-    if inspect.isclass(f):
-        f = f.__init__
+    if inspect.isclass(func):
+        func = func.__init__
 
-    spec = inspect.getargspec(f)
+    spec = inspect.getargspec(func)
     num_args = len(spec.args)
 
     num_def = 0
     if spec.defaults is not None:
         num_def = len(spec.defaults)
-    
+
     num_no_def = num_args - num_def
 
     args = []
@@ -152,8 +80,8 @@ def get_signature(f):
         if i == 0 and spec.args[i] == 'self':
             continue
 
-        if spec.args[i] in f.types:
-            typestr = "%s " % f.types[spec.args[i]]
+        if spec.args[i] in func.type_info:
+            typestr = "%s " % func.type_info[spec.args[i]]
 
         if i >= num_no_def:
             default = str(spec.defaults[i-num_no_def])
@@ -167,7 +95,7 @@ def get_signature(f):
     return "%s(%s)" % (name, ", ".join(args))
 
 
-def print_help(f):
+def print_help(func):
     """
     Print usage information about a context or function.
 
@@ -176,19 +104,19 @@ def print_help(f):
     argument types.
     """
 
-    if isinstance(f, BasicContext):
-        name = context_name(f)
+    if isinstance(func, BasicContext):
+        name = context_name(func)
 
         print("\n" + name + "\n")
-        doc = inspect.getdoc(f)
+        doc = inspect.getdoc(func)
         if doc is not None:
             doc = inspect.cleandoc(doc)
             print(doc)
 
         return
 
-    sig = get_signature(f)
-    doc = inspect.getdoc(f)
+    sig = get_signature(func)
+    doc = inspect.getdoc(func)
     if doc is not None:
         doc = inspect.cleandoc(doc)
 
@@ -196,31 +124,31 @@ def print_help(f):
     if doc is not None:
         print(doc)
 
-    if inspect.isclass(f):
-        f = f.__init__
+    if inspect.isclass(func):
+        func = func.__init__
 
     print("\nArguments:")
-    for key in f.params.iterkeys():
-        type = f.types[key]
+    for key in func.type_info.iterkeys():
+        type = func.type_info[key]
         desc = ""
-        if key in f.param_descs:
-            desc = f.param_descs[key]
+        if key in func.param_descs:
+            desc = func.param_descs[key]
 
         print(" - %s (%s): %s" % (key, type, desc))
 
 
-def print_retval(f, value):
-    if hasattr(f, 'typed_retval') and f.typed_retval == True:
-        print(type_system.format_return_value(f, value))
+def print_retval(func, value):
+    if hasattr(func, 'typed_retval') and func.typed_retval is True:
+        print(type_system.format_return_value(func, value))
         return
 
-    if not hasattr(f, 'retval'):
+    if not hasattr(func, 'retval'):
         print(str(value))
 
-    elif f.retval.printer[0] is not None:
-        f.retval.printer[0](value)
-    elif f.retval.desc != "":
-        print("%s: %s" % (f.retval.desc, str(value)))
+    elif func.retval.printer[0] is not None:
+        func.retval.printer[0](value)
+    elif func.retval.desc != "":
+        print("%s: %s" % (func.retval.desc, str(value)))
     else:
         print(str(value))
 
@@ -231,7 +159,7 @@ def find_all(container):
     else:
         names = dir(container)
 
-    context = BasicContext()
+    built_context = BasicContext()
 
     for name in names:
         #Ignore _ and __ names
@@ -246,21 +174,21 @@ def find_all(container):
         # Check if this is an annotated object that should be included.  Check the type of
         # annotated to avoid issues with module imports where someone did from annotate import *
         # into the module causing an annotated symbol to be defined as a decorator
-        
+
         # If we are in a dict context then strings point to lazily loaded modules so include them
         # too.
         if isinstance(container, dict) and isinstance(obj, str):
-            context[name] = obj
+            built_context[name] = obj
         elif hasattr(obj, 'annotated') and isinstance(getattr(obj, 'annotated'), int):
-            context[name] = obj
+            built_context[name] = obj
 
-    return context
+    return built_context
 
 
 def context_from_module(module):
     """
     Given a module, create a context from all of the top level annotated
-    symbols in that module.  
+    symbols in that module.
     """
 
     con = find_all(module)
@@ -281,61 +209,120 @@ def context_from_module(module):
     return name, con
 
 
-def check_returns_data(f):
-    if hasattr(f, 'typed_retval') and f.typed_retval == True:
+def check_returns_data(func):
+    if hasattr(func, 'typed_retval') and func.typed_retval is True:
         return True
 
-    if not hasattr(f, 'retval'):
+    if not hasattr(func, 'retval'):
         return False
 
-    return f.retval.data
+    return func.retval.data
+
+
+def _parse_validators(valids):
+    """Parse a list of validator names or n-tuples, checking for errors.
+
+    Returns:
+        list((func_name, [args...])): A list of validator function names and a
+            potentially empty list of optional parameters for each function.
+    """
+
+    outvals = []
+
+    for val in valids:
+        if isinstance(val, str):
+            args = []
+        elif len(val) > 1:
+            args = val[1:]
+            val = val[0]
+        else:
+            raise ValidationError("You must pass either an n-tuple or a string to define a validator", validator=val)
+
+        name = "validate_%s" % str(val)
+        outvals.append((name, args))
+
+    return outvals
+
 
 #Decorators
-def param(name, type, *validators, **kwargs):
-    def _param(f):
-        f = annotated(f)
+def param(name, type_name, *validators, **kwargs):
+    """Decorate a function to give type information about its parameters.
 
-        f.params[name] = type_system.get_type(type)
-        f.types[name] = type
-        f.valids[name] = _parse_validators(f.params[name], validators)
+    This function stores a type name, optional description and optional list
+    of validation functions along with the decorated function it is called
+    on in order to allow run time type conversions and validation.
+
+    Args:
+        type_name (string): The name of a type that will be known to the type
+            system by the time this function is called for the first time.  Types
+            are lazily loaded so it is not required that the type resolve correctly
+            at the point in the module where this function is defined.
+        validators (list(string or tuple)): A list of validators.  Each validator
+            can be defined either using a string name or as an n-tuple of the form
+            [name, *extra_args].  The name is used to look up a validator function
+            of the form validate_name, which is called on the parameters value to
+            determine if it is valid.  If extra_args are given, they are passed
+            as extra arguments to the validator function, which is called as:
+
+            validator(value, *extra_args)
+        desc (string): An optional descriptioon for this parameter that must be
+            passed as a keyword argument.
+
+    Returns:
+        callable: A decorated function with additional type metadata
+    """
+
+    def _param(func):
+        func = annotated(func)
+
+        func.type_info[name] = type_name
+        func.validator_info[name] = _parse_validators(validators)
 
         if 'desc' in kwargs:
-            f.param_descs[name] = kwargs['desc']
+            func.param_descs[name] = kwargs['desc']
 
-        return decorator(_check_and_execute, f)
+        # Only decorate the function once even if we have multiple param decorators
+        if func.decorated:
+            return func
+
+        func.decorated = True
+        return decorate(func, _check_and_execute)
 
     return _param
+
 
 def returns(desc=None, printer=None, data=True):
     """
     Specify how the return value of this function should be handled
 
-    If data == True, then this function just returns data and does 
+    If data == True, then this function just returns data and does
     not return a context so that the context for future calls remains
-    unchanged.  
+    unchanged.
     """
 
-    def _returns(f):
-        annotated(f)
+    def _returns(func):
+        annotated(func)
 
-        f.retval = namedtuple("ReturnValue", ["desc", "printer", "data"])
-        f.retval.desc = desc
-        f.retval.printer = (printer,)
-        f.retval.data = data
+        func.retval = namedtuple("ReturnValue", ["desc", "printer", "data"])
+        func.retval.desc = desc
+        func.retval.printer = (printer,)
+        func.retval.data = data
 
-        return f
+        return func
 
     return _returns
 
-def stringable(f):
+
+def stringable(func):
     """Specify that the return value for this function should just be printed as a string
     """
 
-    f.retval = namedtuple("ReturnValue", ["desc", "printer", "data"])
-    f.retval.desc = ""
-    f.retval.printer = (None,)
-    f.retval.data = True
-    return f
+    func.retval = namedtuple("ReturnValue", ["desc", "printer", "data"])
+    func.retval.desc = ""
+    func.retval.printer = (None,)
+    func.retval.data = True
+    return func
+
 
 def return_type(type, formatter=None):
     """
@@ -345,16 +332,17 @@ def return_type(type, formatter=None):
     must be a valid formatter for that type
     """
 
-    def _returns(f):
-        annotated(f)
-        f.typed_retval = True
-        f.retval_type = type_system.get_type(type)
-        f.retval_typename = type
-        f.retval_formatter = formatter
+    def _returns(func):
+        annotated(func)
+        func.typed_retval = True
+        func.retval_type = type_system.get_type(type)
+        func.retval_typename = type
+        func.retval_formatter = formatter
 
-        return f
+        return func
 
     return _returns
+
 
 def context(name=None):
     """
@@ -375,15 +363,17 @@ def context(name=None):
 
     return _context
 
-def finalizer(f):
+
+def finalizer(func):
     """
     Indicate that this function destroys the context in which it is invoked, such as a quit method
     on a subprocess or a delete method on an object.
     """
 
-    f = annotated(f)
-    f.finalizer = True
-    return f
+    func = annotated(func)
+    func.finalizer = True
+    return func
+
 
 def context_name(context):
     """
@@ -397,33 +387,47 @@ def context_name(context):
 
     return str(context)
 
-def takes_cmdline(f):
-    f = annotated(f)
-    f.takes_cmdline = True
 
-    return f
-    
-def annotated(f):
-    if not hasattr(f, 'params'):
-        f.params = {}
-    if not hasattr(f, 'valids'):
-        f.valids = {}
-    if not hasattr(f, 'types'):
-        f.types = {}
-    if not hasattr(f, 'param_descs'):
-        f.param_descs = {}
+def takes_cmdline(func):
+    func = annotated(func)
+    func.takes_cmdline = True
 
-    f.annotated = True
-    f.finalizer = False
-    f.takes_cmdline = False
-    return f
+    return func
 
-def short_description(f):
+
+def annotated(func):
+    """Mark a function as callable from the command line.
+
+    This function is meant to be called as decorator.  This function
+    also initializes metadata about the function's arguments that is
+    built up by the param decorator.
+
+    Args:
+        func (callable): The function that we wish to mark as callable
+            from the command line.
+    """
+
+    if hasattr(func, 'annotated'):
+        return func
+
+    func.validator_info = {}
+    func.type_info = {}
+    func.param_descs = {}
+
+    func.annotated = True
+    func.finalizer = False
+    func.takes_cmdline = False
+    func.decorated = False
+
+    return func
+
+
+def short_description(func):
     """
     Given an object with a docstring, return the first line of the docstring
     """
 
-    doc = inspect.getdoc(f)
+    doc = inspect.getdoc(func)
     if doc is not None:
         doc = inspect.cleandoc(doc)
         lines = doc.splitlines()

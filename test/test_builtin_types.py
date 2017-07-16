@@ -1,26 +1,29 @@
+"""Tests for builtin types included with typedargs."""
+
 # This file is adapted from python code released by WellDone International
 # under the terms of the LGPLv3.  WellDone International's contact information is
 # info@welldone.org
 # http://welldone.org
 #
-# Modifications to this file from the original created at WellDone International 
+# Modifications to this file from the original created at WellDone International
 # are copyright Arch Systems Inc.
 
 import pytest
 from typedargs import type_system
 import typedargs
-
 from typedargs.exceptions import ValidationError, ArgumentError
 
 
 def test_builtins_exist():
-    builtin = ['integer', 'path', 'string']
+    """Make sure basic builtins are found."""
+    builtin = ['integer', 'path', 'string', 'basic_dict', 'bool', 'bytes', 'float']
 
-    for b in builtin:
-        type_system.get_type(b)
+    for type_name in builtin:
+        type_system.get_type(type_name)
 
 
 def test_builtin_conversions():
+    """Make sure basic conversions work."""
     val = type_system.convert_to_type('42', 'integer')
     assert val == 42
 
@@ -32,32 +35,36 @@ def test_builtin_conversions():
 
 
 def test_annotation_correct():
+    """Make sure param annotation works."""
     @typedargs.param("string_param", "string", desc='Hello')
-    def function_test(string_param):
+    def function_test(string_param):  # pylint: disable=C0111,W0613
         pass
 
     function_test("hello")
 
 
 def test_annotation_unknown_type():
+    """Make sure we flag unknown types."""
     with pytest.raises(ArgumentError):
         @typedargs.param("string_param", "unknown_type", desc='Hello')
-        def function_test(string_param):
+        def function_test(string_param):  # pylint: disable=C0111,W0613
             pass
 
         function_test("hello")
 
 
 def test_annotation_validation():
+    """Make sure validation works."""
     with pytest.raises(ValidationError):
         @typedargs.param("int_param", "integer", "nonnegative", desc="No desc")
-        def function_test(int_param):
+        def function_test(int_param):  # pylint: disable=C0111,W0613
             pass
 
         function_test(-1)
 
 
 def test_bool_valid():
+    """Ensure bool conversion works."""
     val = type_system.convert_to_type('True', 'bool')
     assert val is True
 
@@ -81,6 +88,7 @@ def test_bool_valid():
 
 
 def test_format_bool():
+    """Ensure that bool formatting works."""
     val = type_system.format_value(True, 'bool')
     assert val == 'True'
 
