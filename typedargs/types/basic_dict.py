@@ -1,3 +1,5 @@
+# pylint: disable=unused-argument,missing-docstring
+
 import json
 
 def convert(arg, **kwargs):

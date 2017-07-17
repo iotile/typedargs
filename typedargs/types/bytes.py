@@ -1,5 +1,7 @@
-# This file is copyright Arch Systems, Inc.  
+# This file is copyright Arch Systems, Inc.
 # Except as otherwise provided in the relevant LICENSE file, all rights are reserved.
+
+# pylint: disable=unused-argument,missing-docstring
 
 #bytes.py
 #Simple bytearray type

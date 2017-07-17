@@ -6,13 +6,15 @@
 # Modifications to this file from the original created at WellDone International
 # are copyright Arch Systems Inc.
 
+# pylint: disable=unused-argument,missing-docstring
+
 #map.py
 #a complex type wrapping a python dictionary
 
 from future.utils import viewitems
 
 
-class map(object):
+class map(object): # pylint: disable=C0103
     def __init__(self, keytype, valuetype, **kwargs):
 
         self.keytype = keytype
@@ -26,7 +28,8 @@ class map(object):
 
         return map(types[0], types[1], **kwargs)
 
-    def convert(self, value, **kwargs):
+    @classmethod
+    def convert(cls, value, **kwargs):
         if isinstance(value, dict):
             return value
 

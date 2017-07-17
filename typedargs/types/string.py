@@ -3,8 +3,10 @@
 # info@welldone.org
 # http://welldone.org
 #
-# Modifications to this file from the original created at WellDone International 
+# Modifications to this file from the original created at WellDone International
 # are copyright Arch Systems Inc.
+
+# pylint: disable=unused-argument,missing-docstring
 
 from builtins import str
 

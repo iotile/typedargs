@@ -1,3 +1,7 @@
+"""Tests for hierarchical shell."""
+
+# pylint: disable=unused-argument,redefined-outer-name
+
 import pytest
 from typedargs import param, return_type, context, annotated, stringable
 from typedargs.shell import HierarchicalShell
@@ -29,15 +33,19 @@ class DemoClass(object):
 
     @return_type("integer", "hex")
     def get_arg(self):
+        """Get arg."""
         return self.value
 
     @stringable
-    def return_one(self):
+    def return_one(self):  # pylint: disable=R0201
+        """Return 1."""
         return 1
 
 
 @pytest.fixture
 def shell():
+    """Create a new hierarchical shell."""
+
     hshell = HierarchicalShell('Test Shell')
     hshell.root_add('func', func)
     hshell.root_add('func2', func2)

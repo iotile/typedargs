@@ -260,7 +260,7 @@ class TypeSystem(object):
         if not hasattr(typeobj, "default_formatter"):
             raise ArgumentError("type is invalid, does not have default_formatter function", type=typeobj, methods=dir(typeobj))
 
-    def load_type_module(self, module, verbose=False):
+    def load_type_module(self, module):
         """
         Given a module that contains a list of some types find all symbols in the module that
         do not start with _ and attempt to import them as types.
@@ -274,7 +274,7 @@ class TypeSystem(object):
             except ArgumentError:
                 pass
 
-    def load_external_types(self, path, verbose=False):
+    def load_external_types(self, path):
         """
         Given a path to a python package or module, load that module, search for all defined variables
         inside of it that do not start with _ or __ and inject them into the type system.  If any of the
@@ -290,7 +290,7 @@ class TypeSystem(object):
         except ImportError as exc:
             raise ArgumentError("could not import module in order to load external types", module_path=path, parent_directory=folder, module_name=filename, error=str(exc))
 
-        self.load_type_module(mod, verbose)
+        self.load_type_module(mod)
 
 
 def iprint(stringable):
@@ -306,4 +306,4 @@ def iprint(stringable):
 #are imported, create a default TypeSystem object that is used globally to store type
 #information
 
-type_system = TypeSystem(types)
+type_system = TypeSystem(types)  # pylint: disable=invalid-name

@@ -1,6 +1,5 @@
 """Utility functons that are only used internally inside typedargs."""
 
-import inspect
 from .exceptions import ValidationError
 from .metadata import AnnotatedMetadata
 

@@ -1,3 +1,5 @@
+"""A strong typing system with command line REPL environment for Python 2 and 3 code."""
+
 # This file is adapted from python code released by WellDone International
 # under the terms of the LGPLv3.  WellDone International's contact information is
 # info@welldone.org

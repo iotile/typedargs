@@ -3,9 +3,12 @@
 # info@welldone.org
 # http://welldone.org
 #
-# Modifications to this file from the original created at WellDone International 
+# Modifications to this file from the original created at WellDone International
 # are copyright Arch Systems Inc.
 
+# pylint: disable=unused-argument,missing-docstring
+
+from builtins import int
 from past.builtins import basestring
 
 
@@ -13,9 +16,9 @@ def convert(arg):
     if arg is None:
         return None
 
-    if isinstance(arg, basestring) or isinstance(arg, int) or isinstance(arg, long) or isinstance(arg, float):
+    if isinstance(arg, (basestring, int, float)):
         return float(arg)
-    
+
     raise TypeError("Unknown argument type")
 
 #Validation Functions

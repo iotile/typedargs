@@ -26,7 +26,7 @@ class AnnotatedMetadata(object):
 
     def __init__(self, func, name=None):
         self.annotated_params = {}
-        self.has_self = False
+        self._has_self = False
 
         if inspect.isclass(func):
             func = func.__init__
@@ -44,7 +44,7 @@ class AnnotatedMetadata(object):
             # Skip self argument if this is a method function
             if len(args) > 0 and args[0] == 'self':
                 args = args[1:]
-                self.has_self = True
+                self._has_self = True
 
             if defaults is None:
                 defaults = []
@@ -246,7 +246,7 @@ class AnnotatedMetadata(object):
         """
 
         # For bound methods, skip self
-        if self.has_self:
+        if self._has_self:
             if index == 0:
                 return arg_value
 

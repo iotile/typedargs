@@ -6,10 +6,13 @@
 # Modifications to this file from the original created at WellDone International
 # are copyright Arch Systems Inc.
 
+# pylint: disable=unused-argument,missing-docstring
+
 #integer type
 
-from past.builtins import basestring
 from builtins import int
+from past.builtins import basestring
+
 
 def convert(arg):
     if arg is None:
@@ -30,19 +33,19 @@ def validate_positive(arg):
     if arg <= 0:
         raise ValueError("value is not positive")
 
-def validate_nonnegative(arg):
-    if arg is None:
-        return
-
-    if arg < 0:
-        raise ValueError("value is negative")
-
 def validate_range(arg, lower, upper):
     if arg is None:
         return
 
     if arg < lower or arg > upper:
         raise ValueError("not in required range [%d, %d]" %(int(lower), int(upper)))
+
+def validate_nonnegative(arg):
+    if arg is None:
+        return
+
+    if arg < 0:
+        raise ValueError("value is negative")
 
 #Formatting functions
 def default_formatter(arg, **kwarg):

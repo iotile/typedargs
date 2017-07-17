@@ -8,6 +8,8 @@
 # Modifications to this file from the original created at WellDone International
 # are copyright Arch Systems Inc.
 
+# pylint: disable=unused-argument,redefined-outer-name,missing-docstring
+
 import pytest
 from typedargs import type_system
 import typedargs
