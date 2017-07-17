@@ -169,7 +169,7 @@ class HierarchicalShell(object):
 
         parts = shlex.split(line, posix=self.posix_lex)
         if not self.posix_lex:
-            parts = map(self._remove_quotes, parts)
+            parts = [self._remove_quotes(x) for x in parts]
 
         return parts
 
@@ -461,9 +461,9 @@ class HierarchicalShell(object):
         return val, line, finished
 
     def invoke(self, line):
-        """Invoke a function given a list of arguments with the function listed first.
+        """Invoke a one or more function given a list of arguments.
 
-        The function is searched for using the current context on the context stack
+        The functions are searched for using the current context on the context stack
         and its annotated type information is used to convert all of the string parameters
         passed in line to appropriate python types.
 
@@ -471,13 +471,39 @@ class HierarchicalShell(object):
             line (list): The list of command line arguments.
 
         Returns:
-            (list, bool): A boolean specifying if the function created a new context
+            bool: A boolean specifying if the last function created a new context
                 (False if a new context was created) and a list with the remainder of the
-                command line if this function did not consume all arguments.
+                command line if this function did not consume all arguments.)
         """
 
-        val, line, finished = self.invoke_one(line)
-        if val is not None:
-            iprint(val)
+        while len(line) > 0:
+            val, line, finished = self.invoke_one(line)
+            if val is not None:
+                iprint(val)
 
-        return line, finished
+        return finished
+
+    def invoke_string(self, line):
+        """Parse and invoke a string line.
+
+        Args:
+            line (str): The line that we want to parse and invoke.
+
+        Returns:
+            bool: A boolean specifying if the last function created a new context
+                (False if a new context was created) and a list with the remainder of the
+                command line if this function did not consume all arguments.)
+        """
+
+        # Make sure line is a unicode string on all python versions
+        line = str(line)
+
+        # Ignore empty lines and comments
+        if len(line) == 0:
+            return True
+
+        if line[0] == u'#':
+            return True
+
+        args = self._split_line(line)
+        return self.invoke(args)

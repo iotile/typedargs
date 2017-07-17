@@ -65,6 +65,18 @@ def test_shortarg(shell):
     assert finished is False
 
 
+def test_context_retval(shell):
+    """Make sure functions that return a context work."""
+
+    val, remainder, finished = shell.invoke_one(u'func2'.split(' '))
+    assert val is None
+    assert len(remainder) == 0
+    assert finished is False
+    assert len(shell.contexts) == 2
+    assert isinstance(shell.contexts[-1], DemoClass)
+    assert shell.contexts[-1].value == 1
+
+
 def test_class_creation(shell):
     """Make sure we can create a class with parameters."""
 
@@ -133,3 +145,14 @@ def test_builtin_back(shell):
     assert remained == []
     assert finished is True
     assert len(shell.contexts) == 1
+
+
+def test_invoke_string(shell):
+    finished = shell.invoke_string(u'demo 1 back')
+    assert finished is True
+
+    finished = shell.invoke_string('demo 1 back')
+    assert finished is True
+
+    finished = shell.invoke_string(u'func2')
+    assert finished is False

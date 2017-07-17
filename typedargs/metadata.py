@@ -5,8 +5,8 @@ from __future__ import (absolute_import, division,
 from builtins import range, str
 from collections import namedtuple
 import inspect
-from .exceptions import TypeSystemError, ArgumentError, ValidationError
 import typedargs.typeinfo as typeinfo
+from .exceptions import TypeSystemError, ArgumentError, ValidationError
 
 
 ParameterInfo = namedtuple("ParameterInfo", ['type_name', 'validators', 'desc'])

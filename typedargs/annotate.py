@@ -1,3 +1,5 @@
+"""Decorators that allow you to annotate type information with a function or class."""
+
 # This file is adapted from python code released by WellDone International
 # under the terms of the LGPLv3.  WellDone International's contact information is
 # info@welldone.org
