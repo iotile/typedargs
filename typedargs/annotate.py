@@ -117,6 +117,8 @@ def param(name, type_name, *validators, **kwargs):
     """
 
     def _param(func):
+        print("Called param decorator on " + func.__name__)
+
         func = annotated(func)
 
         valids = _parse_validators(validators)
@@ -126,6 +128,7 @@ def param(name, type_name, *validators, **kwargs):
         if func.decorated:
             return func
 
+        print("Called param decorator on " + func.__name__)
         func.decorated = True
         return decorate(func, _check_and_execute)
 

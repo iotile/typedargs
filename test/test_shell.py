@@ -1,6 +1,7 @@
 import pytest
 from typedargs import param, return_type, context, annotated, stringable
 from typedargs.shell import HierarchicalShell
+from typedargs.exceptions import ValidationError
 
 
 @param("arg1", "integer")
@@ -62,6 +63,25 @@ def test_shortarg(shell):
     assert val is None
     assert len(remainder) == 1
     assert finished is False
+
+
+def test_class_creation(shell):
+    """Make sure we can create a class with parameters."""
+
+    shell.invoke_one(u'demo 1'.split(' '))
+    assert len(shell.contexts) == 2
+    assert shell.contexts[-1].value == 1
+
+
+def test_class_create_error(shell):
+    """Make sure we throw an exception if there are not enough class params."""
+
+    with pytest.raises(ValidationError):
+        shell.invoke_one(u'demo'.split(' '))
+
+    # Make sure type checking happens on class constructors
+    with pytest.raises(ValidationError):
+        shell.invoke_one(u'demo hello'.split(' '))
 
 
 def test_builtin_help(shell):

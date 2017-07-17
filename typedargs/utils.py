@@ -27,6 +27,9 @@ def _check_and_execute(func, *args, **kwargs):
     for key, val in kwargs:
         convkw[key] = func.metadata.convert_argument(key, val)
 
+    if not func.metadata.spec_filled(convargs, convkw):
+        raise ValidationError("Not enough parameters specified to call function", function=func.metadata.name, signature=func.metadata.signature())
+
     retval = func(*convargs, **convkw)
     return retval
 

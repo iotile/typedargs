@@ -9,7 +9,7 @@
 #integer type
 
 from past.builtins import basestring
-
+from builtins import int
 
 def convert(arg):
     if arg is None:
@@ -17,7 +17,7 @@ def convert(arg):
 
     if isinstance(arg, basestring):
         return int(arg, 0)
-    elif isinstance(arg, (int, long)):
+    elif isinstance(arg, int):
         return arg
 
     raise TypeError("Unknown argument type")

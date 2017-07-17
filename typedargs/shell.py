@@ -20,8 +20,8 @@ import os.path
 import platform
 import importlib
 from builtins import str
-from future.utils import iteritems, iterkeys
-from typedargs.exceptions import ArgumentError, NotFoundError
+from future.utils import iteritems
+from typedargs.exceptions import ArgumentError, NotFoundError, ValidationError
 import typedargs.annotate as annotate
 import typedargs.utils as utils
 from typedargs import iprint
@@ -437,6 +437,11 @@ class HierarchicalShell(object):
             line = []
         else:
             posargs, kwargs, line = self.process_arguments(func, line)
+
+            #We need to check for not enough args for classes before calling or the call won't make it all the way to __init__
+            if inspect.isclass(func) and not func.metadata.spec_filled(posargs, kwargs):
+                raise ValidationError("Not enough parameters specified to call function", function=func.metadata.name, signature=func.metadata.signature())
+
             val = func(*posargs, **kwargs)
 
         # Update our current context if this function destroyed it or returned a new one.
