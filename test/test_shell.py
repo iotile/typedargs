@@ -1,5 +1,5 @@
 import pytest
-from typedargs import param, return_type
+from typedargs import param, return_type, context, annotated, stringable
 from typedargs.shell import HierarchicalShell
 
 
@@ -8,13 +8,39 @@ from typedargs.shell import HierarchicalShell
 @param("arg2", "string")
 @return_type("string")
 def func(arg1, force=False, arg2="hello"):
+    """Demo function."""
     return (arg1, force, arg2)
+
+
+@annotated
+def func2():
+    """Demo function 2."""
+    return DemoClass(1)
+
+
+@context("Test")
+class DemoClass(object):
+    """Hello."""
+
+    @param("arg1", "integer", "nonnegative", desc="Test description")
+    def __init__(self, arg1):
+        self.value = arg1
+
+    @return_type("integer", "hex")
+    def get_arg(self):
+        return self.value
+
+    @stringable
+    def return_one(self):
+        return 1
 
 
 @pytest.fixture
 def shell():
     hshell = HierarchicalShell('Test Shell')
     hshell.root_add('func', func)
+    hshell.root_add('func2', func2)
+    hshell.root_add('demo', DemoClass)
 
     return hshell
 
@@ -22,4 +48,68 @@ def shell():
 def test_shortarg(shell):
     """Make sure we can specify short kw argument names."""
 
-    shell.invoke(u'func 1 -f -a back'.split(' '))
+    val, remainder, finished = shell.invoke_one(u'func 1 -f -a back'.split(' '))
+    assert val == "(1, True, 'back')"
+    assert len(remainder) == 0
+    assert finished is True
+
+    val, remainder, finished = shell.invoke_one(u'func 1 -f false -a back'.split(' '))
+    assert val == "(1, False, 'back')"
+    assert len(remainder) == 0
+    assert finished is True
+
+    val, remainder, finished = shell.invoke_one(u'func2 get_arg'.split(' '))
+    assert val is None
+    assert len(remainder) == 1
+    assert finished is False
+
+
+def test_builtin_help(shell):
+    """Make sure the builtins work."""
+
+    val, remained, finished = shell.invoke_one(u'help'.split(' '))
+    assert val == """
+root
+A basic context for holding the root callable functions for a shell.
+
+Defined Functions:
+ - Test(integer arg1)
+   Hello.
+ - func(integer arg1, bool force=False, string arg2=hello)
+   Demo function.
+ - func2()
+   Demo function 2.
+ - import_types(path package, string module=None)
+   Add externally defined types from a python package or module.
+
+Builtin Functions
+ - back
+ - help
+ - quit
+
+"""
+    assert remained == []
+    assert finished is True
+
+    val, remained, finished = shell.invoke_one(u'help demo'.split(' '))
+    assert val == """
+Test(integer arg1)
+
+Hello.
+
+Arguments:
+  - arg1 (integer): Test description
+"""
+    assert finished is True
+    assert remained == []
+
+
+def test_builtin_back(shell):
+    shell.invoke_one(u'demo 1'.split(' '))
+    assert len(shell.contexts) == 2
+
+    val, remained, finished = shell.invoke_one('back'.split(' '))
+    assert val is None
+    assert remained == []
+    assert finished is True
+    assert len(shell.contexts) == 1

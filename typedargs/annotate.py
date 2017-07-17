@@ -8,8 +8,9 @@
 
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
-from builtins import range, str
+from builtins import range, str  # pylint: disable=W0611
 import inspect
+from future.utils import iteritems
 from decorator import decorate
 from typedargs.exceptions import ArgumentError
 from typedargs.utils import find_all, _check_and_execute, _parse_validators, context_name
@@ -37,46 +38,54 @@ def context_from_module(module):
     return name, con
 
 
-def print_help(func):
-    """Print usage information about a context or function.
+def get_help(func):
+    """Return usage information about a context or function.
 
-    For contexts, just print the context name and its docstring
-    For functions, print the function signature as well as its
+    For contexts, just return the context name and its docstring
+    For functions, return the function signature as well as its
     argument types.
+
+    Args:
+        func (callable): An annotated callable function
+
+    Returns:
+        str: The formatted help text
     """
 
+    help_text = ""
     if isinstance(func, dict):
         name = context_name(func)
 
-        print("\n" + name + "\n")
+        help_text = "\n" + name + "\n\n"
         doc = inspect.getdoc(func)
         if doc is not None:
             doc = inspect.cleandoc(doc)
-            print(doc)
+            help_text += doc + '\n'
 
         return
 
-    sig = func.metadata.get_signature()
+    sig = func.metadata.signature()
     doc = inspect.getdoc(func)
     if doc is not None:
         doc = inspect.cleandoc(doc)
 
-    print("\n" + sig + "\n")
+    help_text += "\n" + sig + "\n\n"
     if doc is not None:
-        print(doc)
+        help_text += doc + '\n'
 
     if inspect.isclass(func):
         func = func.__init__
 
-    print("\nArguments:")
-    for key in func.type_info.iterkeys():
-        type = func.type_info[key]
+    help_text += "\nArguments:\n"
+    for key, info in iteritems(func.metadata.annotated_params):
+        type_name = info.type_name
         desc = ""
-        if key in func.param_descs:
-            desc = func.param_descs[key]
+        if info.desc is not None:
+            desc = info.desc
 
-        print(" - %s (%s): %s" % (key, type, desc))
+        help_text += "  - %s (%s): %s\n" % (key, type_name, desc)
 
+    return help_text
 
 # Decorators
 

@@ -24,6 +24,7 @@ from future.utils import iteritems, iterkeys
 from typedargs.exceptions import ArgumentError, NotFoundError
 import typedargs.annotate as annotate
 import typedargs.utils as utils
+from typedargs import iprint
 from typedargs.typeinfo import type_system
 
 
@@ -205,17 +206,19 @@ class HierarchicalShell(object):
         del self.contexts[:]
 
     @annotate.takes_cmdline
+    @annotate.stringable
     def _builtin_help(self, args):
-        """Display help information for a context or function."""
+        """Return help information for a context or function."""
 
         if len(args) == 0:
-            self.print_dir(self.contexts[-1])
+            return self.list_dir(self.contexts[-1])
         elif len(args) == 1:
             func = self.find_function(self.contexts[-1], args[0])
-            annotate.print_help(func)
-        else:
-            print("Too many arguments:", args)
-            print("Usage: help [function]")
+            return annotate.get_help(func)
+
+        help_text = "Too many arguments: " + str(args) + "\n"
+        help_text += "Usage: help [function]"
+        return help_text
 
     def find_function(self, context, funname):
         """Find a function in the given context by name.
@@ -252,46 +255,50 @@ class HierarchicalShell(object):
 
         return func
 
-    def print_dir(self, context):
-        """Print a listing of all of the functions in this context including builtins.
+    def list_dir(self, context):
+        """Return a listing of all of the functions in this context including builtins.
 
         Args:
             context (object): The context to print a directory for.
+
+        Returns:
+            str
         """
 
         doc = inspect.getdoc(context)
 
-        print("")
-        print(annotate.context_name(context))
+        listing = ""
+        listing += "\n"
+
+        listing += annotate.context_name(context) + "\n"
 
         if doc is not None:
             doc = inspect.cleandoc(doc)
-            print(doc)
+            listing += doc + "\n"
 
-        print("\nDefined Functions:")
+        listing += "\nDefined Functions:\n"
 
         if isinstance(context, dict):
             funs = context.keys()
         else:
             funs = annotate.find_all(context)
 
-        for fun in funs:
+        for fun in sorted(funs):
             fun = self.find_function(context, fun)
             if isinstance(fun, dict):
-                print(" - " + fun.metadata.name)
+                listing += " - " + fun.metadata.name + '\n'
             else:
-                print(" - " + fun.metadata.get_signature())
+                listing += " - " + fun.metadata.signature() + '\n'
 
             if annotate.short_description(fun) != "":
-                print("   " + annotate.short_description(fun) + '\n')
-            else:
-                print("")
+                listing += "   " + annotate.short_description(fun) + '\n'
 
-        print("\nBuiltin Functions")
-        for bif in iterkeys(self.builtins):
-            print(' - ' + bif)
+        listing += "\nBuiltin Functions\n"
+        for bif in sorted(self.builtins.keys()):
+            listing += ' - ' + bif + '\n'
 
-        print("")
+        listing += '\n'
+        return listing
 
     def process_arguments(self, func, args):
         """Process arguments from the command line into positional and kw args.
@@ -319,7 +326,7 @@ class HierarchicalShell(object):
         kw_args = {}
 
         while len(args) > 0:
-            if func.metadata.spec_filled(pos_args, kw_args):
+            if func.metadata.spec_filled(pos_args, kw_args) and not args[0].startswith('-'):
                 break
 
             arg = args.pop(0)
@@ -331,7 +338,7 @@ class HierarchicalShell(object):
                 arg_name = None
 
                 if len(arg) == 2:
-                    arg_name = func.metadata.match_shortname(arg[1:])
+                    arg_name = func.metadata.match_shortname(arg[1:], filled_args=pos_args)
                 else:
                     if not arg.startswith('--'):
                         raise ArgumentError("Invalid method of specifying keyword argument that did not start with --", argument=arg)
@@ -343,7 +350,7 @@ class HierarchicalShell(object):
                     if '=' in arg:
                         arg, arg_value = arg.split('=')
 
-                    arg_name = func.metadate.match_shortname(arg)
+                    arg_name = func.metadate.match_shortname(arg, filled_args=pos_args)
 
                 arg_type = func.metadata.param_type(arg_name)
                 if arg_type is None:
@@ -394,12 +401,21 @@ class HierarchicalShell(object):
 
         return next_arg
 
-    def invoke(self, line):
-        """Invoke a function given a list of command line arguments.
+    def invoke_one(self, line):
+        """Invoke a function given a list of arguments with the function listed first.
 
         The function is searched for using the current context on the context stack
         and its annotated type information is used to convert all of the string parameters
         passed in line to appropriate python types.
+
+        Args:
+            line (list): The list of command line arguments.
+
+        Returns:
+            (object, list, bool): A tuple containing the return value of the function, if any,
+                a boolean specifying if the function created a new context (False if a new context
+                was created) and a list with the remainder of the command line if this function
+                did not consume all arguments.
         """
 
         funname = line.pop(0)
@@ -412,12 +428,12 @@ class HierarchicalShell(object):
         if isinstance(func, dict):
             self.contexts.append(func)
             self._check_initialize_context()
-            return line, False
+            return None, line, False
 
         # If the function wants arguments directly, do not parse them, otherwise turn them
         # into positional and kw arguments
         if func.takes_cmdline is True:
-            val = func(line[1:])
+            val = func(line)
             line = []
         else:
             posargs, kwargs, line = self.process_arguments(func, line)
@@ -430,11 +446,33 @@ class HierarchicalShell(object):
             self.contexts.pop()
         elif val is not None:
             if func.metadata.returns_data():
-                if type_system.interactive:
-                    print(func.metadata.format_returnvalue(val))
+                val = func.metadata.format_returnvalue(val)
             else:
                 self.contexts.append(val)
                 self._check_initialize_context()
                 finished = False
+                val = None
+
+        return val, line, finished
+
+    def invoke(self, line):
+        """Invoke a function given a list of arguments with the function listed first.
+
+        The function is searched for using the current context on the context stack
+        and its annotated type information is used to convert all of the string parameters
+        passed in line to appropriate python types.
+
+        Args:
+            line (list): The list of command line arguments.
+
+        Returns:
+            (list, bool): A boolean specifying if the function created a new context
+                (False if a new context was created) and a list with the remainder of the
+                command line if this function did not consume all arguments.
+        """
+
+        val, line, finished = self.invoke_one(line)
+        if val is not None:
+            iprint(val)
 
         return line, finished

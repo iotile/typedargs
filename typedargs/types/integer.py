@@ -3,7 +3,7 @@
 # info@welldone.org
 # http://welldone.org
 #
-# Modifications to this file from the original created at WellDone International 
+# Modifications to this file from the original created at WellDone International
 # are copyright Arch Systems Inc.
 
 #integer type
@@ -17,7 +17,7 @@ def convert(arg):
 
     if isinstance(arg, basestring):
         return int(arg, 0)
-    elif isinstance(arg, int) or isinstance(arg, long):
+    elif isinstance(arg, (int, long)):
         return arg
 
     raise TypeError("Unknown argument type")
@@ -27,7 +27,7 @@ def validate_positive(arg):
     if arg is None:
         return
 
-    if arg <=0:
+    if arg <= 0:
         raise ValueError("value is not positive")
 
 def validate_nonnegative(arg):

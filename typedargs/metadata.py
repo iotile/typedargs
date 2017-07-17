@@ -9,12 +9,12 @@ from .exceptions import TypeSystemError, ArgumentError, ValidationError
 import typedargs.typeinfo as typeinfo
 
 
-ParameterInfo = namedtuple("ParameterInfo", ['type_name', 'validators', 'description'])
+ParameterInfo = namedtuple("ParameterInfo", ['type_name', 'validators', 'desc'])
 ReturnInfo = namedtuple("ReturnInfo", ['type_name', 'formatter', 'is_data', 'desc'])
 
 
 class AnnotatedMetadata(object):
-    """All of the associated metadata for an annotated function.
+    """All of the associated metadata for an annotated function or class.
 
     Args:
         func (callable): The function that we are annotated so that
@@ -26,9 +26,15 @@ class AnnotatedMetadata(object):
 
     def __init__(self, func, name=None):
         self.annotated_params = {}
+        self.has_self = False
 
         if inspect.isclass(func):
             func = func.__init__
+
+            # If __init__ has anotated params, copy them to the class so
+            # we print correct signatures
+            if hasattr(func, 'metadata'):
+                self.annotated_params = func.metadata.annotated_params
 
         # If we are called to annotate a context, we won't necessarily
         # have any arguments
@@ -38,6 +44,7 @@ class AnnotatedMetadata(object):
             # Skip self argument if this is a method function
             if len(args) > 0 and args[0] == 'self':
                 args = args[1:]
+                self.has_self = True
 
             if defaults is None:
                 defaults = []
@@ -70,7 +77,11 @@ class AnnotatedMetadata(object):
             bool: True if we have a filled spec, False otherwise.
         """
 
-        req = [x for x in self.arg_names[:len(self.arg_defaults)] if x not in kw_args]
+        req_names = self.arg_names
+        if len(self.arg_defaults) > 0:
+            req_names = req_names[:-len(self.arg_defaults)]
+
+        req = [x for x in req_names if x not in kw_args]
         return len(req) <= len(pos_args)
 
     def add_param(self, name, type_name, validators, desc=None):
@@ -131,7 +142,7 @@ class AnnotatedMetadata(object):
         """Check if this function returns data."""
         return self.return_info.is_data
 
-    def match_shortname(self, name):
+    def match_shortname(self, name, filled_args=None):
         """Try to convert a prefix into a parameter name.
 
         If the result could be ambiguous or there is no matching
@@ -139,12 +150,18 @@ class AnnotatedMetadata(object):
 
         Args:
             name (str): A prefix for a parameter name
+            filled_args (list): A list of filled positional arguments that will be
+                removed from consideration.
 
         Returns:
             str: The full matching parameter name
         """
 
-        possible = [x for x in self.arg_names if x.startswith(name)]
+        filled_count = 0
+        if filled_args is not None:
+            filled_count = len(filled_args)
+
+        possible = [x for x in self.arg_names[filled_count:] if x.startswith(name)]
         if len(possible) == 0:
             raise ArgumentError("Could not convert short-name full parameter name, none could be found", short_name=name, parameters=self.arg_names)
         elif len(possible) > 1:
@@ -183,7 +200,7 @@ class AnnotatedMetadata(object):
             typestr = ""
 
             if self.arg_names[i] in self.annotated_params:
-                typestr = "{} ".format(self.annotated_params[self.arg_names[i]])
+                typestr = "{} ".format(self.annotated_params[self.arg_names[i]].type_name)
 
             if i >= num_no_def:
                 default = str(self.arg_defaults[i-num_no_def])
@@ -227,6 +244,13 @@ class AnnotatedMetadata(object):
         Returns:
             object: The converted value.
         """
+
+        # For bound methods, skip self
+        if self.has_self:
+            if index == 0:
+                return arg_value
+
+            index -= 1
 
         arg_name = self.arg_names[index]
         return self.convert_argument(arg_name, arg_value)

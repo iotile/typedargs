@@ -3,7 +3,7 @@
 # info@welldone.org
 # http://welldone.org
 #
-# Modifications to this file from the original created at WellDone International 
+# Modifications to this file from the original created at WellDone International
 # are copyright Arch Systems Inc.
 
 #map.py
@@ -14,7 +14,7 @@ from future.utils import viewitems
 
 class map(object):
     def __init__(self, keytype, valuetype, **kwargs):
-        
+
         self.keytype = keytype
         self.valuetype = valuetype
         self.type_system = kwargs['type_system']
@@ -23,7 +23,7 @@ class map(object):
     def Build(*types, **kwargs):
         if len(types) != 2:
             raise ValueError("map must be created with 2 arguments, a keytype and a valuetype")
-        
+
         return map(types[0], types[1], **kwargs)
 
     def convert(self, value, **kwargs):
