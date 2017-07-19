@@ -1,5 +1,10 @@
 # Release Notes
 
+## 0.10.0
+
+- Port to modern code, fix all pylint errors and turn pylint on in CI
+- Add support for short arguments and not passing True to a boolean flag
+
 ## 0.9.2
 
 - Update unicode compatibility
