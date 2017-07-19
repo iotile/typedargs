@@ -39,7 +39,7 @@ class AnnotatedMetadata(object):
         # If we are called to annotate a context, we won't necessarily
         # have any arguments
         try:
-            args, varargs, kwargs, defaults = inspect.getargspec(func)
+            args, varargs, kwargs, defaults = inspect.getargspec(func)  # pylint: disable=deprecated-method
 
             # Skip self argument if this is a method function
             if len(args) > 0 and args[0] == 'self':
