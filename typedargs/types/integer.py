@@ -3,11 +3,14 @@
 # info@welldone.org
 # http://welldone.org
 #
-# Modifications to this file from the original created at WellDone International 
+# Modifications to this file from the original created at WellDone International
 # are copyright Arch Systems Inc.
+
+# pylint: disable=unused-argument,missing-docstring
 
 #integer type
 
+from builtins import int
 from past.builtins import basestring
 
 
@@ -17,7 +20,7 @@ def convert(arg):
 
     if isinstance(arg, basestring):
         return int(arg, 0)
-    elif isinstance(arg, int) or isinstance(arg, long):
+    elif isinstance(arg, int):
         return arg
 
     raise TypeError("Unknown argument type")
@@ -27,15 +30,8 @@ def validate_positive(arg):
     if arg is None:
         return
 
-    if arg <=0:
+    if arg <= 0:
         raise ValueError("value is not positive")
-
-def validate_nonnegative(arg):
-    if arg is None:
-        return
-
-    if arg < 0:
-        raise ValueError("value is negative")
 
 def validate_range(arg, lower, upper):
     if arg is None:
@@ -43,6 +39,13 @@ def validate_range(arg, lower, upper):
 
     if arg < lower or arg > upper:
         raise ValueError("not in required range [%d, %d]" %(int(lower), int(upper)))
+
+def validate_nonnegative(arg):
+    if arg is None:
+        return
+
+    if arg < 0:
+        raise ValueError("value is negative")
 
 #Formatting functions
 def default_formatter(arg, **kwarg):

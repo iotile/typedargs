@@ -3,8 +3,10 @@
 # info@welldone.org
 # http://welldone.org
 #
-# Modifications to this file from the original created at WellDone International 
+# Modifications to this file from the original created at WellDone International
 # are copyright Arch Systems Inc.
+
+# pylint: disable=unused-argument,missing-docstring
 
 import os.path
 from builtins import str
@@ -25,8 +27,8 @@ def validate_readable(arg):
         raise ValueError("Path is not a file")
 
     try:
-        f = open(arg, "r")
-        f.close()
+        file = open(arg, "r")
+        file.close()
     except:
         raise ValueError("Path could not be opened for reading")
 
@@ -47,7 +49,7 @@ def validate_writeable(arg):
     if not os.path.isdir(parent):
         raise ValueError("Parent directory does not exist and path must be writeable")
 
-  
+
 # Formatting functions
 def default_formatter(arg, **kwargs):
     return str(arg)

@@ -3,44 +3,46 @@
 # info@welldone.org
 # http://welldone.org
 #
-# Modifications to this file from the original created at WellDone International 
+# Modifications to this file from the original created at WellDone International
 # are copyright Arch Systems Inc.
+
+# pylint: disable=unused-argument,missing-docstring
 
 #list.py
 
-class list(object):
-	def __init__(self, valuetype, **kwargs):
-		
-		self.valuetype = valuetype
-		self.type_system = kwargs['type_system']
+class list(object):  # pylint: disable=C0103
+    def __init__(self, valuetype, **kwargs):
 
-	@staticmethod
-	def Build(*types, **kwargs):
-		if len(types) != 1:
-			raise ValueError("list must be created with 1 argument, a value type")
-		
-		return list(types[0], **kwargs)
+        self.valuetype = valuetype
+        self.type_system = kwargs['type_system']
 
-	def convert(self, value, **kwargs):
-		converted = []
-		for x in value:
-			y = self.type_system.convert_to_type(x, self.valuetype, **kwargs)
-			converted.append(y)
+    @staticmethod
+    def Build(*types, **kwargs):
+        if len(types) != 1:
+            raise ValueError("list must be created with 1 argument, a value type")
 
-		return converted
+        return list(types[0], **kwargs)
 
-	def default_formatter(self, value, **kwargs):
-		lines = []
-		for x in value:
-			line = self.type_system.format_value(x, self.valuetype, **kwargs)
-			lines.append(line)
+    def convert(self, value, **kwargs):
+        converted = []
+        for val in value:
+            conv = self.type_system.convert_to_type(val, self.valuetype, **kwargs)
+            converted.append(conv)
 
-		return "\n".join(lines)
+        return converted
 
-	def format_compact(self, value, **kwargs):
-		lines = []
-		for x in value:
-			line = self.type_system.format_value(x, self.valuetype, **kwargs)
-			lines.append(line)
+    def default_formatter(self, value, **kwargs):
+        lines = []
+        for val in value:
+            line = self.type_system.format_value(val, self.valuetype, **kwargs)
+            lines.append(line)
 
-		return "[" + ", ".join(lines) + "]"
+        return "\n".join(lines)
+
+    def format_compact(self, value, **kwargs):
+        lines = []
+        for val in value:
+            line = self.type_system.format_value(val, self.valuetype, **kwargs)
+            lines.append(line)
+
+        return "[" + ", ".join(lines) + "]"

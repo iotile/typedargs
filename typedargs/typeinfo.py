@@ -1,3 +1,5 @@
+"""Define the global type system that allows adding strong type information to python objects."""
+
 # This file is adapted from python code released by WellDone International
 # under the terms of the LGPLv3.  WellDone International's contact information is
 # info@welldone.org
@@ -10,6 +12,10 @@
 #Basic routines for converting information from string or other binary
 #formats to python types and for displaying those types in supported
 #formats
+
+from __future__ import (absolute_import, division,
+                        print_function, unicode_literals)
+from builtins import str
 
 import os.path
 import imp
@@ -26,7 +32,7 @@ class TypeSystem(object):
     def __init__(self, *args):
         """
         Create a TypeSystem by importing all of the types defined in modules passed
-        as arguments to this function.  Each module is imported using 
+        as arguments to this function.  Each module is imported using
         """
 
         self.interactive = False
@@ -40,7 +46,7 @@ class TypeSystem(object):
         """
         Convert value to type 'typename'
 
-        If the conversion routine takes various kwargs to 
+        If the conversion routine takes various kwargs to
         modify the conversion process, **kwargs is passed
         through to the underlying conversion function
         """
@@ -61,7 +67,7 @@ class TypeSystem(object):
 
         'type' must have a convert_binary function.  If 'type'
         supports size checking, the size function is called to ensure
-        that binvalue is the correct size for deserialization  
+        that binvalue is the correct size for deserialization
         """
 
         size = self.get_type_size(type)
@@ -134,17 +140,15 @@ class TypeSystem(object):
         if not hasattr(typeobj, "default_formatter"):
             raise ArgumentError("type is invalid, does not have default_formatter function", type=typeobj, methods=dir(typeobj))
 
-    def is_known_type(self, type):
+    def is_known_type(self, type_name):
+        """Check if type is known to the type system.
+
+        Returns:
+            bool: True if the type is a known instantiated simple type, False otherwise
         """
-        Check if type is known to the type system.
 
-        Returns boolean indicating if type is known.
-        """
-
-        if not isinstance(type, str):
-            raise ArgumentError("type must be a string naming a known type", type=type)
-
-        if type in self.known_types:
+        type_name = str(type_name)
+        if type_name in self.known_types:
             return True
 
         return False
@@ -161,7 +165,7 @@ class TypeSystem(object):
         base, sub = name.split('(')
         if len(sub) == 0 or sub[-1] != ')':
             raise ArgumentError("syntax error in complex type, no matching ) found", passed_type=typename, basetype=base, subtype_string=sub)
-        
+
         sub = sub[:-1]
 
         subs = sub.split(',')
@@ -187,8 +191,20 @@ class TypeSystem(object):
         typeobj = base_type.Build(*subtypes, type_system=self)
         self.inject_type(typename, typeobj)
 
-    def _canonicalize_type(self, typename):
+    @classmethod
+    def _canonicalize_type(cls, typename):
         return typename.replace(' ', '')
+
+    @classmethod
+    def _is_factory(cls, typeobj):
+        """
+        Determine if typeobj is a factory for producing complex types
+        """
+
+        if hasattr(typeobj, 'Build'):
+            return True
+
+        return False
 
     def get_type(self, typename):
         """
@@ -221,23 +237,6 @@ class TypeSystem(object):
 
         return True
 
-    def _is_factory(self, typeobj):
-        """
-        Determine if typeobj is a factory for producing complex types
-        """
-
-        if hasattr(typeobj, 'Build'):
-            return True
-
-        return False
-
-    def format_return_value(self, function, value):
-        """
-        Format the return value of a function based on the annotated type information
-        """
-
-        return self.format_value(value, function.retval_typename, function.retval_formatter)
-
     def inject_type(self, name, typeobj):
         """
         Given a module-like object that defines a type, add it to our type system so that
@@ -261,9 +260,9 @@ class TypeSystem(object):
         if not hasattr(typeobj, "default_formatter"):
             raise ArgumentError("type is invalid, does not have default_formatter function", type=typeobj, methods=dir(typeobj))
 
-    def load_type_module(self, module, verbose=False):
+    def load_type_module(self, module):
         """
-        Given a module that contains a list of some types find all symbols in the module that 
+        Given a module that contains a list of some types find all symbols in the module that
         do not start with _ and attempt to import them as types.
         """
 
@@ -275,7 +274,7 @@ class TypeSystem(object):
             except ArgumentError:
                 pass
 
-    def load_external_types(self, path, verbose=False):
+    def load_external_types(self, path):
         """
         Given a path to a python package or module, load that module, search for all defined variables
         inside of it that do not start with _ or __ and inject them into the type system.  If any of the
@@ -283,17 +282,15 @@ class TypeSystem(object):
         it should not contain the trailing .py since this is added automatically by the python import system
         """
 
-        d, p = os.path.split(path)
+        folder, filename = os.path.split(path)
 
         try:
-            fileobj, pathname, description = imp.find_module(p, [d])
-            mod = imp.load_module(p, fileobj, pathname, description)
+            fileobj, pathname, description = imp.find_module(filename, [folder])
+            mod = imp.load_module(filename, fileobj, pathname, description)
         except ImportError as exc:
-            raise ArgumentError("could not import module in order to load external types", module_path=path, parent_directory=d, module_name=p, error=str(exc))
+            raise ArgumentError("could not import module in order to load external types", module_path=path, parent_directory=folder, module_name=filename, error=str(exc))
 
-        self.load_type_module(mod, verbose)
-
-        #TODO add checking for types that could not be injected and report them
+        self.load_type_module(mod)
 
 
 def iprint(stringable):
@@ -309,4 +306,4 @@ def iprint(stringable):
 #are imported, create a default TypeSystem object that is used globally to store type
 #information
 
-type_system = TypeSystem(types)
+type_system = TypeSystem(types)  # pylint: disable=invalid-name

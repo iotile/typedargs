@@ -3,14 +3,16 @@
 # info@welldone.org
 # http://welldone.org
 #
-# Modifications to this file from the original created at WellDone International 
+# Modifications to this file from the original created at WellDone International
 # are copyright Arch Systems Inc.
+
+# pylint: disable=unused-argument,missing-docstring
 
 # bool.py
 # Simple boolean type
 
-from past.builtins import basestring
 from builtins import str
+from past.builtins import basestring
 
 
 def convert(arg, **kwargs):
