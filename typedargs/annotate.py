@@ -17,6 +17,7 @@ from decorator import decorate
 from typedargs.exceptions import ArgumentError
 from typedargs.utils import find_all, _check_and_execute, _parse_validators, context_name
 from typedargs.metadata import AnnotatedMetadata
+from typedargs.typeinfo import type_system  #pylint: disable=W0611; this is needed for backward compatibility
 
 
 def context_from_module(module):
@@ -64,7 +65,7 @@ def get_help(func):
             doc = inspect.cleandoc(doc)
             help_text += doc + '\n'
 
-        return
+        return help_text
 
     sig = func.metadata.signature()
     doc = inspect.getdoc(func)
@@ -119,8 +120,6 @@ def param(name, type_name, *validators, **kwargs):
     """
 
     def _param(func):
-        print("Called param decorator on " + func.__name__)
-
         func = annotated(func)
 
         valids = _parse_validators(validators)
@@ -130,7 +129,6 @@ def param(name, type_name, *validators, **kwargs):
         if func.decorated:
             return func
 
-        print("Called param decorator on " + func.__name__)
         func.decorated = True
         return decorate(func, _check_and_execute)
 

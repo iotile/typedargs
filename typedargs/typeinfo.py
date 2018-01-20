@@ -19,6 +19,7 @@ from builtins import str
 
 import os.path
 import imp
+import sys
 from typedargs.exceptions import ValidationError, ArgumentError, KeyValueException
 import typedargs.types as types
 
@@ -41,6 +42,37 @@ class TypeSystem(object):
 
         for arg in args:
             self.load_type_module(arg)
+
+        self._lazy_type_sources = []
+        self.failed_sources = []
+
+    def register_type_source(self, source, name=None):
+        """Register an external source of types.
+
+        This function does not actually load any external types, it just
+        keeps track of the source, which must either be a str that is
+        interpreted as a python entry_point group or a callable that
+        will be passed an instance of this type system.
+
+        External type sources will only be loaded in an as needed basis when
+        a type is encountered (and needed) that is not currently known.  At
+        that point external type sources will be considered until the type
+        in question is found.
+
+        If an external type source fails to load for some reason, it is logged
+        but the error is not fatal.
+
+        Args:
+            source (str or callable): Either a pkg_resources entry_point
+                group that will be searched for external types or a callable
+                function that will be called as source(self) where self
+                refers to this TypeSystem object.
+            name (str): Optional short name to use for reporting errors having
+                to do with this source of types.  This is most useful to pass
+                when source is a callable.
+        """
+
+        self._lazy_type_sources.append((source, name))
 
     def convert_to_type(self, value, typename, **kwargs):
         """
@@ -172,9 +204,7 @@ class TypeSystem(object):
         return base, True, subs
 
     def instantiate_type(self, typename, base, subtypes):
-        """
-        Instantiate a complex type
-        """
+        """Instantiate a complex type."""
 
         if base not in self.type_factories:
             raise ArgumentError("unknown complex base type specified", passed_type=typename, base_type=base)
@@ -206,21 +236,57 @@ class TypeSystem(object):
 
         return False
 
-    def get_type(self, typename):
-        """
-        Return the type object corresponding to a type name.
+    def get_type(self, type_name):
+        """Return the type object corresponding to a type name.
+
+        If type_name is not found, this triggers the loading of
+        external types until a matching type is found or until there
+        are no more external type sources.
         """
 
-        typename = self._canonicalize_type(typename)
+        type_name = self._canonicalize_type(type_name)
 
-        type, is_complex, subtypes = self.split_type(typename)
-        if not self.is_known_type(typename):
-            if is_complex:
-                self.instantiate_type(typename, type, subtypes)
+        if self.is_known_type(type_name):
+            return self.known_types[type_name]
+
+        base_type, is_complex, subtypes = self.split_type(type_name)
+        if is_complex and base_type in self.type_factories:
+            self.instantiate_type(type_name, base_type, subtypes)
+            return self.known_types[type_name]
+
+        # If we're here, this is a type that we don't know anything about, so go find it.
+        i = 0
+        for i, (source, name) in enumerate(self._lazy_type_sources):
+            if isinstance(source, str):
+                import pkg_resources
+                import traceback
+
+                for entry in pkg_resources.iter_entry_points(source):
+                    try:
+                        mod = entry.load()
+                        type_system.load_type_module(mod)
+                    except:  #pylint:disable=W0702; We want to catch everything here since we don't want external plugins breaking us
+                        fail_info = ("Entry point group: %s, name: %s" % (source, entry.name), sys.exc_info)
+                        traceback.print_exc()
+                        self.failed_sources.append(fail_info)
             else:
-                raise ArgumentError("get_type called on unknown type", type=typename)
+                try:
+                    source(self)
+                except:  #pylint:disable=W0702; We want to catch everything here since we don't want external plugins breaking us
+                    fail_info = ("source: %s" % name, sys.exc_info)
+                    self.failed_sources.append(fail_info)
 
-        return self.known_types[typename]
+            # Only load as many external sources as we need to resolve this type_name
+            if self.is_known_type(type_name) or (is_complex and base_type in self.type_factories):
+                break
+
+        self._lazy_type_sources = self._lazy_type_sources[i:]
+
+        # If we've loaded everything and we still can't find it then there's a configuration error somewhere
+        if not (self.is_known_type(type_name) or (is_complex and base_type in self.type_factories)):
+            raise ArgumentError("get_type called on unknown type", type=type_name, failed_external_sources=[x[0] for x in self.failed_sources])
+
+        return self.get_type(type_name)
 
     def is_known_format(self, type, format):
         """
