@@ -18,8 +18,8 @@ def _check_and_execute(func, *args, **kwargs):
     convargs = []
 
     #Convert and validate all arguments
-    for i in range(0, len(args)):
-        val = func.metadata.convert_positional_argument(i, args[i])
+    for i, arg in enumerate(args):
+        val = func.metadata.convert_positional_argument(i, arg)
         convargs.append(val)
 
     convkw = {}

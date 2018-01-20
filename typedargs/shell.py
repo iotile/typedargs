@@ -201,7 +201,7 @@ class HierarchicalShell(object):
         pass  # Popping the context is handled by invoke since this is marked as a finalizer
 
     @annotate.takes_cmdline
-    def _builtin_quit(self):
+    def _builtin_quit(self, _cmdline):
         """Quit this hierarchical shell."""
         del self.contexts[:]
 
@@ -350,7 +350,7 @@ class HierarchicalShell(object):
                     if '=' in arg:
                         arg, arg_value = arg.split('=')
 
-                    arg_name = func.metadate.match_shortname(arg, filled_args=pos_args)
+                    arg_name = func.metadata.match_shortname(arg, filled_args=pos_args)
 
                 arg_type = func.metadata.param_type(arg_name)
                 if arg_type is None:

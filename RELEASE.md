@@ -1,5 +1,11 @@
 # Release Notes
 
+## 0.11.0
+
+- Add support for lazy type loading. (Issue #15)
+- Test for and fix compatibility with old embedded typedargs in coretools, to
+  prepare for dropping embedded version.
+
 ## 0.10.0
 
 - Port to modern code, fix all pylint errors and turn pylint on in CI
