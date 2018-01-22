@@ -1,10 +1,11 @@
 # Release Notes
 
-## HEAD
+## 0.12.0
 
 - Add support for @docannotate that pulls all annotation info directly from the
   docstring.
-- 
+- Fix miscellaneous bugs and slight incompatibilities with previous typedargs
+  embedded into CoreTools.
 
 ## 0.11.0
 
