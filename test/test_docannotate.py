@@ -3,7 +3,7 @@
 # pylint: disable=unused-argument,redefined-outer-name,missing-docstring
 
 import pytest
-from builtins import int
+from builtins import int, str
 from typedargs import type_system, docannotate, param, return_type
 from typedargs.annotate import get_help
 from typedargs.exceptions import ValidationError, ArgumentError
@@ -72,3 +72,34 @@ def test_docparse():
     assert 'param2' in params
     assert retinfo is not None
 
+
+DOCSTRING_FORMATAS = """basic line
+
+Returns:
+    integer format-as hex: basic description.
+"""
+
+DOCSTRING_SHOWAS = """basic short desc
+
+Returns:
+    RandomType show-as string: basic description.
+"""
+
+DOCSTRING_CONTEXT = """basic short desc
+
+Returns:
+    RandomType show-as context: basic description.
+"""
+
+
+def test_return_parsing():
+    """Make sure we can parse a show-as and format-as line."""
+
+    _params, retinfo = parse_docstring(DOCSTRING_SHOWAS)
+    assert retinfo == (None, str, True, None)
+
+    _params, retinfo = parse_docstring(DOCSTRING_FORMATAS)
+    assert retinfo == ("integer", "hex", True, None)
+
+    _params, retinfo = parse_docstring(DOCSTRING_CONTEXT)
+    assert retinfo == (None, None, False, None)
