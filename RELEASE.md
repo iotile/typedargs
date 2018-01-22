@@ -1,5 +1,10 @@
 # Release Notes
 
+## 0.12.1
+
+- Add support for indicating contexts and stringable return values in
+  docannotate. (Issue #22)
+
 ## 0.12.0
 
 - Add support for @docannotate that pulls all annotation info directly from the
