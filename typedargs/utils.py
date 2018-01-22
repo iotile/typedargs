@@ -1,5 +1,7 @@
 """Utility functons that are only used internally inside typedargs."""
 
+from builtins import str
+from past.builtins import basestring
 from .exceptions import ValidationError
 from .metadata import AnnotatedMetadata
 
@@ -44,7 +46,7 @@ def _parse_validators(valids):
     outvals = []
 
     for val in valids:
-        if isinstance(val, str):
+        if isinstance(val, basestring):
             args = []
         elif len(val) > 1:
             args = val[1:]

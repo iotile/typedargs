@@ -246,6 +246,12 @@ class TypeSystem(object):
 
         type_name = self._canonicalize_type(type_name)
 
+        # Add basic transformations on common abbreviations
+        if str(type_name) == 'int':
+            type_name = 'integer'
+        elif str(type_name) == 'str':
+            type_name = 'string'
+
         if self.is_known_type(type_name):
             return self.known_types[type_name]
 

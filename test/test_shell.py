@@ -113,14 +113,12 @@ root
 A basic context for holding the root callable functions for a shell.
 
 Defined Functions:
- - Test(integer arg1)
+ - demo(integer arg1)
    Hello.
  - func(integer arg1, bool force=False, string arg2=hello)
    Demo function.
  - func2()
    Demo function 2.
- - import_types(path package, string module=None)
-   Add externally defined types from a python package or module.
 
 Builtin Functions
  - back
