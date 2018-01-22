@@ -3,15 +3,15 @@
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 from builtins import range, str
-from future.utils import viewitems
 import inspect
+from future.utils import viewitems
 import typedargs.typeinfo as typeinfo
 from .exceptions import TypeSystemError, ArgumentError, ValidationError
 from .basic_structures import ParameterInfo, ReturnInfo
 from .doc_annotate import parse_docstring
 
 
-class AnnotatedMetadata(object):
+class AnnotatedMetadata(object): #pylint: disable=R0902; These instance variables are required.
     """All of the associated metadata for an annotated function or class.
 
     Args:
