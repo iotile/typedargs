@@ -79,6 +79,12 @@ def get_help(func):
     if inspect.isclass(func):
         func = func.__init__
 
+    # If we derived the parameter annotations from a docstring,
+    # don't insert a custom arguments section since it already
+    # exists.
+    if func.metadata.load_from_doc:
+        return help_text
+
     help_text += "\nArguments:\n"
     for key, info in iteritems(func.metadata.annotated_params):
         type_name = info.type_name
@@ -222,6 +228,25 @@ def takes_cmdline(func):
     func.takes_cmdline = True
 
     return func
+
+
+def docannotate(func):
+    """Annotate a function using information from its docstring.
+
+    The annotation actually happens at the time the function is first called
+    to improve startup time.  For this function to work, the docstring must be
+    formatted correctly.  You should use the typedargs pylint plugin to make
+    sure there are no errors in the docstring.
+    """
+
+    func = annotated(func)
+    func.metadata.load_from_doc = True
+
+    if func.decorated:
+        return func
+
+    func.decorated = True
+    return decorate(func, _check_and_execute)
 
 
 def annotated(func, name=None):

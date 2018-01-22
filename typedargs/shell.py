@@ -16,7 +16,6 @@ from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 import inspect
 import shlex
-import os.path
 import platform
 import importlib
 from builtins import str
@@ -26,32 +25,6 @@ import typedargs.annotate as annotate
 import typedargs.utils as utils
 from typedargs import iprint
 from typedargs.typeinfo import type_system
-
-
-@annotate.param("package", "path", "exists", desc="Path to the python package containing the types")
-@annotate.param("module", "string", desc="The name of the submodule to load from package, if applicable")
-def import_types(package, module=None):
-    """Add externally defined types from a python package or module.
-
-    The type system is based on type objects that define what kinds of types
-    can be used for function arguments as well as how those types should be displayed and
-    converted from binary representations or strings.  This function allows you to define external
-    types in a separate package and import them into the MoMo type system so that they can be used.
-    You might want to do this if you have custom firmware objects that you would like to interact with
-    or that are returned in a syslog entry, for example.
-
-    All objects defined in the global namespace of package (if module is None) or package.module if
-    module is specified that define valid types will be imported and can from this point on be used
-    just like any primitive type defined in typedargs itself.  Imported types are indistinguishable
-    from primivtive types like string, integer and path.
-    """
-
-    if module is None:
-        path = package
-    else:
-        path = os.path.join(package, module)
-
-    type_system.load_external_types(path)
 
 
 @annotate.context("root")
@@ -73,8 +46,6 @@ class HierarchicalShell(object):
         # Keep track of whether we are on windows because shlex does not dequote
         # strings the same on Windows as on other platforms
         self.posix_lex = platform.system() != 'Windows'
-
-        self.root_add('import_types', import_types)
 
         #Initialize the root context if required
         self._check_initialize_context()
@@ -133,7 +104,7 @@ class HierarchicalShell(object):
             list(str): A list of all of the valid identifiers for this context
         """
 
-        funcs = annotate.find_all(self.contexts[-1]).keys() + self.builtins.keys()
+        funcs = utils.find_all(self.contexts[-1]).keys() + self.builtins.keys()
         return funcs
 
     @classmethod
@@ -277,18 +248,28 @@ class HierarchicalShell(object):
             listing += doc + "\n"
 
         listing += "\nDefined Functions:\n"
+        is_dict = False
 
         if isinstance(context, dict):
             funs = context.keys()
+            is_dict = True
         else:
-            funs = annotate.find_all(context)
+            funs = utils.find_all(context)
 
         for fun in sorted(funs):
+            override_name = None
+            if is_dict:
+                override_name = fun
+
             fun = self.find_function(context, fun)
+
             if isinstance(fun, dict):
-                listing += " - " + fun.metadata.name + '\n'
+                if is_dict:
+                    listing += " - " + override_name + '\n'
+                else:
+                    listing += " - " + fun.metadata.name + '\n'
             else:
-                listing += " - " + fun.metadata.signature() + '\n'
+                listing += " - " + fun.metadata.signature(name=override_name) + '\n'
 
             if annotate.short_description(fun) != "":
                 listing += "   " + annotate.short_description(fun) + '\n'
@@ -475,6 +456,8 @@ class HierarchicalShell(object):
                 (False if a new context was created) and a list with the remainder of the
                 command line if this function did not consume all arguments.)
         """
+
+        finished = True
 
         while len(line) > 0:
             val, line, finished = self.invoke_one(line)

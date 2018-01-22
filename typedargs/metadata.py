@@ -3,17 +3,15 @@
 from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 from builtins import range, str
-from collections import namedtuple
 import inspect
+from future.utils import viewitems
 import typedargs.typeinfo as typeinfo
 from .exceptions import TypeSystemError, ArgumentError, ValidationError
+from .basic_structures import ParameterInfo, ReturnInfo
+from .doc_annotate import parse_docstring
 
 
-ParameterInfo = namedtuple("ParameterInfo", ['type_name', 'validators', 'desc'])
-ReturnInfo = namedtuple("ReturnInfo", ['type_name', 'formatter', 'is_data', 'desc'])
-
-
-class AnnotatedMetadata(object):
+class AnnotatedMetadata(object): #pylint: disable=R0902; These instance variables are required.
     """All of the associated metadata for an annotated function or class.
 
     Args:
@@ -29,6 +27,12 @@ class AnnotatedMetadata(object):
         self._has_self = False
 
         if inspect.isclass(func):
+            # If we're annotating a class, the name of the class should be
+            # the class name so keep track of that before looking at its
+            # __init__ function.
+            if name is None:
+                name = func.__name__
+
             func = func.__init__
 
             # If __init__ has anotated params, copy them to the class so
@@ -65,6 +69,21 @@ class AnnotatedMetadata(object):
             name = func.__name__
 
         self.name = name
+
+        self.load_from_doc = False
+        self._doc_parsed = False
+        self._docstring = func.__doc__
+
+    def _ensure_loaded(self):
+        if self.load_from_doc and not self._doc_parsed:
+            params, ret_info = parse_docstring(self._docstring)
+            for param_name, param_info in viewitems(params):
+                self.add_param(param_name, param_info.type_name, param_info.validators)
+
+            if ret_info is not None:
+                self.return_info = ret_info
+
+            self._doc_parsed = True
 
     def spec_filled(self, pos_args, kw_args):
         """Check if we have enough arguments to call this function.
@@ -140,6 +159,9 @@ class AnnotatedMetadata(object):
 
     def returns_data(self):
         """Check if this function returns data."""
+
+        self._ensure_loaded()
+
         return self.return_info.is_data
 
     def match_shortname(self, name, filled_args=None):
@@ -179,13 +201,32 @@ class AnnotatedMetadata(object):
             str: The type name or None if no type information is given.
         """
 
+        self._ensure_loaded()
+
         if name not in self.annotated_params:
             return None
 
         return self.annotated_params[name].type_name
 
-    def signature(self):
-        """Return our function signature as a string."""
+    def signature(self, name=None):
+        """Return our function signature as a string.
+
+        By default this function uses the annotated name of the function
+        however if you need to override that with a custom name you can
+        pass name=<custom name>
+
+        Args:
+            name (str): Optional name to override the default name given
+                in the function signature.
+
+        Returns:
+            str: The formatted function signature
+        """
+
+        self._ensure_loaded()
+
+        if name is None:
+            name = self.name
 
         num_args = len(self.arg_names)
 
@@ -211,7 +252,7 @@ class AnnotatedMetadata(object):
             else:
                 args.append(typestr + str(self.arg_names[i]))
 
-        return "{}({})".format(self.name, ", ".join(args))
+        return "{}({})".format(name, ", ".join(args))
 
     def format_returnvalue(self, value):
         """Format the return value of this function as a string.
@@ -223,6 +264,8 @@ class AnnotatedMetadata(object):
             str: The formatted return value, or None if this function indicates
                 that it does not return data
         """
+
+        self._ensure_loaded()
 
         if not self.return_info.is_data:
             return None
@@ -265,6 +308,8 @@ class AnnotatedMetadata(object):
         Returns:
             object: The converted value.
         """
+
+        self._ensure_loaded()
 
         type_name = self.param_type(arg_name)
         if type_name is None:

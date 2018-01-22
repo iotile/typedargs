@@ -1,5 +1,11 @@
 # Release Notes
 
+## HEAD
+
+- Add support for @docannotate that pulls all annotation info directly from the
+  docstring.
+- 
+
 ## 0.11.0
 
 - Add support for lazy type loading. (Issue #15)
