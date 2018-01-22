@@ -11,6 +11,8 @@ functions or if the docstring for an @docannotate function
 is not correctly formatted.
 """
 
+#pylint: disable=all; Work in progress that should not be linted yet
+
 from __future__ import (unicode_literals, print_function, absolute_import)
 import sys
 import inspect
