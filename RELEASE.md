@@ -1,5 +1,10 @@
 # Release Notes
 
+## 0.12.2
+
+- Fix issue with bytes type that did not properly allow specifying hex strings
+  during the conversion to being python 3 compliant.  (Issue #25)
+
 ## 0.12.1
 
 - Add support for indicating contexts and stringable return values in
