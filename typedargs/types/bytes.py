@@ -7,16 +7,18 @@
 #Simple bytearray type
 
 from builtins import str
-
+import sys
+from binascii import unhexlify
 
 def convert(arg, **kwargs):
     if isinstance(arg, bytearray):
         return arg
-    elif isinstance(arg, str):
+    elif isinstance(arg, str) or (isinstance(arg, bytes) and sys.version_info < (3, 0)):
         if len(arg) > 2 and arg.startswith("0x"):
-            data = arg[2:].decode('hex')
+            data = unhexlify(arg[2:])
         else:
             data = arg
+
         return bytearray(data)
 
     raise TypeError("You must create a bytes object from a bytearray or a hex string")

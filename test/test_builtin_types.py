@@ -115,3 +115,13 @@ def test_unicode_conversion():
     # Test float
     val = type_system.convert_to_type(u'42.5', 'float')
     assert val == 42.5
+
+
+def test_bytes_from_hex():
+    """Make sure we can convert a hex string to bytes."""
+
+    val = type_system.convert_to_type(u'0xabcd', 'bytes')
+    val2 = type_system.convert_to_type('0xabcd', 'bytes')
+
+    assert val == val2
+    assert val == bytearray(b'\xab\xcd')
