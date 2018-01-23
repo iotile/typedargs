@@ -1,3 +1,13 @@
+environment:
+  matrix:
+
+    # For Python versions available on Appveyor, see
+    # http://www.appveyor.com/docs/installed-software#python
+    # The list here is complete (excluding Python 2.6, which
+    # isn't covered by this document) at the time of writing.
+
+    - PYTHON: "C:\\Python27"
+
 install:
   # We need wheel installed to build wheels
   - "%PYTHON%\\python.exe -m pip install --upgrade -r requirements_build.txt"
@@ -8,4 +18,5 @@ build: off
 test_script:
   - "pwd"
   - "ls"
+  - tox --listenvs
   - ps: tox -r
