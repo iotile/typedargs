@@ -168,4 +168,4 @@ def test_valid_identifiers(shell):
     """Regression test failed dict key addition on python 3."""
 
     idents = shell.valid_identifiers()
-    assert idents == ['func', 'func2', 'demo', 'back', 'help', 'quit']
+    assert sorted(idents) == sorted(['func', 'func2', 'demo', 'back', 'help', 'quit'])
