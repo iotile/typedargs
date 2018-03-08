@@ -281,6 +281,35 @@ class HierarchicalShell(object):
         listing += '\n'
         return listing
 
+    @classmethod
+    def _is_flag(cls, arg):
+        """Check if an argument is a flag.
+
+        A flag starts with - or -- and the next character must be a letter
+        followed by letters, numbers, - or _.  Currently we only check the
+        alpha'ness of the first non-dash character to make sure we're not just
+        looking at a negative number.
+
+        Returns:
+            bool: Whether the argument is a flag.
+        """
+
+        if arg == '--':
+            return False
+
+        if not arg.startswith('-'):
+            return False
+
+        if arg.startswith('--'):
+            first_char = arg[2]
+        else:
+            first_char = arg[1]
+
+        if not first_char.isalpha():
+            return False
+
+        return True
+
     def process_arguments(self, func, args):
         """Process arguments from the command line into positional and kw args.
 
@@ -307,14 +336,14 @@ class HierarchicalShell(object):
         kw_args = {}
 
         while len(args) > 0:
-            if func.metadata.spec_filled(pos_args, kw_args) and not args[0].startswith('-'):
+            if func.metadata.spec_filled(pos_args, kw_args) and not self._is_flag(args[0]):
                 break
 
             arg = args.pop(0)
 
             if arg == '--':
                 break
-            elif arg.startswith('-'):
+            elif self._is_flag(arg):
                 arg_value = None
                 arg_name = None
 
@@ -328,8 +357,10 @@ class HierarchicalShell(object):
                     arg = arg[2:]
 
                     # Check if the value is embedded in the parameter
+                    # Make sure we allow the value after the equals sign to also
+                    # contain an equals sign.
                     if '=' in arg:
-                        arg, arg_value = arg.split('=')
+                        arg, arg_value = arg.split('=', 1)
 
                     arg_name = func.metadata.match_shortname(arg, filled_args=pos_args)
 

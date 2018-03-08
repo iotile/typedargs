@@ -169,3 +169,16 @@ def test_valid_identifiers(shell):
 
     idents = shell.valid_identifiers()
     assert sorted(idents) == sorted(['func', 'func2', 'demo', 'back', 'help', 'quit'])
+
+def test_negative_numbers(shell):
+    """Make sure we correctly handle negative numbers not as flags."""
+
+    with pytest.raises(ValidationError):
+        shell.invoke_string('demo -15')
+
+
+def test_equals_in_flag(shell):
+    """Make sure --flags=string=value works with the flag value being 'string=value'."""
+
+    finished = shell.invoke_string("func 1 --arg2=name=value --")
+    assert finished is True
