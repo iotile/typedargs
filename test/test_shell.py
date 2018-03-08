@@ -162,3 +162,10 @@ def test_invoke_string(shell):
 
     finished = shell.invoke_string(u'func2')
     assert finished is False
+
+
+def test_valid_identifiers(shell):
+    """Regression test failed dict key addition on python 3."""
+
+    idents = shell.valid_identifiers()
+    assert idents == ['func', 'func2', 'demo', 'back', 'help', 'quit']

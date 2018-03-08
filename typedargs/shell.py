@@ -104,7 +104,7 @@ class HierarchicalShell(object):
             list(str): A list of all of the valid identifiers for this context
         """
 
-        funcs = utils.find_all(self.contexts[-1]).keys() + self.builtins.keys()
+        funcs = list(utils.find_all(self.contexts[-1])) + list(self.builtins)
         return funcs
 
     @classmethod
