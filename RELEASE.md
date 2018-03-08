@@ -1,5 +1,13 @@
 # Release Notes
 
+## 0.12.3
+
+- Fix valid_identifiers() on python 3 that was adding dict.keys() which is no
+  longer supported.
+- Fix negative numbers being misinterpreted as flags.
+- Fix equals signs in --flag=name=value causing an exception due to incorrect
+  splitting logic.
+
 ## 0.12.2
 
 - Fix issue with bytes type that did not properly allow specifying hex strings
