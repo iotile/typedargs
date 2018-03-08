@@ -1,5 +1,10 @@
 # Release Notes
 
+## 0.12.3
+
+- Fix valid_identifiers() on python 3 that was adding dict.keys() which is no
+  longer supported.
+
 ## 0.12.2
 
 - Fix issue with bytes type that did not properly allow specifying hex strings
