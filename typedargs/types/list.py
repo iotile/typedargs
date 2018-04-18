@@ -10,6 +10,11 @@
 
 #list.py
 
+import ast
+from past.builtins import basestring
+import collections
+
+
 class list(object):  # pylint: disable=C0103
     def __init__(self, valuetype, **kwargs):
 
@@ -24,7 +29,16 @@ class list(object):  # pylint: disable=C0103
         return list(types[0], **kwargs)
 
     def convert(self, value, **kwargs):
+        if value is None:
+            return value
+
         converted = []
+        if isinstance(value, basestring):
+            old_value = value
+            value = ast.literal_eval(value)
+            if not isinstance(value, collections.Sequence):
+                raise ValueError("converted list from a string but it did not produce a sequence: %s" % old_value)
+
         for val in value:
             conv = self.type_system.convert_to_type(val, self.valuetype, **kwargs)
             converted.append(conv)

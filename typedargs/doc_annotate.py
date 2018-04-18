@@ -7,6 +7,7 @@ from .exceptions import ValidationError
 from .basic_structures import ParameterInfo, ReturnInfo
 
 
+
 def parse_docstring(doc):
     """Parse a docstring into ParameterInfo and ReturnInfo objects."""
 

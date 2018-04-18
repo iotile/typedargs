@@ -10,7 +10,9 @@
 
 # pylint: disable=unused-argument,redefined-outer-name
 
+import pytest
 from typedargs import type_system
+from typedargs.exceptions import ValidationError
 
 
 def test_splitting():
@@ -47,3 +49,28 @@ def test_list_formatting():
 
     formatted = type_system.format_value(val, 'list(integer)')
     assert formatted == "10\n15"
+
+
+def test_list_conversion():
+    """Make sure we can convert strings to lists."""
+
+    out = type_system.convert_to_type("[1, 2, 3]", 'list(integer)')
+    assert out == [1, 2, 3]
+
+    out = type_system.convert_to_type("['abc', 'def', 'g']", 'list(string)')
+    assert out == ['abc', 'def', 'g']
+
+    with pytest.raises(ValidationError):
+        out = type_system.convert_to_type("['abc', 'def', 'g']", 'list(integer)')
+
+    with pytest.raises(ValidationError):
+        out = type_system.convert_to_type("abc", 'list(str)')
+
+    with pytest.raises(ValidationError):
+        out = type_system.convert_to_type("{'abc': 'def'}", 'list(string)')
+
+    out = type_system.convert_to_type([1, 2, 3], 'list(integer)')
+    assert out == [1, 2, 3]
+
+    out = type_system.convert_to_type(None, 'list(integer)')
+    assert out is None
