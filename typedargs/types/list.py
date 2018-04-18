@@ -11,8 +11,8 @@
 #list.py
 
 import ast
-from past.builtins import basestring
 import collections
+from past.builtins import basestring
 
 
 class list(object):  # pylint: disable=C0103

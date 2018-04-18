@@ -3,6 +3,8 @@
 Adapted from https://gist.github.com/jtriley/1108174
 """
 
+#pylint:skip-file;This is imported code
+
 import os
 import shlex
 import struct

@@ -1,9 +1,13 @@
+"""Experimental module for better google docstring parsing."""
+
 from __future__ import unicode_literals
-from builtins import int
+from builtins import int, str
 import inspect
 from .basic_structures import ParameterInfo, ReturnInfo
+from .exceptions import ValidationError
 
 
+# pylint: disable=too-few-public-methods;Experimental class
 class ParsedDocstring(object):
     """A parser for google docstrings.
 
@@ -26,11 +30,12 @@ class ParsedDocstring(object):
         if self.MAIN_SECTION in self.known_sections and len(self.known_sections[self.MAIN_SECTION]) > 0:
             self.short_desc = self.known_sections[self.MAIN_SECTION][0]
 
-        self.param_info = {self._parse_param(arg)[0]: self._parse_param(arg)[1] for arg in self.known_sections.get(self.ARGS_SECTION, [])}
+        self.param_info = {parse_param(arg, True)[0]: parse_param(arg, True)[1] for arg in self.known_sections.get(self.ARGS_SECTION, [])}
         self.return_info = None
         if self.RETURN_SECTION in self.known_sections:
-            self.return_info = self._parse_return(self.known_sections[self.RETURN_SECTION][0])
+            self.return_info = parse_return(self.known_sections[self.RETURN_SECTION][0], True)
 
+    #pylint:disable=too-many-branches
     def _collect_sections(self, doc):
         doc = inspect.cleandoc(doc)
         lines = doc.splitlines()
@@ -86,7 +91,8 @@ class ParsedDocstring(object):
             else:
                 self.unknown_sections[curr_section] = self._join_paragraphs(section_contents, use_indent=use_indent)
 
-    def _join_paragraph(self, lines, leading_blanks, trailing_blanks):
+    @classmethod
+    def _join_paragraph(cls, lines, leading_blanks, trailing_blanks):
         if leading_blanks is False:
             remove_count = 0
             for line in lines:
@@ -111,7 +117,8 @@ class ParsedDocstring(object):
 
         return " ".join(lines)
 
-    def _join_paragraphs(self, lines, use_indent=False, leading_blanks=False, trailing_blanks=False):
+    @classmethod
+    def _join_paragraphs(cls, lines, use_indent=False, leading_blanks=False, trailing_blanks=False):
         """Join adjacent lines together into paragraphs using either a blank line or indent as separator."""
 
         curr_para = []
@@ -126,70 +133,78 @@ class ParsedDocstring(object):
                     continue
                 else:
                     if len(curr_para) > 0:
-                        paragraphs.append(self._join_paragraph(curr_para, leading_blanks, trailing_blanks))
+                        paragraphs.append(cls._join_paragraph(curr_para, leading_blanks, trailing_blanks))
 
                     curr_para = [line.lstrip()]
             else:
                 if len(line) != 0:
                     curr_para.append(line)
                 else:
-                    paragraphs.append(self._join_paragraph(curr_para, leading_blanks, trailing_blanks))
+                    paragraphs.append(cls._join_paragraph(curr_para, leading_blanks, trailing_blanks))
                     curr_para = []
 
         # Finish the last paragraph if ther is one
         if len(curr_para) > 0:
-            paragraphs.append(self._join_paragraph(curr_para, leading_blanks, trailing_blanks))
+            paragraphs.append(cls._join_paragraph(curr_para, leading_blanks, trailing_blanks))
 
         return paragraphs
 
-    def _parse_param(self, param):
-        """Parse a single typed parameter statement."""
 
-        param_def, _colon, desc = param.partition(':')
-        if _colon == "":
-            raise ValidationError("Invalid parameter declaration in docstring, missing colon", declaration=param)
+def parse_param(param, include_desc=False):
+    """Parse a single typed parameter statement."""
 
-        param_name, _space, param_type = param_def.partition(' ')
-        if len(param_type) < 2 or param_type[0] != '(' or param_type[-1] != ')':
-            raise ValidationError("Invalid parameter type string not enclosed in ( ) characters", param_string=param_def, type_string=param_type)
+    param_def, _colon, desc = param.partition(':')
+    if not include_desc:
+        desc = None
 
-        param_type = param_type[1:-1]
-        return param_name, ParameterInfo(param_type, [], desc)
+    if _colon == "":
+        raise ValidationError("Invalid parameter declaration in docstring, missing colon", declaration=param)
 
-    def _parse_return(self, return_line):
-        """Parse a single return statement declaration.
+    param_name, _space, param_type = param_def.partition(' ')
+    if len(param_type) < 2 or param_type[0] != '(' or param_type[-1] != ')':
+        raise ValidationError("Invalid parameter type string not enclosed in ( ) characters", param_string=param_def, type_string=param_type)
 
-        The valid types of return declarion are a Returns: section heading
-        followed a line that looks like:
-        type [format-as formatter]: description
+    param_type = param_type[1:-1]
+    return param_name, ParameterInfo(param_type, [], desc)
 
-        OR
 
-        type [show-as (string | context)]: description sentence
-        """
+def parse_return(return_line, include_desc=False):
+    """Parse a single return statement declaration.
 
-        ret_def, _colon, desc = return_line.partition(':')
-        if _colon == "":
-            raise ValidationError("Invalid return declaration in docstring, missing colon", declaration=ret_def)
+    The valid types of return declarion are a Returns: section heading
+    followed a line that looks like:
+    type [format-as formatter]: description
 
-        if 'show-as' in ret_def:
-            ret_type, _showas, show_type = ret_def.partition('show-as')
-            ret_type = ret_type.strip()
-            show_type = show_type.strip()
+    OR
 
-            if show_type not in ('string', 'context'):
-                raise ValidationError("Unkown show-as formatting specifier", found=show_type, expected=['string', 'context'])
+    type [show-as (string | context)]: description sentence
+    """
 
-            if show_type == 'string':
-                return ReturnInfo(None, str, True, desc)
+    ret_def, _colon, desc = return_line.partition(':')
+    if _colon == "":
+        raise ValidationError("Invalid return declaration in docstring, missing colon", declaration=ret_def)
 
-            return ReturnInfo(None, None, False, desc)
+    if not include_desc:
+        desc = None
 
-        if 'format-as' in ret_def:
-            ret_type, _showas, formatter = ret_def.partition('format-as')
-            ret_type = ret_type.strip()
-            formatter = formatter.strip()
+    if 'show-as' in ret_def:
+        ret_type, _showas, show_type = ret_def.partition('show-as')
+        ret_type = ret_type.strip()
+        show_type = show_type.strip()
 
-            return ReturnInfo(ret_type, formatter, True, desc)
+        if show_type not in ('string', 'context'):
+            raise ValidationError("Unkown show-as formatting specifier", found=show_type, expected=['string', 'context'])
 
-        return ReturnInfo(ret_def, None, True, desc)
+        if show_type == 'string':
+            return ReturnInfo(None, str, True, desc)
+
+        return ReturnInfo(None, None, False, desc)
+
+    if 'format-as' in ret_def:
+        ret_type, _showas, formatter = ret_def.partition('format-as')
+        ret_type = ret_type.strip()
+        formatter = formatter.strip()
+
+        return ReturnInfo(ret_type, formatter, True, desc)
+
+    return ReturnInfo(ret_def, None, True, desc)
