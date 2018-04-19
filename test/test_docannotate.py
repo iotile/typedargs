@@ -142,8 +142,6 @@ def test_parsed_doc():
     parsed1 = ParsedDocstring(DOCSTRING1)
     parsed2 = ParsedDocstring(DOCSTRING2)
 
-    print(parsed2.wrap_and_format(include_params=True))
-
     assert parsed2.short_desc == u'Do something.'
     assert parsed1.short_desc == u'Do something.'
 
