@@ -114,7 +114,11 @@ DOCSTRING2 = """Do something.
         Here is a second paragraph of text about what it will
         do.
 
-        Unsupported Section:
+        - Here is the start of a list
+          continuation of line 1
+        - Line 2 of list
+
+        UnsupportedSection:
             Here is text in an unsupported section.
 
             Here is a second unsupported paragraph.
@@ -138,18 +142,12 @@ def test_parsed_doc():
     parsed1 = ParsedDocstring(DOCSTRING1)
     parsed2 = ParsedDocstring(DOCSTRING2)
 
-    assert ParsedDocstring.ARGS_SECTION in parsed2.known_sections
-    assert ParsedDocstring.MAIN_SECTION in parsed2.known_sections
-    assert ParsedDocstring.RETURN_SECTION in parsed2.known_sections
+    print(parsed2.wrap_and_format(include_params=True))
 
-    assert parsed2.known_sections == {0: [u'Do something.', u'This function will do some random things.',
-                                          u'Here is a second paragraph of text about what it will do.'],
-                                      1: [u'param1 (integer): A basic parameter. Extra information about that basic parameter.',
-                                          u'param2 (bool): The basic dict parameter'],
-                                      2: [u'map(string, int): A generic struct. Here is more first paragraph text', u'This is additional information about the return value.']}
-    assert parsed2.unknown_sections == {'Unsupported Section': [u'Here is text in an unsupported section.', u'Here is a second unsupported paragraph.']}
     assert parsed2.short_desc == u'Do something.'
     assert parsed1.short_desc == u'Do something.'
 
-    assert parsed1.param_info == {u'param2': ParameterInfo(type_name=u'bool', validators=[], desc=u' The basic dict parameter'),
-                                  u'param1': ParameterInfo(type_name=u'integer', validators=[], desc=u' A basic parameter')}
+    assert parsed1.param_info == {u'param2': ParameterInfo(type_name=u'bool', validators=[], desc=u'The basic dict parameter'),
+                                  u'param1': ParameterInfo(type_name=u'integer', validators=[], desc=u'A basic parameter')}
+
+    print
