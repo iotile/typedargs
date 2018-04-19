@@ -26,6 +26,8 @@ class AnnotatedMetadata(object): #pylint: disable=R0902; These instance variable
         self.annotated_params = {}
         self._has_self = False
 
+        docstring = func.__doc__
+
         if inspect.isclass(func):
             # If we're annotating a class, the name of the class should be
             # the class name so keep track of that before looking at its
@@ -72,7 +74,7 @@ class AnnotatedMetadata(object): #pylint: disable=R0902; These instance variable
 
         self.load_from_doc = False
         self._doc_parsed = False
-        self._docstring = func.__doc__
+        self._docstring = docstring
 
     def _ensure_loaded(self):
         if self.load_from_doc and not self._doc_parsed:

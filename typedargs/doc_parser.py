@@ -3,7 +3,7 @@
 from __future__ import unicode_literals, print_function
 from builtins import str
 import inspect
-from StringIO import StringIO
+from io import StringIO
 from collections import namedtuple
 from textwrap import fill, dedent
 from future.utils import viewitems
