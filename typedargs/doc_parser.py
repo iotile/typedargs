@@ -304,7 +304,6 @@ class ParsedDocstring(object):
                 out.write(fill(line.contents, initial_indent=" %s " % line.marker[0], subsequent_indent="   ", width=width))
                 out.write('\n')
 
-
         if include_params:
             included_params = set(self.param_info) - set(excluded_params)
             if len(included_params) > 0:
