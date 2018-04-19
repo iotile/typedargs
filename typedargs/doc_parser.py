@@ -319,7 +319,7 @@ class ParsedDocstring(object):
         if include_return:
             print("Returns:")
             print("    " + self.return_info.type_name)
-            #pylint:disable=fixme; Issue tracked in #
+            #pylint:disable=fixme; Issue tracked in #32
             # TODO: Also include description information here
 
         return out.getvalue()
