@@ -265,7 +265,7 @@ class ParsedDocstring(object):
                     paragraphs.append(cls._join_paragraph(curr_para, leading_blanks, trailing_blanks))
                     curr_para = []
 
-        # Finish the last paragraph if ther is one
+        # Finish the last paragraph if there is one
         if len(curr_para) > 0:
             paragraphs.append(cls._join_paragraph(curr_para, leading_blanks, trailing_blanks))
 
@@ -276,7 +276,7 @@ class ParsedDocstring(object):
 
         Args:
             width (int): The number of characters per line.  If set to None
-                this will be inferred from the terminal width and defualt
+                this will be inferred from the terminal width and default
                 to 80 if not passed or if passed as None and the terminal
                 width cannot be determined.
             include_return (bool): Include the return information section
