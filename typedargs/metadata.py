@@ -300,7 +300,7 @@ class AnnotatedMetadata(object): #pylint: disable=R0902; These instance variable
         arg_name = self.arg_names[index]
         return self.convert_argument(arg_name, arg_value)
 
-    def check_spec(self, pos_args, kwargs):
+    def check_spec(self, pos_args, kwargs=None):
         """Check if there are any missing or duplicate arguments.
 
         Args:
@@ -316,6 +316,9 @@ class AnnotatedMetadata(object): #pylint: disable=R0902; These instance variable
             ArgumentError: If a positional or keyword argument does not fit in the spec.
             ValidationError: If an argument is passed twice.
         """
+
+        if kwargs is None:
+            kwargs = {}
 
         if self.varargs is not None or self.kwargs is not None:
             raise InternalError("check_spec cannot be called on a function that takes *args or **kwargs")
