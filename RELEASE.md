@@ -9,6 +9,7 @@
   parsing used in @docannotate.
 - Add experimental terminal size querying routines to support better help string
   printing in the shell.
+- Add additional functionality to metadata
 
 ## 0.12.3
 
