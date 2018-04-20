@@ -6,7 +6,7 @@ from builtins import range, str
 import inspect
 from future.utils import viewitems
 import typedargs.typeinfo as typeinfo
-from .exceptions import TypeSystemError, ArgumentError, ValidationError
+from .exceptions import TypeSystemError, ArgumentError, ValidationError, InternalError
 from .basic_structures import ParameterInfo, ReturnInfo
 from .doc_annotate import parse_docstring
 
@@ -25,6 +25,8 @@ class AnnotatedMetadata(object): #pylint: disable=R0902; These instance variable
     def __init__(self, func, name=None):
         self.annotated_params = {}
         self._has_self = False
+
+        docstring = func.__doc__
 
         if inspect.isclass(func):
             # If we're annotating a class, the name of the class should be
@@ -72,7 +74,7 @@ class AnnotatedMetadata(object): #pylint: disable=R0902; These instance variable
 
         self.load_from_doc = False
         self._doc_parsed = False
-        self._docstring = func.__doc__
+        self._docstring = docstring
 
     def _ensure_loaded(self):
         if self.load_from_doc and not self._doc_parsed:
@@ -297,6 +299,64 @@ class AnnotatedMetadata(object): #pylint: disable=R0902; These instance variable
 
         arg_name = self.arg_names[index]
         return self.convert_argument(arg_name, arg_value)
+
+    def check_spec(self, pos_args, kwargs=None):
+        """Check if there are any missing or duplicate arguments.
+
+        Args:
+            pos_args (list): A list of arguments that will be passed as positional
+                arguments.
+            kwargs (dict): A dictionary of the keyword arguments that will be passed.
+
+        Returns:
+            dict: A dictionary of argument name to argument value, pulled from either
+                the value passed or the default value if no argument is passed.
+
+        Raises:
+            ArgumentError: If a positional or keyword argument does not fit in the spec.
+            ValidationError: If an argument is passed twice.
+        """
+
+        if kwargs is None:
+            kwargs = {}
+
+        if self.varargs is not None or self.kwargs is not None:
+            raise InternalError("check_spec cannot be called on a function that takes *args or **kwargs")
+
+        missing = object()
+
+        arg_vals = [missing]*len(self.arg_names)
+        kw_indices = {name: i for i, name in enumerate(self.arg_names)}
+
+        for i, arg in enumerate(pos_args):
+            if i >= len(arg_vals):
+                raise ArgumentError("Too many positional arguments, first excessive argument=%s" % str(arg))
+
+            arg_vals[i] = arg
+
+        for arg, val in viewitems(kwargs):
+            index = kw_indices.get(arg)
+            if index is None:
+                raise ArgumentError("Cannot find argument by name: %s" % arg)
+
+            if arg_vals[index] is not missing:
+                raise ValidationError("Argument %s passed twice" % arg)
+
+            arg_vals[index] = val
+
+        # Fill in any default variables if their args are missing
+        if len(self.arg_defaults) > 0:
+            for i in range(0, len(self.arg_defaults)):
+                neg_index = -len(self.arg_defaults) + i
+                if arg_vals[neg_index] is missing:
+                    arg_vals[neg_index] = self.arg_defaults[i]
+
+        # Now make sure there isn't a missing gap
+        if missing in arg_vals:
+            index = arg_vals.index(missing)
+            raise ArgumentError("Missing a required argument (position: %d, name: %s)" % (index, self.arg_names[index]))
+
+        return {name: val for name, val in zip(self.arg_names, arg_vals)}
 
     def convert_argument(self, arg_name, arg_value):
         """Given a parameter with type information, convert and validate it.

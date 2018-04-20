@@ -8,6 +8,8 @@ from typedargs import type_system, docannotate, param, return_type
 from typedargs.annotate import get_help
 from typedargs.exceptions import ValidationError, ArgumentError
 from typedargs.doc_annotate import parse_docstring
+from typedargs.doc_parser import ParsedDocstring
+from typedargs.basic_structures import ParameterInfo
 
 
 DOCSTRING1 = """Do something.
@@ -103,3 +105,47 @@ def test_return_parsing():
 
     _params, retinfo = parse_docstring(DOCSTRING_CONTEXT)
     assert retinfo == (None, None, False, None)
+
+
+DOCSTRING2 = """Do something.
+
+        This function will do some random things.
+
+        Here is a second paragraph of text about what it will
+        do.
+
+        - Here is the start of a list
+          continuation of line 1
+        - Line 2 of list
+
+        UnsupportedSection:
+            Here is text in an unsupported section.
+
+            Here is a second unsupported paragraph.
+
+        Args:
+            param1 (integer): A basic parameter.
+                Extra information about that basic parameter.
+            param2 (bool): The basic dict parameter
+
+        Returns:
+            map(string, int): A generic struct.
+            Here is more first paragraph text
+
+            This is additional information about the return value.
+        """
+
+
+def test_parsed_doc():
+    """Make sure we can correctly parse docstring sections."""
+
+    parsed1 = ParsedDocstring(DOCSTRING1)
+    parsed2 = ParsedDocstring(DOCSTRING2)
+
+    assert parsed2.short_desc == u'Do something.'
+    assert parsed1.short_desc == u'Do something.'
+
+    assert parsed1.param_info == {u'param2': ParameterInfo(type_name=u'bool', validators=[], desc=u'The basic dict parameter'),
+                                  u'param1': ParameterInfo(type_name=u'integer', validators=[], desc=u'A basic parameter')}
+
+    print

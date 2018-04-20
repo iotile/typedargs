@@ -1,5 +1,16 @@
 # Release Notes
 
+## 0.13.0
+
+- Add support for passing complex lists on the command line and converting from
+  string to list using ast.literal_eval to safely evaluate the string
+  expression.
+- Add experimental ParsedDocstring class to help generalize the docstring
+  parsing used in @docannotate.
+- Add experimental terminal size querying routines to support better help string
+  printing in the shell.
+- Add additional functionality to metadata
+
 ## 0.12.3
 
 - Fix valid_identifiers() on python 3 that was adding dict.keys() which is no
