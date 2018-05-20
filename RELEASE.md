@@ -1,5 +1,9 @@
 # Release Notes
 
+## 0.13.1
+
+- Move pyreadline to a windows only dependency as it should be.
+
 ## 0.13.0
 
 - Add support for passing complex lists on the command line and converting from

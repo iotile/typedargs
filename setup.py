@@ -26,7 +26,7 @@ setup(
     install_requires=[
         "decorator>=3.4.0",
         "future>=0.16.0",
-        "pyreadline>=2.1.0"
+        "pyreadline>=2.1.0;platform_system==\"Windows\""
     ],
     description="A typechecking and shell generation program for python APIs",
     author="Arch",
