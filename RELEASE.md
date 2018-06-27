@@ -1,5 +1,10 @@
 # Release Notes
 
+## 0.13.2
+
+- Provide more helpful error messages when an external module cannot be
+  properly imported.  Now we log the exception using the logging module.
+
 ## 0.13.1
 
 - Move pyreadline to a windows only dependency as it should be.

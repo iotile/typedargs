@@ -19,6 +19,7 @@ from builtins import str
 
 import os.path
 import imp
+import logging
 import sys
 from typedargs.exceptions import ValidationError, ArgumentError, KeyValueException
 import typedargs.types as types
@@ -39,6 +40,7 @@ class TypeSystem(object):
         self.interactive = False
         self.known_types = {}
         self.type_factories = {}
+        self.logger = logging.getLogger(__name__)
 
         for arg in args:
             self.load_type_module(arg)
@@ -265,7 +267,6 @@ class TypeSystem(object):
         for i, (source, name) in enumerate(self._lazy_type_sources):
             if isinstance(source, str):
                 import pkg_resources
-                import traceback
 
                 for entry in pkg_resources.iter_entry_points(source):
                     try:
@@ -273,13 +274,14 @@ class TypeSystem(object):
                         type_system.load_type_module(mod)
                     except:  #pylint:disable=W0702; We want to catch everything here since we don't want external plugins breaking us
                         fail_info = ("Entry point group: %s, name: %s" % (source, entry.name), sys.exc_info)
-                        traceback.print_exc()
+                        logging.exception("Error loading external type source from entry point, group: %s, name: %s", source, entry.name)
                         self.failed_sources.append(fail_info)
             else:
                 try:
                     source(self)
                 except:  #pylint:disable=W0702; We want to catch everything here since we don't want external plugins breaking us
                     fail_info = ("source: %s" % name, sys.exc_info)
+                    logging.exception("Error loading external type source, source: %s", source)
                     self.failed_sources.append(fail_info)
 
             # Only load as many external sources as we need to resolve this type_name
