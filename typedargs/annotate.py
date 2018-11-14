@@ -98,6 +98,7 @@ def get_help(func):
 
 # Decorators
 
+
 def param(name, type_name, *validators, **kwargs):
     """Decorate a function to give type information about its parameters.
 
@@ -106,6 +107,7 @@ def param(name, type_name, *validators, **kwargs):
     on in order to allow run time type conversions and validation.
 
     Args:
+        name (string): name of the parameter
         type_name (string): The name of a type that will be known to the type
             system by the time this function is called for the first time.  Types
             are lazily loaded so it is not required that the type resolve correctly
@@ -264,6 +266,8 @@ def annotated(func, name=None):
     """
 
     if hasattr(func, 'metadata'):
+        if name is not None:
+            func.metadata = AnnotatedMetadata(func, name)
         return func
 
     func.metadata = AnnotatedMetadata(func, name)
