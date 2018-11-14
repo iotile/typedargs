@@ -1,4 +1,4 @@
-"""Utility functons that are only used internally inside typedargs."""
+"""Utility functions that are only used internally inside typedargs."""
 
 from builtins import str
 from past.builtins import basestring
@@ -62,7 +62,6 @@ def _parse_validators(valids):
 
 def context_name(con):
     """Given a context, return its proper name as a string."""
-
     if hasattr(con, 'metadata'):
         return con.metadata.name
 
@@ -92,7 +91,7 @@ def find_all(container):
     built_context = BasicContext()
 
     for name in names:
-        #Ignore _ and __ names
+        # Ignore _ and __ names
         if name.startswith('_'):
             continue
 
@@ -105,8 +104,7 @@ def find_all(container):
         # annotated to avoid issues with module imports where someone did from annotate import *
         # into the module causing an annotated symbol to be defined as a decorator
 
-        # If we are in a dict context then strings point to lazily loaded modules so include them
-        # too.
+        # If we are in a dict context then strings point to lazily loaded modules so include them too.
         if isinstance(container, dict) and isinstance(obj, str):
             built_context[name] = obj
         elif hasattr(obj, 'metadata') and isinstance(getattr(obj, 'metadata'), AnnotatedMetadata):
