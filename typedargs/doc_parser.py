@@ -20,7 +20,7 @@ ListItem = namedtuple("ListItem", ['marker', 'contents'])
 
 
 # pylint: disable=too-few-public-methods;Experimental class
-class ParsedDocstring(object):
+class ParsedDocstring:
     """A parser for google docstrings.
 
     The parser will collect all of the sections and parse them into
