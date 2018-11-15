@@ -15,7 +15,7 @@ import collections
 from past.builtins import basestring
 
 
-class list(object):  # pylint: disable=C0103
+class list:  # pylint: disable=C0103
     def __init__(self, valuetype, **kwargs):
 
         self.valuetype = valuetype

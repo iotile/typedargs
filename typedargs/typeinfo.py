@@ -22,10 +22,10 @@ import imp
 import logging
 import sys
 from typedargs.exceptions import ValidationError, ArgumentError, KeyValueException
-import typedargs.types as types
+from typedargs import types
 
 
-class TypeSystem(object):
+class TypeSystem:
     """
     TypeSystem permits the inspection of defined types and supports
     converted string and binary values to and from these types.

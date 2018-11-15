@@ -21,8 +21,7 @@ import importlib
 from builtins import str
 from future.utils import iteritems
 from typedargs.exceptions import ArgumentError, NotFoundError, ValidationError
-import typedargs.annotate as annotate
-import typedargs.utils as utils
+from typedargs import annotate, utils
 from typedargs import iprint
 from typedargs.typeinfo import type_system
 
@@ -33,7 +32,7 @@ class InitialContext(dict):
     pass
 
 
-class HierarchicalShell(object):
+class HierarchicalShell:
     """A hierarchical shell for navigating through python package API functions."""
 
     def __init__(self, name):
@@ -183,7 +182,7 @@ class HierarchicalShell(object):
 
         if len(args) == 0:
             return self.list_dir(self.contexts[-1])
-        elif len(args) == 1:
+        if len(args) == 1:
             func = self.find_function(self.contexts[-1], args[0])
             return annotate.get_help(func)
 

@@ -14,7 +14,7 @@
 from future.utils import viewitems
 
 
-class map(object): # pylint: disable=C0103
+class map:  # pylint: disable=C0103
     def __init__(self, keytype, valuetype, **kwargs):
 
         self.keytype = keytype
