@@ -13,6 +13,7 @@ jobs:
         - python3 -m pip install virtualenv
         - virtualenv venv -p python3
         - source venv/bin/activate
+        - python --version
       cache:
         directories:
           - $HOME/Library/Caches/Homebrew
