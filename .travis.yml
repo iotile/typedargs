@@ -1,12 +1,8 @@
 language: python
-dist: xenial
-sudo: false
-python:
-- '2.7'
-- '3.6'
-matrix:
+jobs:
   include:
-    - os: osx
+    - stage: Test
+      os: osx
       language: sh
       python: "3.7"
       addons:
@@ -34,6 +30,15 @@ matrix:
         - choco install python2
         - export PATH="/c/Python27:/c/Python27/Scripts:$PATH"
         - python -m pip install --upgrade pip wheel
+    - os: linux
+      dist: xenial
+      sudo: false
+      python: "2.7"
+    - os: linux
+      dist: xenial
+      sudo: false
+      python: "3.6"
+
 install:
 - pip install --upgrade tox-travis -r requirements_build.txt
 script:
