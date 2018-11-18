@@ -60,6 +60,7 @@ jobs:
 
 install:
 - pip install -r requirements_build.txt -r requirements_test.txt
+- pip install .
 script:
 - pytest test
 - pylint --rcfile=.pylintrc typedargs
