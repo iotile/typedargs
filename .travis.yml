@@ -31,7 +31,7 @@ jobs:
         - virtualenv venv -p python3
         - source venv/Scripts/activate
         - python --version
-    - cache:
+      cache:
         directories:
           - C:/Python36
     - os: windows
@@ -44,7 +44,7 @@ jobs:
         - python -m pip install --upgrade pip wheel virtualenv
         - virtualenv venv -p python2
         - source venv/bin/activate
-    - cache:
+      cache:
         directories:
           - C:/Python27
     - os: linux
