@@ -28,8 +28,6 @@ jobs:
         - choco install python3 --version 3.6.5
         - export PATH="/c/Python36:/c/Python36/Scripts:$PATH"
         - python -m pip install --upgrade pip wheel virtualenv
-        - virtualenv venv -p /c/Python36/python
-        - source venv/Scripts/activate
         - python --version
     - os: windows
       language: sh
@@ -37,9 +35,7 @@ jobs:
       before_install:
         - choco install python2
         - export PATH="/c/Python27:/c/Python27/Scripts:$PATH"
-        - python -m pip install --upgrade pip wheel virtualenv
-        - virtualenv venv -p /c/Python27/python
-        - source venv/Scripts/activate
+        - python -m pip install --upgrade pip wheel
         - python --version
     - os: linux
       dist: xenial
