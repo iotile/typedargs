@@ -59,7 +59,7 @@ jobs:
       language: python
 
 install:
-- pip install -r requirements_build.txt -r requirements_test
+- pip install -r requirements_build.txt -r requirements_test.txt
 script:
 - pytest test
 - pylint --rcfile=.pylintrc typedargs
