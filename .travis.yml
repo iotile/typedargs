@@ -19,7 +19,7 @@ jobs:
       before_install:
         - python -m pip install virtualenv
         - virtualenv venv -p python2
-        - source venv/Scripts/activate
+        - source venv/bin/activate
         - python --version
     - os: windows
       language: sh
