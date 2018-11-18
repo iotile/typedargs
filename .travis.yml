@@ -57,6 +57,8 @@ jobs:
       sudo: false
       python: "2.7"
       language: python
+  exclude:
+    - language: ruby
 
 install:
 - pip install -r requirements_build.txt -r requirements_test.txt
