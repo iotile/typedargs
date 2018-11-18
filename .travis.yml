@@ -32,8 +32,8 @@ jobs:
         - source venv/Scripts/activate
         - python --version
     - cache:
-      directories:
-        - C:/Python36
+        directories:
+          - C:/Python36
     - os: windows
       language: sh
       python: "2.7"
@@ -45,8 +45,8 @@ jobs:
         - virtualenv venv -p python2
         - source venv/bin/activate
     - cache:
-      directories:
-        - C:/Python27
+        directories:
+          - C:/Python27
     - os: linux
       dist: xenial
       sudo: false
@@ -57,8 +57,6 @@ jobs:
       sudo: false
       python: "2.7"
       language: python
-  exclude:
-    - language: ruby
 
 install:
 - pip install -r requirements_build.txt -r requirements_test.txt
