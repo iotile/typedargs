@@ -59,6 +59,7 @@ jobs:
       script:
         - mkdir .tmp_doc
         - mkdir .tmp_html
+        - scripts/generate_api.sh
         - python scripts/copy_docs.py doc .tmp_doc
         - sphinx-build -W -E -b html .tmp_doc .tmp_html
         - python scripts/copy_docs.py .tmp_html built_docs
