@@ -1,4 +1,3 @@
-language: python
 jobs:
   include:
     - stage: Test
@@ -52,10 +51,12 @@ jobs:
       dist: xenial
       sudo: false
       python: "3.6"
+      language: python
     - os: linux
       dist: xenial
       sudo: false
       python: "2.7"
+      language: python
 
 install:
 - pip install -r requirements_build.txt -r requirements_test
