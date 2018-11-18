@@ -10,7 +10,7 @@ jobs:
           packages:
             - python3
       before_install:
-        - python3 -m pip install virtualenv
+        - python3 -m pip install --upgrade pip wheel virtualenv
         - virtualenv venv -p python3
         - source venv/bin/activate
         - python --version
@@ -20,7 +20,7 @@ jobs:
       before_install:
         - python -m pip install virtualenv
         - virtualenv venv -p python2
-        - source venv/bin/activate
+        - source venv/Scripts/activate
         - python --version
     - os: windows
       language: sh
@@ -28,8 +28,13 @@ jobs:
       before_install:
         - choco install python3 --version 3.6.5
         - export PATH="/c/Python36:/c/Python36/Scripts:$PATH"
+        - python -m pip install --upgrade pip wheel virtualenv
+        - virtualenv venv -p python3
+        - source venv/Scripts/activate
         - python --version
-        - python -m pip install --upgrade pip wheel
+    - cache:
+      directories:
+        - C:/Python36
     - os: windows
       language: sh
       python: "2.7"
@@ -37,7 +42,12 @@ jobs:
         - choco install python2
         - export PATH="/c/Python27:/c/Python27/Scripts:$PATH"
         - python --version
-        - python -m pip install --upgrade pip wheel
+        - python -m pip install --upgrade pip wheel virtualenv
+        - virtualenv venv -p python2
+        - source venv/bin/activate
+    - cache:
+      directories:
+        - C:/Python27
     - os: linux
       dist: xenial
       sudo: false
@@ -48,9 +58,11 @@ jobs:
       python: "2.7"
 
 install:
-- pip install --upgrade tox-travis -r requirements_build.txt
+- pip install -r requirements_build.txt -r requirements_test
 script:
-- tox
+- pytest test
+- pylint --rcfile=.pylintrc typedargs
+
 deploy:
   skip_cleanup: true
   provider: script
