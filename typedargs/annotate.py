@@ -114,12 +114,12 @@ def param(name, type_name, *validators, **kwargs):
             at the point in the module where this function is defined.
         validators (list(string or tuple)): A list of validators.  Each validator
             can be defined either using a string name or as an n-tuple of the form
-            [name, *extra_args].  The name is used to look up a validator function
+            [name, \\*extra_args].  The name is used to look up a validator function
             of the form validate_name, which is called on the parameters value to
             determine if it is valid.  If extra_args are given, they are passed
             as extra arguments to the validator function, which is called as:
 
-            validator(value, *extra_args)
+            validator(value, \\*extra_args)
         desc (string): An optional descriptioon for this parameter that must be
             passed as a keyword argument.
 
