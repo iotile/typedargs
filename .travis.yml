@@ -31,9 +31,6 @@ jobs:
         - virtualenv venv -p /c/Python36/python
         - source venv/Scripts/activate
         - python --version
-      cache:
-        directories:
-          - C:/Python36
     - os: windows
       language: sh
       python: "2.7"
@@ -44,9 +41,6 @@ jobs:
         - virtualenv venv -p /c/Python27/python
         - source venv/Scripts/activate
         - python --version
-      cache:
-        directories:
-          - C:/Python27
     - os: linux
       dist: xenial
       sudo: false
