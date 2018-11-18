@@ -57,10 +57,11 @@ jobs:
         - pip install -r requirements_build.txt -r requirements_test.txt -r requirements_doc.txt
         - pip install .
       script:
-        - mkdir .tmp
-        - python scripts/copy_docs.py doc .tmp/doc
-        - sphinx-build -W -E -b html .tmp/doc .tmp/html
-        - python scripts/copy_docs.py .tmp/html built_docs
+        - mkdir .tmp_doc
+        - mkdir .tmp_html
+        - python scripts/copy_docs.py doc .tmp_doc
+        - sphinx-build -W -E -b html .tmp_doc .tmp_html
+        - python scripts/copy_docs.py .tmp_html built_docs
         - touch built_docs/.nojekyll
 
 install:
