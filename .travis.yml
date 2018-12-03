@@ -1,26 +1,106 @@
-language: python
-sudo: false
-python:
-- '2.7'
-- '3.6'
+jobs:
+  include:
+    - stage: Test
+      os: osx
+      language: sh
+      python: "3.6"
+      name: "Mac OS - Python 3.6"
+      addons:
+        homebrew:
+          packages:
+            - python3
+      before_install:
+        - python3 -m pip install --upgrade pip wheel virtualenv
+        - virtualenv venv -p python3
+        - source venv/bin/activate
+        - python --version
+    - os: osx
+      language: sh
+      python: "2.7"
+      name: "Mac OS - Python 2.7"
+      before_install:
+        - python -m pip install virtualenv
+        - virtualenv venv -p python2
+        - source venv/bin/activate
+        - python --version
+    - os: windows
+      language: sh
+      python: "3.6"
+      name: "Windows - Python 3.6"
+      before_install:
+        - choco install python3 --version 3.6.5
+        - export PATH="/c/Python36:/c/Python36/Scripts:$PATH"
+        - python -m pip install --upgrade pip wheel virtualenv
+        - python --version
+    - os: windows
+      language: sh
+      python: "2.7"
+      name: "Windows - Python 2.7"
+      before_install:
+        - choco install python2
+        - export PATH="/c/Python27:/c/Python27/Scripts:$PATH"
+        - python -m pip install --upgrade pip wheel
+        - python --version
+    - os: linux
+      dist: xenial
+      python: "3.6"
+      language: python
+      name: "Linux - Python 3.6"
+    - os: linux
+      dist: xenial
+      python: "2.7"
+      name: "Linux - Python 2.7"
+      language: python
+
+    - stage: "Deploy"
+      if: branch = master AND type != pull_request
+      script: python .multipackage/scripts/build_documentation.py
+      os: linux
+      dist: xenial
+      python: "3.6"
+      language: python
+      name: "Documentation to Github Pages"
+      deploy:
+        - provider: pages
+          skip-cleanup: true
+          github-token: $GITHUB_TOKEN
+          committer-from-gh: true
+          keep-history: true
+          local-dir: built_docs
+      env:
+        - secure: WXFXQtY33yUCcX+cZij0yehWL/cz0HkyaCarEYjogCH4VhfdRjto7nzsoeWNGNmmfxYkU+4ICgFp2AnkUmrR8XBJATUuE2SaxsffLK5RUGy5Hnzm1o8dRNNb8dnc/UULapfZ+8Qt/29Biz6ZopQaDJYBj1H6aPiQ6TRDOvCZrMuntGONLR+H0cEmMCCekjJKozeiQznit0ZHrgjwnHsVv1IxQKQYCogbOmW3laoI0wf3o/gKURjaA+sQdNCucQG13DI36c+eXhpaDsGIMHQLnKdXW2A5i+PZAHGdSuK6+4zaB0ycxEtIzzJbm1vrTTSBpduyE5Hi4nAbMmk1HIAJmQxmSosfCeaYvf6CV5ZiSINXApAJBFcBLwNy0bccLbFiJlHbiddhMPsgpJwea98YgiEubLqtXzhkH9ve2J/Y9f7ZYNO2SNlPdXb+WUlZgUuOhhGvrbow826QhXI8R0fOn0w/mj/K/fFOCrXahWULhfJr/0LFxHeZXPbjaPl1ILVxQIamC2SHOewFTChOzmMv3YH28FBMxft7GeajywH/aZ8UuiOPOKPONb2DT54KIShWO7GKaE28mm5fLTJZNAQg8h+7zzLZAU6Z3gEHuHlRUboYk/Jod2IpC1QxrFIvnyqKSKkj240jLg9QHXpWTYrg4fKngKbfFl61LRwgoEaASyU=
+        - secure: jDFmBaDLEacobo8WXHjsD/R8tt0Gj+HNSkU54VRt/7zW/qFhuqDYgzgUV+pclsbTfrpFCnxtVEx3I3KKO7gQxorSESUjvWqvx7/2I0kwX3GQEwsR59Q8c3MPBSAbQgsbvUkOcaaqY7y6CHEdRXHZFHYlCNxhLt4L9ESI0FTKOKk/u3apkmT4MJmJEiRww/uB1WFwxz6eSnHlm3mqZLwxBD0puqTidAixf3hv7dQ5NIdzKKq6VFstcBTSs4vJO6/c+Jy+aSjWUUlKVVkap1o7o0oO6yFO4ieFY77LudL9fMGnf3tbcXbt3+R6BHkburrqVtmX0lRLd+oG0yjxJPGE+nZMn03m6sg2H+/U0yx4QVN8OIAcMjjoqG7duqtRyV7Oh9Y+VOX9D3RNtxop4VXFaZLdn83wz2j38CRShgiZsdy/cdpZORH90mVvFZ1MClRSerBsLX1tfPUFItpXCKRzRZ3XxiaW6Jhdu3ga/HySK7UWtA50d3i5czaMREetYpUEfi/Td0V1lLSXJFFzijGW+Mw6SFwy2btxGu8o6T2TWjZuL9Kl3XbDmJbZng0vbVqpNw9EubYFNaNTg7P3Rbb/O2s8YIYJr5j54U7YFSBWdyZSrTAyBk/fdOzHqm1zsmQoPMY85ArXGI+IxF/WT2iRo5Wk/eeg2vacBB9A1HnK82Y=
+        - secure: nuWCVXm7YIwGTd3+ptOL5LWLYDwz6I2gOOY8m9we/+SDCZjr/2ymh2UmVp9xTxhSvwE47Cr+3cdhBfjfQXeDZkMS7DemthAqRqiHnNIIfQDLwFCk4GqI/oAZiF5cCmj/cmuEO5Xwvp2xFNZrhEViD/O0Use+09eGTxyA68RSCc9HcvRzGBd71jq0R+iNtuILmScflvFGPY705kH3Pc3wYCJ26KXhNkBaUHZyGz6fzhXBXfauRs7R0+Z0n7Leo1FbCQ/OgsVSIWXTVG2DFZKqx1NBFZbGNw1qluzfVLHQt8rAJ3B4/7v8Y0XdHDRRD/mRTQfPoZ2Z8krvO2UB0LbKS/CzpoZN4B8/4LcR5jpgWjTnLFwkspN5jwV0o3vt5hmG3iLGMjQ4vFapY+lmDroKOii+qRATMG+Zk65REHI8EIpAS+H5w86u5aUChIcq0/OGaJYvSMFhVlLed0L6ooqDSYlrfa9X7ggEcpbCv3u9r9CewAB+vydOkK7BcISW6lNJBDOkXND661ifavGHZRIcQHxV/LUmimvwcEaF/lgggkZXCBrpvAvAOwFLE+0Fql08CezIEgDadGA3t4nucU5taykcA4Y9Hr7FzeJknT+EyQ1gdp5PS8vSxRKFlyV846rSalZphdRLVMtWlZhweukYHLd7DU/DrjpYXjPid/drTvw=
+        - secure: D2ODB4kblKn9fKKM7gRLrcQCwqyY/8dj4RUbg9VN1WMDH0FJrZUcS/5cBa3UQK8maic408ifdBt0GVpfPZJaM8qfxu5qT5IN15U1l0016rIrhbmubO3Log/d2uxnZastmYa5JFMiYQ93nRRu5ywSECfTuoK3NFmugCsK3VuqXNLI59QMgP5r6+YYKfNuC8ElwVXzL6kB05znUfz/siM7lR4hMHVse8tbmn81bscq7Eq90ftxwfAqzCiRbNYVZigSwdccuR6w65T+3mRcXuBepDPFvap28SJW/5c/bLXgzHtxAzHj4aTkDhk2r2gm4bw5Vu4PugM4XTXIObuP79QX5jnc8mbDH7mP9kLGPOYe1cwTdBy95XEwq5cA1X0Dfy+ek3d2zWAixg7rBzemZPWtylxNx0MENpUdyK9o13sLvYwBqtPsdWB1LX0IdGMrD87M0/6FhnyH8mWGSV68N+yIEFbDi10h5tVL459lCzAGrVmYfjaTffKOsbGDUy5swkRKbAlNrN5vO5kDntGDoGJsIwYphJMjIsoJTrTV5pNEan57XpX8yncYdxQ5oscJ6JbirAlJL+JGuiPgmsKvLPZOYY3S5TeFrEoU0D8csXdB/2j5A5BC4ZSoRto1Tj3ZADlnz9j6B6dW88EyZ75h78iEmVC1wTiECHWZ+9iCixyeMs0=
+        - secure: C13O5HAFOrpaDRg8gv2HDCsu+i9KaDKeujXaYcvoPpMfQvdxhYhT03IFYM4hBUQwFJ0rJD0Uqt8tExsFeX+fGTtmdSI8W20twUHdO+R/1aYKcXBzQlfaeETD/GWI6+7in9qK9FLsFxn8qcv1Os/I5ukzUj9tJlnb/NEkVHH0DO5VGwgBetxHqAkclOTD4ybxvveYZ2YRg3wPjqJlTO12q4r11hsHLBlf6HNvE9yIDoYyBv+up9XlUgPdYNfFCUYi3XhGNgEX81e+OV27rJ97JI0bDOSvSwJKDYlQhgvWVY6LHulkvZVt6ltAAa2RofNKZu4zn9ATJPvnGEpjDlAO3qDrbL/lxYfOXS4FLonIpQQ5JNmD2geGunbK4jqZDYYrDBjXJE58mtdqvmaSiqdUKIcJ2dVquCCYUziOqbgo53zNVaZiNMeD7C5exRagIj37na4M0NkYcaQ+Qh/M9Tom6qqSlxlCgAKpKMsrjmopZSiDkRkKgUFfT0+AN5WNYNW4+XMLdqDkJgTx6mHhcZRY8OwKwhInzbVHKcf3clQC7OZt24PzeITTEfou/ECje6wem75Z2Jt4AEHmTWNNvpZ+y/pXBWUsJDQCxfF56VCFBpQrwqPkOF47YNtCw2ZipKt/r4f9j6czuYO9/5rVUlN2ZWkKi6EzYK2VfRFS6mbruak=
+    - stage: "Deploy"
+      if: tag IS present
+      script: python .multipackage/scripts/release_by_name.py $TRAVIS_TAG
+      os: linux
+      dist: xenial
+      python: "3.6"
+      language: python
+      name: "Release to PyPI Index"
+      env:
+        - secure: rFF42kmB8XEzcqstw9MgXVsCIvksP1XcvRI6pgeX/phw+eGGwq/EBRXv6DATxEPAzSEQwMSFtracL11qLZ5ajVbnEYO1EM9n3DzjRHGF6/DmuNbR/rqSoKuCHQ2UVqjSTLE75OESkGItrctFg+0xJ03HSYtiZcqPECVyS4d3VRBkaypTG/k/TpeT8MktyPZvKhTZ2+c0L5sCXu7drQi0WxaUmvHM6X8txjojVmNpCKIC5M8OxSmw/yDQh0HmPoO73OMQuPWptzt+vL0u3cJFysItUI6ma6jeiyEEx9sco4YN7uG6qJP7tf7yQRyj7N97lortsDIi4NZvao/NEaCtDyOkrsVIJfBCSyeViVD/nrIxe4/WY8R50YNYQJuPNdnlBlnfxfo4y92ZLuUfTIstg5P3NS4ckPQj/btiCalmkNKBRy3FyWdspPKC0/2g5G03WFqvIeBujgKqZmRDm0YuN6+scOWtLBMjpIcd49Hfnpotcl5gQ+tUQzmzpWDL1mPWmLhCJTVSrqYAE2sW5wB6jEYdF+lgXgObP0aeEG47QypLj9bloINbk65mLsV9FWzDMhycKnFgsbIiCj/TUljC7EqQJLeWtvQsYkFYbVaiCoK5EY2xVXXJijBmqUWcnjKDON+tXZhTAYmDFWb8LEJJEkIIsMF3evs30Wnk/dwum8s=
+        - secure: PBEEHkhZjCWhc9FN7hSOCWOgQXGEjPCcLKQtZJWbRlCuUjF4nJE1lpzT1BF0MZUZXVRkIaCcjJkZJeUlwlh/v8vSE/NZPajA8F3rRIFald6RaSQhRlPQ1dFgTfRUN3qViLyiJrg0YCqzzPUo7INwkVphKskuRxNxZSOj0EKvw2/kk7SsCLvpg5wKo9+R9KqcF8VMSNcTWI6ax0ex9uYSYxISSu5/hmkvmZlfb0UDHkfZg/qI3dNgvKx3wQToSNMj0hdPEAJGb/x8p4t6udc74NklPwH+k0Z9wCDE5hp+K0k41+yFhENVLzhaLXgl70a0w3D1Hi5PlDf18SGh/GGQukXe8etxWVWxjSvBulsmNYZCVVcZ8jsWp8loJCGk8GpRW5lQnF+By1n/E2kPNhhRjJpy8qjuNGQnbmkv0PeHfAVSK4KFMUqw2qR6F0vxoPaa22yxjgq/768J0d6RS28GYZ0e6/gA55vrcwsWIIa0G83H/n2IXyiRJVqPxNQNSLr+BlpPAR3CoTy51QOXPeS9tYuCgMCC1WZWgyVv7uXjA4GipLQ/hLHDSF3c8Fo4nu2D4PUnlvIkBUuXGb+yU5+aL041L7fA2KlRKcSrVbOksnbmdRqB6oTGohbttMFuG7d0iqu2l0HRE/jUVpEARw3xfJfMc30R2rd0xBVEky5TJWQ=
+        - secure: mxNdm/VwRpzvBLSxVieepG9W3Cy+3LkFcx25O0auClsxQZPwyyxkiU0v/DOgMwQTAZH559rvflfwf8p3K8G8nyuVTi+dttfWyTe2LOokYAzztycusHeokA03Iys+qZ2oazD7y5OZxuPDXEITcjkChsBFbvCNYcRYrl0OYEZtWzq/aZurfGfASuKNtQ+g0wfYvApeyLWnxMN9e68I+/vwxfamPPrrniHzmmqyurfDTioQx5zcJFlDZ5+a1pCe/cbT8mTBjER9V6HEyBsgjcEpDzmawApXxqy3pBiRFOev304WJV/h8N8mxK5Z/gI4fhhlpsMKk9YqngbBI4id6dc8fySgAzk0IUij/Ox4m7Sftt0PoO7mpjmpkTeXb7YZRLHO6dfmWlmq6tKX5w+QTtcGJv1CyIySlqwdQBMYQ2r+jGGyBNqwqFnkj/63AD4zisG7BNL3zkNl1AYNqjKYVonG6BnVhUFBE33YG5ST2ZUJejvckdyBkXGTJTZQMEixny98Z8IvGInIwDirp9s3u7sOxFQuXiPiNy/I+in9qeke092zDzYpmPq9/wlsOYESjm5K2OvPtL8bHySh/DfilhBUGfs1k7ufMB3yQ1DC1aaUvGYIRNe2Eax6D6EAz5tbPjczNac8jc3HRxqSiLL4QS8vEiH68Icl+JxWUCb/fvxJxWU=
+        - secure: ImWfE9lM9ZtA8gj783j6ydnlmc1hN4+SeIx4lxm6zFCkQY2JqLXCl9FweFZYpCvOZ875Wowz7ngEN8w987qhnBjnQDCN+qYVM4PNU4PHQVHPVs84sae0RvuhBfe1awck3EIfand1fnDi3srx1WjSlX8j+r0B5Q+cFu6NAXAL+Kw6EKzV+6UqsSZ6e9yndqZY19ykFIE2/1bI93UY17p1ti/hqOTC1IsUn/R75bur5HtWYuSHBWiQoOAX0Zzg64GbGeNHGkAGxMvN8eGC1Z08pl7gx5eFu32dsnv6vyPF2IaEvjBjDcryljGpwTqAqG5smV0tA2xityZxruYDbXTprYYWlfMeEwrOfsb8QvVg1md5FuUXG4sWecugue1W99yB8c1EZxFABXq8GwVIw4Et87e3zpbSefdy673KYa5PXEmGx63h1vK+IY7WPS8fuI8vCl5A0l7NeqkmaCY50jfOV2v+kRNbBA1sh3/WwBTEwa5pcPUpFUEBgJAy3R+FLxhCNUwo3RV3aqSwK9SLsvUigo893ejFKfFT4y1KtDVuF/DvjK/XrbfP2Jkkk26/7Tj7bGJmYYJ+KOQICnEWuj3LAgZEMKrfh3rU7/kcHeUIUzdKwg6g0w1VN0z6kdOgHV3oUAKsNxaZQhB1QashdGdc+zkG7O2FCZgVXh1QVp0mx34=
+        - secure: VQ4PjeksN+TqOR9uDTNXChJsieJeyHGw8FZxQxxUH1pu7cma402Cn631QrbeCnJTh6zue+zA+o5ZMjKUKUeWYtj1z63cdWVITfHHPKuKbgYj8H2lXxXAkcEdNeYkC9+GnarAbjYdFzzZYAgXENvAepz4hu97g5B9c0w1lDxyaiL59ThRf+UHcdYyDV4W2ZojmgjXw6PVEQjbj06BaXVC+xWIiPIUC1lgonRLs0qG6IpUJa2Ync1ZUTBLl6xYqQe1jYjGch6YnHj76GSxdpg+NYfAy8km6zvf7bIUs2ePee0XLVeJ0vXjBD+IWOZj8s3uKYn4tEbn8gx28yLJVXJoHhxWaWdrk1k5zZ72TJTFuDzONQRsh7z7GCd7gibdIpSsAafqYr0ssXteEK5tT3Lxhz1C/F9ey8QcfF/iun7PvtUw7SRgAPd3+nBHumtvThFLbDvx21lG+CHMRiu/kFVTucAmQa42wQzFhUrL9RwBWKqS6LqARZE0/iFJHxdgbl9hRX5JQqd5qeUBPjo7rdkcmI7MWafc/cr6RFxHiNz7Xeb9jfpuFymHfJZifsZSSAF0hqplU+1szZUs0R8dio66rDCgm91bkoLILUoLnj5hWxwIRf0lqQyo2uBAiD7kX3VmpmOrDZFV64UW/RS4mErmSW/p7R8LAn6g1PsDWaGTWek=
 install:
-- pip install --upgrade tox-travis -r requirements_build.txt
+- pip install -r requirements_build.txt -r requirements_doc.txt
+- pip install ./
+
 script:
-- tox
-deploy:
-  skip_cleanup: true
-  provider: script
-  script: python scripts/release.py $TRAVIS_TAG
-  on:
-    branch: master
-    tags: true
-    condition: $TRAVIS_PYTHON_VERSION = "2.7"
+- python .multipackage/scripts/test_by_name.py typedargs
+- python .multipackage/scripts/build_documentation.py
+
 notifications:
-  on_success: always
-  on_failure: always
   email: false
   slack:
-    secure: fTxYi+g7KKlH8Hhs+r+A7FVoj00J1N2IawIZZNB2L6MSB2/puTL3QKOVF5IprvwKcc2lhAe3dPMinhDYgoBY0AeibaEb4GFf7pGJhnN03sdxTBWMBswePf5eU4dexdpdAMldsqffMDbd7Uo22+j0/k0RhJhX7nTvu4GbUFtv4Gh0yh2nw5dDcD3y4ZLRk1SOAK8xErBZO8x30PNPZze+pjIyVcxfkOE1x2P/TfkY1bkWLDbts5bV4txb0Ycu14uS7lWE7OJvxOltl7fBVLnoCrD36fEtdlQes/ZtRqBQJAbDEXtjCHiJDIm83DY2Oh+hrYKrtIFllfYUlNn+gZM9Z3AWtv6zKYKR18XtK+TqI+NUJrAjsgECgy+RmrP2n2DDnYEFePI3YAAet5ssFv0RkE/+7eJpHZFr8mAopyWFhuxUPnnYHVwwTDMk7XFIGx6DCvjH/NDBgFpEXTfZlJ8E0xscPcUIsHr5B6k6FEZa4Dcyoae6OJ2lYVpHu+MPwA2ohGyaxF02HwLRD2ZGfczWEUTYsbexcV91+GyW/SuJHSAUE78fNu8P/WzX5LwBlmcvczTKwpYj52co5K2r6embQ2WcH0qt2GqBfkQFOl2eP00AgIjyJ9MXJD9Ai9YBbU1585jI6MZ0RYt4HZQsujQhHVSgTf1sy5wEDbhPUgiZ12o=
-env:
-  global:
-    secure: dAmK7XbgXUNg9jNybnpdHm+IReR2BXVO0OAqHcCv/pgnY0bxNGAoxFgA6DE8GfgVuuha75ohPlRZXr5i5TKn5BV3B2azWh8JVWKfhAwy6vy6BXdLFKYLO7bvzvys6vrf+Y6lZRawsQzNe5U5/AgiZWYPd+B9Ze4P1YTNf7x/xbxuJxwkR8dZyLss4Jz2xzbH3MD+LRdwc/X2vH0rVdZPcyJqYrLw5Zt6CNhTykfXaLfj+CXWHTntqVLpmCRt2e89i7LZrLVguVuqWRkqG9xyNQlaz37pjEVnf5SZL9X5RtSxzalzG1ArNBRN65FmjNhs1DFdV9bW5iYnR856Xt5swN6YkM8/51ZV2kFGhO6Unv1Woe7F/djR4604OTb9f/GAq1PWmHlMvFZ72PF7yi70Yipc/SEcl7o2Fu/TVNbHNte8cqjHBENBbfImE0RhIgRwzC1bOrKEP3Ekkd3ocZXSuR1qg683tWWyKvrKMZMAf1RZD+dVZMuseA980I4ksgHuh+EE7vlEvTVtUf2DTeMUMlp3AlADpjHlPe44XbC/lQbSPhMZS4B2pzoksbRa0gU3ojVfZF3GYI9ht8Hhg7otDwC925g0p9OhOyn3U0oXS3b/Ra/YggVjCA8IXtiCCoXGzyS6JHjRzEMQFy1nGR+/EcA/i33DvBGJe2MjNM5z/Ag=
+    rooms:
+    - secure: MYoOnkXqqwMmICwMcMt1/HxnKpUWDU72kX4yxl+GyB376kXARH7tRt/JIhTTMMyOk0bvsKPioaDUGzajzLUrRmgBUTNxwOhFYN4DZdQ0ZJLDTyo7hx+I7ToH0a/NZQKA+VZto+6Zaah4Lba9imBMrsyZf3/KTYHan3SCnku2sLu5VPR8fyirsIiVIPB/XSyGVklHNanIcEEem0RNwwHMoS+E01kdyLmtf433oNGvx5ZpNQUlVqGlnL1/9fiCQG8CrkIn7GPuV4BeJIGXhk9HIc9UP9dSFC2/oOMc+TSVIgazib+YWGYQugViJNjyffYOWCyI+FJCQfcnzw4aHUX1wm/L+TFG8Nayk6OXVzR/UQlkNHxvwQdubqrT1a1+5nZKaMcsfamFLubv3M7YQlX+967Xazo8ma5rYuhS7em0hbAaAZOsyvILGaNW0RxOn/l4XMjXfz2wlGhadXm/RLBNQWr827tV4kBT32NuzYNCLwdauJktIpyTSTvlBa7FPj6InMhmSy28wNVRPk3yo01uECZlBYTUVs8GE0G9LPtwsQS7zbOGdm/DRlL9FCGdt6GkPOaXRFDaa7uTLD5k1L3Cqp8F0tZOqrvb2xhrGqUSckKROVs/Iwe8dLD85Co2zmBYc0Wh4eHO6Fe+cJBmLlXtIoLp3vCqXsIEP3SDedgbaBs=
+    template:
+    - "Build <%{build_url}|#%{build_number}> (<%{compare_url}|%{commit}>) of %{repository_slug}@%{branch} in PR <%{pull_request_url}|#%{pull_request_number}> by %{author} %{result} in %{elapsed_time}"
+    on_success: always
+    on_failure: always

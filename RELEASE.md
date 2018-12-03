@@ -1,4 +1,4 @@
-# Release Notes
+# `typedargs`
 
 ## 0.13.2
 

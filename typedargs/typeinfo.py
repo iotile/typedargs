@@ -81,7 +81,7 @@ class TypeSystem:
         Convert value to type 'typename'
 
         If the conversion routine takes various kwargs to
-        modify the conversion process, **kwargs is passed
+        modify the conversion process, \\**kwargs is passed
         through to the underlying conversion function
         """
         try:
