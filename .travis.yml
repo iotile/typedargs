@@ -65,7 +65,7 @@ jobs:
           skip-cleanup: true
           github-token: $GITHUB_TOKEN
           committer-from-gh: true
-          keep-history: true
+          keep-history: false
           local-dir: built_docs
       env:
         - secure: WXFXQtY33yUCcX+cZij0yehWL/cz0HkyaCarEYjogCH4VhfdRjto7nzsoeWNGNmmfxYkU+4ICgFp2AnkUmrR8XBJATUuE2SaxsffLK5RUGy5Hnzm1o8dRNNb8dnc/UULapfZ+8Qt/29Biz6ZopQaDJYBj1H6aPiQ6TRDOvCZrMuntGONLR+H0cEmMCCekjJKozeiQznit0ZHrgjwnHsVv1IxQKQYCogbOmW3laoI0wf3o/gKURjaA+sQdNCucQG13DI36c+eXhpaDsGIMHQLnKdXW2A5i+PZAHGdSuK6+4zaB0ycxEtIzzJbm1vrTTSBpduyE5Hi4nAbMmk1HIAJmQxmSosfCeaYvf6CV5ZiSINXApAJBFcBLwNy0bccLbFiJlHbiddhMPsgpJwea98YgiEubLqtXzhkH9ve2J/Y9f7ZYNO2SNlPdXb+WUlZgUuOhhGvrbow826QhXI8R0fOn0w/mj/K/fFOCrXahWULhfJr/0LFxHeZXPbjaPl1ILVxQIamC2SHOewFTChOzmMv3YH28FBMxft7GeajywH/aZ8UuiOPOKPONb2DT54KIShWO7GKaE28mm5fLTJZNAQg8h+7zzLZAU6Z3gEHuHlRUboYk/Jod2IpC1QxrFIvnyqKSKkj240jLg9QHXpWTYrg4fKngKbfFl61LRwgoEaASyU=
