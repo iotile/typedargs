@@ -1,0 +1,598 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>typedargs.metadata &mdash; typedargs latest documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> typedargs
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                latest
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../release.html">Release Notes</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">typedargs</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>typedargs.metadata</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for typedargs.metadata</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;The basic class that is used to store metadata about a function.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="p">(</span><span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span>
+                        <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">builtins</span> <span class="k">import</span> <span class="nb">range</span><span class="p">,</span> <span class="nb">str</span>
+<span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">from</span> <span class="nn">future.utils</span> <span class="k">import</span> <span class="n">viewitems</span>
+<span class="kn">from</span> <span class="nn">typedargs</span> <span class="k">import</span> <span class="n">typeinfo</span>
+<span class="kn">from</span> <span class="nn">.exceptions</span> <span class="k">import</span> <span class="n">TypeSystemError</span><span class="p">,</span> <span class="n">ArgumentError</span><span class="p">,</span> <span class="n">ValidationError</span><span class="p">,</span> <span class="n">InternalError</span>
+<span class="kn">from</span> <span class="nn">.basic_structures</span> <span class="k">import</span> <span class="n">ParameterInfo</span><span class="p">,</span> <span class="n">ReturnInfo</span>
+<span class="kn">from</span> <span class="nn">.doc_annotate</span> <span class="k">import</span> <span class="n">parse_docstring</span>
+
+
+<div class="viewcode-block" id="AnnotatedMetadata"><a class="viewcode-back" href="../../api/typedargs.metadata.html#typedargs.metadata.AnnotatedMetadata">[docs]</a><span class="k">class</span> <span class="nc">AnnotatedMetadata</span><span class="p">:</span> <span class="c1">#pylint: disable=R0902; These instance variables are required.</span>
+    <span class="sd">&quot;&quot;&quot;All of the associated metadata for an annotated function or class.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        func (callable): The function that we are annotated so that</span>
+<span class="sd">            we can pull out relevant argument spec information.  If func</span>
+<span class="sd">            is a class, we pull arguments from its __init__ routine</span>
+<span class="sd">        name (str): An optional name that will overwrite the default name</span>
+<span class="sd">            of this function</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">annotated_params</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_has_self</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="n">docstring</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="vm">__doc__</span>
+
+        <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+            <span class="c1"># If we&#39;re annotating a class, the name of the class should be</span>
+            <span class="c1"># the class name so keep track of that before looking at its</span>
+            <span class="c1"># __init__ function.</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span>
+
+            <span class="n">func</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="fm">__init__</span>
+
+            <span class="c1"># If __init__ has anotated params, copy them to the class so</span>
+            <span class="c1"># we print correct signatures</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="s1">&#39;metadata&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">annotated_params</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">annotated_params</span>
+
+        <span class="c1"># If we are called to annotate a context, we won&#39;t necessarily</span>
+        <span class="c1"># have any arguments</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">args</span><span class="p">,</span> <span class="n">varargs</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">defaults</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getargspec</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>  <span class="c1"># pylint: disable=deprecated-method</span>
+
+            <span class="c1"># Skip self argument if this is a method function</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;self&#39;</span><span class="p">:</span>
+                <span class="n">args</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_has_self</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="k">if</span> <span class="n">defaults</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">defaults</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">varargs</span> <span class="o">=</span> <span class="n">varargs</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">arg_names</span> <span class="o">=</span> <span class="n">args</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">arg_defaults</span> <span class="o">=</span> <span class="n">defaults</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">varargs</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">arg_names</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">arg_defaults</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span> <span class="o">=</span> <span class="n">ReturnInfo</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_from_doc</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_doc_parsed</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_docstring</span> <span class="o">=</span> <span class="n">docstring</span>
+
+    <span class="k">def</span> <span class="nf">_ensure_loaded</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_from_doc</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_doc_parsed</span><span class="p">:</span>
+            <span class="n">params</span><span class="p">,</span> <span class="n">ret_info</span> <span class="o">=</span> <span class="n">parse_docstring</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_docstring</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">param_info</span> <span class="ow">in</span> <span class="n">viewitems</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="n">param_name</span><span class="p">,</span> <span class="n">param_info</span><span class="o">.</span><span class="n">type_name</span><span class="p">,</span> <span class="n">param_info</span><span class="o">.</span><span class="n">validators</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">ret_info</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span> <span class="o">=</span> <span class="n">ret_info</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_doc_parsed</span> <span class="o">=</span> <span class="kc">True</span>
+
+<div class="viewcode-block" id="AnnotatedMetadata.spec_filled"><a class="viewcode-back" href="../../api/typedargs.metadata.html#typedargs.metadata.AnnotatedMetadata.spec_filled">[docs]</a>    <span class="k">def</span> <span class="nf">spec_filled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos_args</span><span class="p">,</span> <span class="n">kw_args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Check if we have enough arguments to call this function.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            pos_args (list): A list of all the positional values we have.</span>
+<span class="sd">            kw_args (dict): A dict of all of the keyword args we have.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if we have a filled spec, False otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">req_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">arg_names</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arg_defaults</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">req_names</span> <span class="o">=</span> <span class="n">req_names</span><span class="p">[:</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arg_defaults</span><span class="p">)]</span>
+
+        <span class="n">req</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">req_names</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kw_args</span><span class="p">]</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">req</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pos_args</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="AnnotatedMetadata.add_param"><a class="viewcode-back" href="../../api/typedargs.metadata.html#typedargs.metadata.AnnotatedMetadata.add_param">[docs]</a>    <span class="k">def</span> <span class="nf">add_param</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">type_name</span><span class="p">,</span> <span class="n">validators</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add type information for a parameter by name.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): The name of the parameter we wish to annotate</span>
+<span class="sd">            type_name (str): The name of the parameter&#39;s type</span>
+<span class="sd">            validators (list): A list of either strings or n tuples that each</span>
+<span class="sd">                specify a validator defined for type_name.  If a string is passed,</span>
+<span class="sd">                the validator is invoked with no extra arguments.  If a tuple is</span>
+<span class="sd">                passed, the validator will be invoked with the extra arguments.</span>
+<span class="sd">            desc (str): Optional parameter description.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">annotated_params</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">TypeSystemError</span><span class="p">(</span><span class="s2">&quot;Annotation specified multiple times for the same parameter&quot;</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">arg_names</span> <span class="ow">and</span> <span class="n">name</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">varargs</span> <span class="ow">and</span> <span class="n">name</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">TypeSystemError</span><span class="p">(</span><span class="s2">&quot;Annotation specified for unknown parameter&quot;</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="n">info</span> <span class="o">=</span> <span class="n">ParameterInfo</span><span class="p">(</span><span class="n">type_name</span><span class="p">,</span> <span class="n">validators</span><span class="p">,</span> <span class="n">desc</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">annotated_params</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span></div>
+
+<div class="viewcode-block" id="AnnotatedMetadata.typed_returnvalue"><a class="viewcode-back" href="../../api/typedargs.metadata.html#typedargs.metadata.AnnotatedMetadata.typed_returnvalue">[docs]</a>    <span class="k">def</span> <span class="nf">typed_returnvalue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">type_name</span><span class="p">,</span> <span class="n">formatter</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add type information to the return value of this function.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            type_name (str): The name of the type of the return value.</span>
+<span class="sd">            formatter (str): An optional name of a formatting function specified</span>
+<span class="sd">                for the type given in type_name.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span> <span class="o">=</span> <span class="n">ReturnInfo</span><span class="p">(</span><span class="n">type_name</span><span class="p">,</span> <span class="n">formatter</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="AnnotatedMetadata.string_returnvalue"><a class="viewcode-back" href="../../api/typedargs.metadata.html#typedargs.metadata.AnnotatedMetadata.string_returnvalue">[docs]</a>    <span class="k">def</span> <span class="nf">string_returnvalue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Mark the return value as data that should be converted with str.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span> <span class="o">=</span> <span class="n">ReturnInfo</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="AnnotatedMetadata.custom_returnvalue"><a class="viewcode-back" href="../../api/typedargs.metadata.html#typedargs.metadata.AnnotatedMetadata.custom_returnvalue">[docs]</a>    <span class="k">def</span> <span class="nf">custom_returnvalue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">printer</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Use a custom function to print the return value.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            printer (callable): A function that should take in the return</span>
+<span class="sd">                value and convert it to a string.</span>
+<span class="sd">            desc (str): An optional description of the return value.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span> <span class="o">=</span> <span class="n">ReturnInfo</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">printer</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="AnnotatedMetadata.has_varargs"><a class="viewcode-back" href="../../api/typedargs.metadata.html#typedargs.metadata.AnnotatedMetadata.has_varargs">[docs]</a>    <span class="k">def</span> <span class="nf">has_varargs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Check if this function supports variable arguments.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">varargs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="AnnotatedMetadata.has_kwargs"><a class="viewcode-back" href="../../api/typedargs.metadata.html#typedargs.metadata.AnnotatedMetadata.has_kwargs">[docs]</a>    <span class="k">def</span> <span class="nf">has_kwargs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Check if this function supports arbitrary keyword arguments.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="AnnotatedMetadata.returns_data"><a class="viewcode-back" href="../../api/typedargs.metadata.html#typedargs.metadata.AnnotatedMetadata.returns_data">[docs]</a>    <span class="k">def</span> <span class="nf">returns_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Check if this function returns data.&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_loaded</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">is_data</span></div>
+
+<div class="viewcode-block" id="AnnotatedMetadata.match_shortname"><a class="viewcode-back" href="../../api/typedargs.metadata.html#typedargs.metadata.AnnotatedMetadata.match_shortname">[docs]</a>    <span class="k">def</span> <span class="nf">match_shortname</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">filled_args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Try to convert a prefix into a parameter name.</span>
+
+<span class="sd">        If the result could be ambiguous or there is no matching</span>
+<span class="sd">        parameter, throw an ArgumentError</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): A prefix for a parameter name</span>
+<span class="sd">            filled_args (list): A list of filled positional arguments that will be</span>
+<span class="sd">                removed from consideration.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: The full matching parameter name</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">filled_count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">filled_args</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">filled_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">filled_args</span><span class="p">)</span>
+
+        <span class="n">possible</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">arg_names</span><span class="p">[</span><span class="n">filled_count</span><span class="p">:]</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">name</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">possible</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ArgumentError</span><span class="p">(</span><span class="s2">&quot;Could not convert short-name full parameter name, none could be found&quot;</span><span class="p">,</span> <span class="n">short_name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">arg_names</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">possible</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ArgumentError</span><span class="p">(</span><span class="s2">&quot;Short-name is ambiguous, could match multiple keyword parameters&quot;</span><span class="p">,</span> <span class="n">short_name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">possible_matches</span><span class="o">=</span><span class="n">possible</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">possible</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="AnnotatedMetadata.param_type"><a class="viewcode-back" href="../../api/typedargs.metadata.html#typedargs.metadata.AnnotatedMetadata.param_type">[docs]</a>    <span class="k">def</span> <span class="nf">param_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the parameter type information by name.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): The full name of a parameter.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: The type name or None if no type information is given.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_loaded</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">annotated_params</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">annotated_params</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">type_name</span></div>
+
+<div class="viewcode-block" id="AnnotatedMetadata.signature"><a class="viewcode-back" href="../../api/typedargs.metadata.html#typedargs.metadata.AnnotatedMetadata.signature">[docs]</a>    <span class="k">def</span> <span class="nf">signature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return our function signature as a string.</span>
+
+<span class="sd">        By default this function uses the annotated name of the function</span>
+<span class="sd">        however if you need to override that with a custom name you can</span>
+<span class="sd">        pass name=&lt;custom name&gt;</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): Optional name to override the default name given</span>
+<span class="sd">                in the function signature.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: The formatted function signature</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_loaded</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+
+        <span class="n">num_args</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arg_names</span><span class="p">)</span>
+
+        <span class="n">num_def</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">arg_defaults</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">num_def</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arg_defaults</span><span class="p">)</span>
+
+        <span class="n">num_no_def</span> <span class="o">=</span> <span class="n">num_args</span> <span class="o">-</span> <span class="n">num_def</span>
+
+        <span class="n">args</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arg_names</span><span class="p">)):</span>
+            <span class="n">typestr</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">arg_names</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">annotated_params</span><span class="p">:</span>
+                <span class="n">typestr</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">annotated_params</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">arg_names</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span><span class="o">.</span><span class="n">type_name</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="n">num_no_def</span><span class="p">:</span>
+                <span class="n">default</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arg_defaults</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="n">num_no_def</span><span class="p">])</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">default</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">default</span> <span class="o">=</span> <span class="s2">&quot;&#39;&#39;&quot;</span>
+
+                <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}{}</span><span class="s2">=</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">typestr</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arg_names</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="n">default</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">typestr</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arg_names</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">(</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="AnnotatedMetadata.format_returnvalue"><a class="viewcode-back" href="../../api/typedargs.metadata.html#typedargs.metadata.AnnotatedMetadata.format_returnvalue">[docs]</a>    <span class="k">def</span> <span class="nf">format_returnvalue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Format the return value of this function as a string.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value (object): The return value that we are supposed to format.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: The formatted return value, or None if this function indicates</span>
+<span class="sd">                that it does not return data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_loaded</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">is_data</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="c1"># If the return value is typed, use the type_system to format it</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">type_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">typeinfo</span><span class="o">.</span><span class="n">type_system</span><span class="o">.</span><span class="n">format_value</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">type_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">formatter</span><span class="p">)</span>
+
+        <span class="c1"># Otherwise we expect a callable function to convert this value to a string</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">formatter</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="AnnotatedMetadata.convert_positional_argument"><a class="viewcode-back" href="../../api/typedargs.metadata.html#typedargs.metadata.AnnotatedMetadata.convert_positional_argument">[docs]</a>    <span class="k">def</span> <span class="nf">convert_positional_argument</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">arg_value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Convert and validate a positional argument.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            index (int): The positional index of the argument</span>
+<span class="sd">            arg_value (object): The value to convert and validate</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            object: The converted value.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># For bound methods, skip self</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_self</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">index</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">arg_value</span>
+
+            <span class="n">index</span> <span class="o">-=</span> <span class="mi">1</span>
+
+        <span class="n">arg_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">arg_names</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert_argument</span><span class="p">(</span><span class="n">arg_name</span><span class="p">,</span> <span class="n">arg_value</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="AnnotatedMetadata.check_spec"><a class="viewcode-back" href="../../api/typedargs.metadata.html#typedargs.metadata.AnnotatedMetadata.check_spec">[docs]</a>    <span class="k">def</span> <span class="nf">check_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos_args</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Check if there are any missing or duplicate arguments.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            pos_args (list): A list of arguments that will be passed as positional</span>
+<span class="sd">                arguments.</span>
+<span class="sd">            kwargs (dict): A dictionary of the keyword arguments that will be passed.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: A dictionary of argument name to argument value, pulled from either</span>
+<span class="sd">                the value passed or the default value if no argument is passed.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ArgumentError: If a positional or keyword argument does not fit in the spec.</span>
+<span class="sd">            ValidationError: If an argument is passed twice.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">varargs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InternalError</span><span class="p">(</span><span class="s2">&quot;check_spec cannot be called on a function that takes *args or **kwargs&quot;</span><span class="p">)</span>
+
+        <span class="n">missing</span> <span class="o">=</span> <span class="nb">object</span><span class="p">()</span>
+
+        <span class="n">arg_vals</span> <span class="o">=</span> <span class="p">[</span><span class="n">missing</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arg_names</span><span class="p">)</span>
+        <span class="n">kw_indices</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arg_names</span><span class="p">)}</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">arg</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pos_args</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">arg_vals</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">ArgumentError</span><span class="p">(</span><span class="s2">&quot;Too many positional arguments, first excessive argument=</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">arg</span><span class="p">))</span>
+
+            <span class="n">arg_vals</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">arg</span>
+
+        <span class="k">for</span> <span class="n">arg</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">viewitems</span><span class="p">(</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">kw_indices</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ArgumentError</span><span class="p">(</span><span class="s2">&quot;Cannot find argument by name: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">arg</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">arg_vals</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">missing</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="s2">&quot;Argument </span><span class="si">%s</span><span class="s2"> passed twice&quot;</span> <span class="o">%</span> <span class="n">arg</span><span class="p">)</span>
+
+            <span class="n">arg_vals</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+
+        <span class="c1"># Fill in any default variables if their args are missing</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arg_defaults</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arg_defaults</span><span class="p">)):</span>
+                <span class="n">neg_index</span> <span class="o">=</span> <span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arg_defaults</span><span class="p">)</span> <span class="o">+</span> <span class="n">i</span>
+                <span class="k">if</span> <span class="n">arg_vals</span><span class="p">[</span><span class="n">neg_index</span><span class="p">]</span> <span class="ow">is</span> <span class="n">missing</span><span class="p">:</span>
+                    <span class="n">arg_vals</span><span class="p">[</span><span class="n">neg_index</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">arg_defaults</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+        <span class="c1"># Now make sure there isn&#39;t a missing gap</span>
+        <span class="k">if</span> <span class="n">missing</span> <span class="ow">in</span> <span class="n">arg_vals</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">arg_vals</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">missing</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ArgumentError</span><span class="p">(</span><span class="s2">&quot;Missing a required argument (position: </span><span class="si">%d</span><span class="s2">, name: </span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">arg_names</span><span class="p">[</span><span class="n">index</span><span class="p">]))</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">val</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arg_names</span><span class="p">,</span> <span class="n">arg_vals</span><span class="p">)}</span></div>
+
+<div class="viewcode-block" id="AnnotatedMetadata.convert_argument"><a class="viewcode-back" href="../../api/typedargs.metadata.html#typedargs.metadata.AnnotatedMetadata.convert_argument">[docs]</a>    <span class="k">def</span> <span class="nf">convert_argument</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg_name</span><span class="p">,</span> <span class="n">arg_value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Given a parameter with type information, convert and validate it.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            arg_name (str): The name of the argument to convert and validate</span>
+<span class="sd">            arg_value (object): The value to convert and validate</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            object: The converted value.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_loaded</span><span class="p">()</span>
+
+        <span class="n">type_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">param_type</span><span class="p">(</span><span class="n">arg_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">type_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">arg_value</span>
+
+        <span class="n">val</span> <span class="o">=</span> <span class="n">typeinfo</span><span class="o">.</span><span class="n">type_system</span><span class="o">.</span><span class="n">convert_to_type</span><span class="p">(</span><span class="n">arg_value</span><span class="p">,</span> <span class="n">type_name</span><span class="p">)</span>
+
+        <span class="n">validators</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">annotated_params</span><span class="p">[</span><span class="n">arg_name</span><span class="p">]</span><span class="o">.</span><span class="n">validators</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">validators</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">val</span>
+
+        <span class="n">type_obj</span> <span class="o">=</span> <span class="n">typeinfo</span><span class="o">.</span><span class="n">type_system</span><span class="o">.</span><span class="n">get_type</span><span class="p">(</span><span class="n">type_name</span><span class="p">)</span>
+
+        <span class="c1"># Run all of the validators that were defined for this argument.</span>
+        <span class="c1"># If the validation fails, they will raise an exception that we convert to</span>
+        <span class="c1"># an instance of ValidationError</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">validator_name</span><span class="p">,</span> <span class="n">extra_args</span> <span class="ow">in</span> <span class="n">validators</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">type_obj</span><span class="p">,</span> <span class="n">validator_name</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="s2">&quot;Could not find validator specified for argument&quot;</span><span class="p">,</span> <span class="n">argument</span><span class="o">=</span><span class="n">arg_name</span><span class="p">,</span> <span class="n">validator_name</span><span class="o">=</span><span class="n">validator_name</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">type_obj</span><span class="p">),</span> <span class="n">method</span><span class="o">=</span><span class="nb">dir</span><span class="p">(</span><span class="n">type_obj</span><span class="p">))</span>
+
+                <span class="n">validator</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">type_obj</span><span class="p">,</span> <span class="n">validator_name</span><span class="p">)</span>
+                <span class="n">validator</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="o">*</span><span class="n">extra_args</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="n">exc</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">argument</span><span class="o">=</span><span class="n">arg_name</span><span class="p">,</span> <span class="n">arg_value</span><span class="o">=</span><span class="n">val</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">val</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018 Arch Systems Inc.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,721 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>typedargs.shell &mdash; typedargs latest documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> typedargs
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                latest
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../release.html">Release Notes</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">typedargs</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>typedargs.shell</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for typedargs.shell</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Hierarchical Shell provides as REPL like environment for executing commmands.&quot;&quot;&quot;</span>
+
+<span class="c1"># This file is adapted from python code released by WellDone International</span>
+<span class="c1"># under the terms of the LGPLv3.  WellDone International&#39;s contact information is</span>
+<span class="c1"># info@welldone.org</span>
+<span class="c1"># http://welldone.org</span>
+<span class="c1">#</span>
+<span class="c1"># Modifications to this file from the original created at WellDone International</span>
+<span class="c1"># are copyright Arch Systems Inc.</span>
+
+<span class="c1">#shell.py</span>
+<span class="c1">#Given a command line string, attempt to map it to a function and fill in</span>
+<span class="c1">#the parameters based on that function&#39;s annotated type information.</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="p">(</span><span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span>
+                        <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">import</span> <span class="nn">shlex</span>
+<span class="kn">import</span> <span class="nn">platform</span>
+<span class="kn">import</span> <span class="nn">importlib</span>
+<span class="kn">from</span> <span class="nn">builtins</span> <span class="k">import</span> <span class="nb">str</span>
+<span class="kn">from</span> <span class="nn">future.utils</span> <span class="k">import</span> <span class="n">iteritems</span>
+<span class="kn">from</span> <span class="nn">typedargs.exceptions</span> <span class="k">import</span> <span class="n">ArgumentError</span><span class="p">,</span> <span class="n">NotFoundError</span><span class="p">,</span> <span class="n">ValidationError</span>
+<span class="kn">from</span> <span class="nn">typedargs</span> <span class="k">import</span> <span class="n">annotate</span><span class="p">,</span> <span class="n">utils</span>
+<span class="kn">from</span> <span class="nn">typedargs</span> <span class="k">import</span> <span class="n">iprint</span>
+<span class="kn">from</span> <span class="nn">typedargs.typeinfo</span> <span class="k">import</span> <span class="n">type_system</span>
+
+
+<div class="viewcode-block" id="InitialContext"><a class="viewcode-back" href="../../api/typedargs.shell.html#typedargs.shell.InitialContext">[docs]</a><span class="nd">@annotate</span><span class="o">.</span><span class="n">context</span><span class="p">(</span><span class="s2">&quot;root&quot;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">InitialContext</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A basic context for holding the root callable functions for a shell.&quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="HierarchicalShell"><a class="viewcode-back" href="../../api/typedargs.shell.html#typedargs.shell.HierarchicalShell">[docs]</a><span class="k">class</span> <span class="nc">HierarchicalShell</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;A hierarchical shell for navigating through python package API functions.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_commands</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">InitialContext</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">contexts</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">]</span>
+
+        <span class="c1"># Keep track of whether we are on windows because shlex does not dequote</span>
+        <span class="c1"># strings the same on Windows as on other platforms</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">posix_lex</span> <span class="o">=</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span> <span class="o">!=</span> <span class="s1">&#39;Windows&#39;</span>
+
+        <span class="c1">#Initialize the root context if required</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_initialize_context</span><span class="p">()</span>
+
+        <span class="c1"># Initialize our builtin functions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">builtins</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_builtin</span><span class="p">(</span><span class="s1">&#39;back&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_builtin_back</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_builtin</span><span class="p">(</span><span class="s1">&#39;help&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_builtin_help</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_builtin</span><span class="p">(</span><span class="s1">&#39;quit&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_builtin_quit</span><span class="p">)</span>
+
+<div class="viewcode-block" id="HierarchicalShell.add_builtin"><a class="viewcode-back" href="../../api/typedargs.shell.html#typedargs.shell.HierarchicalShell.add_builtin">[docs]</a>    <span class="k">def</span> <span class="nf">add_builtin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">callable</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a builtin function callable from all contexts.</span>
+
+<span class="sd">        Callable should be an annotated function like any other that you</span>
+<span class="sd">        want to call from a HierarchicalShell</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): The name of the function</span>
+<span class="sd">            callable (callable): The annotated function that we should call</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">builtins</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">callable</span></div>
+
+<div class="viewcode-block" id="HierarchicalShell.root_update"><a class="viewcode-back" href="../../api/typedargs.shell.html#typedargs.shell.HierarchicalShell.root_update">[docs]</a>    <span class="k">def</span> <span class="nf">root_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dict_like</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add entries to root from a dict_line object.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">dict_like</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="HierarchicalShell.root_add"><a class="viewcode-back" href="../../api/typedargs.shell.html#typedargs.shell.HierarchicalShell.root_add">[docs]</a>    <span class="k">def</span> <span class="nf">root_add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a single function to the root context.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name (str): The name of the callable to add</span>
+<span class="sd">            value (str or callable): The callable function or a string to</span>
+<span class="sd">                lazily resolve to the callable later.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span></div>
+
+<div class="viewcode-block" id="HierarchicalShell.context_name"><a class="viewcode-back" href="../../api/typedargs.shell.html#typedargs.shell.HierarchicalShell.context_name">[docs]</a>    <span class="k">def</span> <span class="nf">context_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the string name of the current context.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">utils</span><span class="o">.</span><span class="n">context_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">contexts</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="HierarchicalShell.finished"><a class="viewcode-back" href="../../api/typedargs.shell.html#typedargs.shell.HierarchicalShell.finished">[docs]</a>    <span class="k">def</span> <span class="nf">finished</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Check if we have finalized all contexts.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if there are no nested contexts left, False otherwise</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">contexts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span></div>
+
+<div class="viewcode-block" id="HierarchicalShell.valid_identifiers"><a class="viewcode-back" href="../../api/typedargs.shell.html#typedargs.shell.HierarchicalShell.valid_identifiers">[docs]</a>    <span class="k">def</span> <span class="nf">valid_identifiers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get a list of all valid identifiers for the current context.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list(str): A list of all of the valid identifiers for this context</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">funcs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">utils</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">contexts</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">builtins</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">funcs</span></div>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_deferred_add</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">add_action</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Lazily load a callable.</span>
+
+<span class="sd">        Perform a lazy import of a context so that we don&#39;t have a huge initial startup time</span>
+<span class="sd">        loading all of the modules that someone might want even though they probably only</span>
+<span class="sd">        will use a few of them.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">module</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">obj</span> <span class="o">=</span> <span class="n">add_action</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+
+        <span class="n">mod</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">obj</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">con</span> <span class="o">=</span> <span class="n">annotate</span><span class="o">.</span><span class="n">context_from_module</span><span class="p">(</span><span class="n">mod</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">con</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">mod</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">mod</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
+
+        <span class="k">raise</span> <span class="n">ArgumentError</span><span class="p">(</span><span class="s2">&quot;Attempted to import nonexistent object from module&quot;</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">,</span> <span class="nb">object</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_remove_quotes</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">word</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">word</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">word</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">))</span> <span class="ow">and</span> <span class="n">word</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">word</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="n">word</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">word</span>
+
+    <span class="k">def</span> <span class="nf">_split_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Split a line into arguments using shlex and a dequoting routine.&quot;&quot;&quot;</span>
+
+        <span class="n">parts</span> <span class="o">=</span> <span class="n">shlex</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">posix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">posix_lex</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">posix_lex</span><span class="p">:</span>
+            <span class="n">parts</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_remove_quotes</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">parts</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">parts</span>
+
+    <span class="k">def</span> <span class="nf">_check_initialize_context</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check if our context matches something that we have initialization commands</span>
+<span class="sd">        for.  If so, run them to initialize the context before proceeding with other</span>
+<span class="sd">        commands.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">annotate</span><span class="o">.</span><span class="n">context_name</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">contexts</span><span class="p">])</span>
+
+        <span class="c1">#Make sure we don&#39;t clutter up the output with return values from</span>
+        <span class="c1">#initialization functions</span>
+        <span class="n">old_interactive</span> <span class="o">=</span> <span class="n">type_system</span><span class="o">.</span><span class="n">interactive</span>
+        <span class="n">type_system</span><span class="o">.</span><span class="n">interactive</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">cmds</span> <span class="ow">in</span> <span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">init_commands</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">cmd</span> <span class="ow">in</span> <span class="n">cmds</span><span class="p">:</span>
+                    <span class="n">line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_line</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+
+        <span class="n">type_system</span><span class="o">.</span><span class="n">interactive</span> <span class="o">=</span> <span class="n">old_interactive</span>
+
+    <span class="nd">@annotate</span><span class="o">.</span><span class="n">finalizer</span>
+    <span class="k">def</span> <span class="nf">_builtin_back</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Pop the current context and return to its parent.&quot;&quot;&quot;</span>
+        <span class="k">pass</span>  <span class="c1"># Popping the context is handled by invoke since this is marked as a finalizer</span>
+
+    <span class="nd">@annotate</span><span class="o">.</span><span class="n">takes_cmdline</span>
+    <span class="k">def</span> <span class="nf">_builtin_quit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_cmdline</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Quit this hierarchical shell.&quot;&quot;&quot;</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">contexts</span><span class="p">[:]</span>
+
+    <span class="nd">@annotate</span><span class="o">.</span><span class="n">takes_cmdline</span>
+    <span class="nd">@annotate</span><span class="o">.</span><span class="n">stringable</span>
+    <span class="k">def</span> <span class="nf">_builtin_help</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return help information for a context or function.&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_dir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">contexts</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_function</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">contexts</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">annotate</span><span class="o">.</span><span class="n">get_help</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+
+        <span class="n">help_text</span> <span class="o">=</span> <span class="s2">&quot;Too many arguments: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">help_text</span> <span class="o">+=</span> <span class="s2">&quot;Usage: help [function]&quot;</span>
+        <span class="k">return</span> <span class="n">help_text</span>
+
+<div class="viewcode-block" id="HierarchicalShell.find_function"><a class="viewcode-back" href="../../api/typedargs.shell.html#typedargs.shell.HierarchicalShell.find_function">[docs]</a>    <span class="k">def</span> <span class="nf">find_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">funname</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Find a function in the given context by name.</span>
+
+<span class="sd">        This function will first search the list of builtins and if the</span>
+<span class="sd">        desired function is not a builtin, it will continue to search</span>
+<span class="sd">        the given context.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            context (object): A dict or class that is a typedargs context</span>
+<span class="sd">            funname (str): The name of the function to find</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            callable: The found function.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">funname</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">builtins</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">builtins</span><span class="p">[</span><span class="n">funname</span><span class="p">]</span>
+
+        <span class="n">func</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">funname</span> <span class="ow">in</span> <span class="n">context</span><span class="p">:</span>
+                <span class="n">func</span> <span class="o">=</span> <span class="n">context</span><span class="p">[</span><span class="n">funname</span><span class="p">]</span>
+
+                <span class="c1">#Allowed lazy loading of functions</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                    <span class="n">func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_deferred_add</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+                    <span class="n">context</span><span class="p">[</span><span class="n">funname</span><span class="p">]</span> <span class="o">=</span> <span class="n">func</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">funname</span><span class="p">):</span>
+            <span class="n">func</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">funname</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">func</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">NotFoundError</span><span class="p">(</span><span class="s2">&quot;Function not found&quot;</span><span class="p">,</span> <span class="n">function</span><span class="o">=</span><span class="n">funname</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">func</span></div>
+
+<div class="viewcode-block" id="HierarchicalShell.list_dir"><a class="viewcode-back" href="../../api/typedargs.shell.html#typedargs.shell.HierarchicalShell.list_dir">[docs]</a>    <span class="k">def</span> <span class="nf">list_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a listing of all of the functions in this context including builtins.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            context (object): The context to print a directory for.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">doc</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getdoc</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+
+        <span class="n">listing</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">listing</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+        <span class="n">listing</span> <span class="o">+=</span> <span class="n">annotate</span><span class="o">.</span><span class="n">context_name</span><span class="p">(</span><span class="n">context</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+        <span class="k">if</span> <span class="n">doc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">doc</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">cleandoc</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+            <span class="n">listing</span> <span class="o">+=</span> <span class="n">doc</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+
+        <span class="n">listing</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Defined Functions:</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">is_dict</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">funs</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="n">is_dict</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">funs</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">fun</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">funs</span><span class="p">):</span>
+            <span class="n">override_name</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">is_dict</span><span class="p">:</span>
+                <span class="n">override_name</span> <span class="o">=</span> <span class="n">fun</span>
+
+            <span class="n">fun</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_function</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">fun</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fun</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">is_dict</span><span class="p">:</span>
+                    <span class="n">listing</span> <span class="o">+=</span> <span class="s2">&quot; - &quot;</span> <span class="o">+</span> <span class="n">override_name</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">listing</span> <span class="o">+=</span> <span class="s2">&quot; - &quot;</span> <span class="o">+</span> <span class="n">fun</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">listing</span> <span class="o">+=</span> <span class="s2">&quot; - &quot;</span> <span class="o">+</span> <span class="n">fun</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">override_name</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+            <span class="k">if</span> <span class="n">annotate</span><span class="o">.</span><span class="n">short_description</span><span class="p">(</span><span class="n">fun</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                <span class="n">listing</span> <span class="o">+=</span> <span class="s2">&quot;   &quot;</span> <span class="o">+</span> <span class="n">annotate</span><span class="o">.</span><span class="n">short_description</span><span class="p">(</span><span class="n">fun</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="n">listing</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Builtin Functions</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">for</span> <span class="n">bif</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">builtins</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="n">listing</span> <span class="o">+=</span> <span class="s1">&#39; - &#39;</span> <span class="o">+</span> <span class="n">bif</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="n">listing</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">return</span> <span class="n">listing</span></div>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_is_flag</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Check if an argument is a flag.</span>
+
+<span class="sd">        A flag starts with - or -- and the next character must be a letter</span>
+<span class="sd">        followed by letters, numbers, - or _.  Currently we only check the</span>
+<span class="sd">        alpha&#39;ness of the first non-dash character to make sure we&#39;re not just</span>
+<span class="sd">        looking at a negative number.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: Whether the argument is a flag.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">arg</span> <span class="o">==</span> <span class="s1">&#39;--&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">arg</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;--&#39;</span><span class="p">):</span>
+            <span class="n">first_char</span> <span class="o">=</span> <span class="n">arg</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">first_char</span> <span class="o">=</span> <span class="n">arg</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">first_char</span><span class="o">.</span><span class="n">isalpha</span><span class="p">():</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="k">return</span> <span class="kc">True</span>
+
+<div class="viewcode-block" id="HierarchicalShell.process_arguments"><a class="viewcode-back" href="../../api/typedargs.shell.html#typedargs.shell.HierarchicalShell.process_arguments">[docs]</a>    <span class="k">def</span> <span class="nf">process_arguments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Process arguments from the command line into positional and kw args.</span>
+
+<span class="sd">        Arguments are consumed until the argument spec for the function is filled</span>
+<span class="sd">        or a -- is found or there are no more arguments.  Keyword arguments can be</span>
+<span class="sd">        specified using --field=value, -f value or --field value.  Positional</span>
+<span class="sd">        arguments are specified just on the command line itself.</span>
+
+<span class="sd">        If a keyword argument (`field`) is a boolean, it can be set to True by just passing</span>
+<span class="sd">        --field or -f without needing to explicitly pass True unless this would cause</span>
+<span class="sd">        ambiguity in parsing since the next expected positional argument is also a boolean</span>
+<span class="sd">        or a string.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            func (callable): A function previously annotated with type information</span>
+<span class="sd">            args (list): A list of all of the potential arguments to this function.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (args, kw_args, unused args): A tuple with a list of args, a dict of</span>
+<span class="sd">                keyword args and a list of any unused args that were not processed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">pos_args</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">kw_args</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">func</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">spec_filled</span><span class="p">(</span><span class="n">pos_args</span><span class="p">,</span> <span class="n">kw_args</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_flag</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="k">break</span>
+
+            <span class="n">arg</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">arg</span> <span class="o">==</span> <span class="s1">&#39;--&#39;</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_flag</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
+                <span class="n">arg_value</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">arg_name</span> <span class="o">=</span> <span class="kc">None</span>
+
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">arg_name</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">match_shortname</span><span class="p">(</span><span class="n">arg</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">filled_args</span><span class="o">=</span><span class="n">pos_args</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">arg</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;--&#39;</span><span class="p">):</span>
+                        <span class="k">raise</span> <span class="n">ArgumentError</span><span class="p">(</span><span class="s2">&quot;Invalid method of specifying keyword argument that did not start with --&quot;</span><span class="p">,</span> <span class="n">argument</span><span class="o">=</span><span class="n">arg</span><span class="p">)</span>
+
+                    <span class="c1"># Skip the --</span>
+                    <span class="n">arg</span> <span class="o">=</span> <span class="n">arg</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+
+                    <span class="c1"># Check if the value is embedded in the parameter</span>
+                    <span class="c1"># Make sure we allow the value after the equals sign to also</span>
+                    <span class="c1"># contain an equals sign.</span>
+                    <span class="k">if</span> <span class="s1">&#39;=&#39;</span> <span class="ow">in</span> <span class="n">arg</span><span class="p">:</span>
+                        <span class="n">arg</span><span class="p">,</span> <span class="n">arg_value</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+                    <span class="n">arg_name</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">match_shortname</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">filled_args</span><span class="o">=</span><span class="n">pos_args</span><span class="p">)</span>
+
+                <span class="n">arg_type</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">param_type</span><span class="p">(</span><span class="n">arg_name</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">arg_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">ArgumentError</span><span class="p">(</span><span class="s2">&quot;Attempting to set a parameter from command line that does not have type information&quot;</span><span class="p">,</span> <span class="n">argument</span><span class="o">=</span><span class="n">arg_name</span><span class="p">)</span>
+
+                <span class="c1"># If we don&#39;t have a value yet, attempt to get one from the next parameter on the command line</span>
+                <span class="k">if</span> <span class="n">arg_value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">arg_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_arg_value</span><span class="p">(</span><span class="n">arg_name</span><span class="p">,</span> <span class="n">arg_type</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+
+                <span class="n">kw_args</span><span class="p">[</span><span class="n">arg_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">arg_value</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">pos_args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+
+        <span class="c1"># Always check if there is a trailing &#39;--&#39; and chomp so that we always</span>
+        <span class="c1"># start on a function name.  This can happen if there is a gratuitous</span>
+        <span class="c1"># -- for a 0 arg function or after an implicit boolean flag like -f --</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;--&#39;</span><span class="p">:</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">pos_args</span><span class="p">,</span> <span class="n">kw_args</span><span class="p">,</span> <span class="n">args</span></div>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_extract_arg_value</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">arg_name</span><span class="p">,</span> <span class="n">arg_type</span><span class="p">,</span> <span class="n">remaining</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Try to find the value for a keyword argument.&quot;&quot;&quot;</span>
+
+        <span class="n">next_arg</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">should_consume</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">remaining</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">next_arg</span> <span class="o">=</span> <span class="n">remaining</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">should_consume</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="k">if</span> <span class="n">next_arg</span> <span class="o">==</span> <span class="s1">&#39;--&#39;</span><span class="p">:</span>
+                <span class="n">next_arg</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Generally we just return the next argument, however if the type</span>
+        <span class="c1"># is bool we allow not specifying anything to mean true if there</span>
+        <span class="c1"># is no ambiguity</span>
+        <span class="k">if</span> <span class="n">arg_type</span> <span class="o">==</span> <span class="s2">&quot;bool&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">next_arg</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">next_arg</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">):</span>
+                <span class="n">next_arg</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">should_consume</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">next_arg</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ArgumentError</span><span class="p">(</span><span class="s2">&quot;Could not find value for keyword argument&quot;</span><span class="p">,</span> <span class="n">argument</span><span class="o">=</span><span class="n">arg_name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">should_consume</span><span class="p">:</span>
+            <span class="n">remaining</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">next_arg</span>
+
+<div class="viewcode-block" id="HierarchicalShell.invoke_one"><a class="viewcode-back" href="../../api/typedargs.shell.html#typedargs.shell.HierarchicalShell.invoke_one">[docs]</a>    <span class="k">def</span> <span class="nf">invoke_one</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Invoke a function given a list of arguments with the function listed first.</span>
+
+<span class="sd">        The function is searched for using the current context on the context stack</span>
+<span class="sd">        and its annotated type information is used to convert all of the string parameters</span>
+<span class="sd">        passed in line to appropriate python types.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            line (list): The list of command line arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            (object, list, bool): A tuple containing the return value of the function, if any,</span>
+<span class="sd">                a boolean specifying if the function created a new context (False if a new context</span>
+<span class="sd">                was created) and a list with the remainder of the command line if this function</span>
+<span class="sd">                did not consume all arguments.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">funname</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">context</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">contexts</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_function</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">funname</span><span class="p">)</span>
+
+        <span class="c1">#If this is a context derived from a module or package, just jump to it</span>
+        <span class="c1">#since there is no initialization function</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">contexts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_check_initialize_context</span><span class="p">()</span>
+            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="kc">False</span>
+
+        <span class="c1"># If the function wants arguments directly, do not parse them, otherwise turn them</span>
+        <span class="c1"># into positional and kw arguments</span>
+        <span class="k">if</span> <span class="n">func</span><span class="o">.</span><span class="n">takes_cmdline</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">posargs</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_arguments</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+
+            <span class="c1">#We need to check for not enough args for classes before calling or the call won&#39;t make it all the way to __init__</span>
+            <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">func</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">func</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">spec_filled</span><span class="p">(</span><span class="n">posargs</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="s2">&quot;Not enough parameters specified to call function&quot;</span><span class="p">,</span> <span class="n">function</span><span class="o">=</span><span class="n">func</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">signature</span><span class="o">=</span><span class="n">func</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">signature</span><span class="p">())</span>
+
+            <span class="n">val</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">posargs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Update our current context if this function destroyed it or returned a new one.</span>
+        <span class="n">finished</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="n">func</span><span class="o">.</span><span class="n">finalizer</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">contexts</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">func</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">returns_data</span><span class="p">():</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">format_returnvalue</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">contexts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_check_initialize_context</span><span class="p">()</span>
+                <span class="n">finished</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="n">val</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">finished</span></div>
+
+<div class="viewcode-block" id="HierarchicalShell.invoke"><a class="viewcode-back" href="../../api/typedargs.shell.html#typedargs.shell.HierarchicalShell.invoke">[docs]</a>    <span class="k">def</span> <span class="nf">invoke</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Invoke a one or more function given a list of arguments.</span>
+
+<span class="sd">        The functions are searched for using the current context on the context stack</span>
+<span class="sd">        and its annotated type information is used to convert all of the string parameters</span>
+<span class="sd">        passed in line to appropriate python types.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            line (list): The list of command line arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: A boolean specifying if the last function created a new context</span>
+<span class="sd">                (False if a new context was created) and a list with the remainder of the</span>
+<span class="sd">                command line if this function did not consume all arguments.)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">finished</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">val</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">finished</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">invoke_one</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">iprint</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">finished</span></div>
+
+<div class="viewcode-block" id="HierarchicalShell.invoke_string"><a class="viewcode-back" href="../../api/typedargs.shell.html#typedargs.shell.HierarchicalShell.invoke_string">[docs]</a>    <span class="k">def</span> <span class="nf">invoke_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Parse and invoke a string line.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            line (str): The line that we want to parse and invoke.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: A boolean specifying if the last function created a new context</span>
+<span class="sd">                (False if a new context was created) and a list with the remainder of the</span>
+<span class="sd">                command line if this function did not consume all arguments.)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Make sure line is a unicode string on all python versions</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+
+        <span class="c1"># Ignore empty lines and comments</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="sa">u</span><span class="s1">&#39;#&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="n">args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_line</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span><span class="n">args</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018 Arch Systems Inc.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

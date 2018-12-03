@@ -1,0 +1,435 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>typedargs.doc_parser module &mdash; typedargs latest documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="typedargs.exceptions module" href="typedargs.exceptions.html" />
+    <link rel="prev" title="typedargs.doc_annotate module" href="typedargs.doc_annotate.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> typedargs
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                latest
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="typedargs.html">typedargs package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="typedargs.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="typedargs.annotate.html">typedargs.annotate module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.basic_structures.html">typedargs.basic_structures module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.doc_annotate.html">typedargs.doc_annotate module</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">typedargs.doc_parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.exceptions.html">typedargs.exceptions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.lint.html">typedargs.lint module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.metadata.html">typedargs.metadata module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.shell.html">typedargs.shell module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.terminal.html">typedargs.terminal module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.typeinfo.html">typedargs.typeinfo module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.utils.html">typedargs.utils module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="typedargs.html#subpackages">Subpackages</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../release.html">Release Notes</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">typedargs</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../api.html">API Reference</a> &raquo;</li>
+        
+          <li><a href="typedargs.html">typedargs package</a> &raquo;</li>
+        
+      <li>typedargs.doc_parser module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/api/typedargs.doc_parser.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-typedargs.doc_parser">
+<span id="typedargs-doc-parser-module"></span><h1>typedargs.doc_parser module<a class="headerlink" href="#module-typedargs.doc_parser" title="Permalink to this headline">¶</a></h1>
+<p>Experimental module for better google docstring parsing.</p>
+<div class="section" id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Permalink to this headline">¶</a></h2>
+<p>Classes:</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#typedargs.doc_parser.BlankLine" title="typedargs.doc_parser.BlankLine"><code class="xref py py-obj docutils literal notranslate"><span class="pre">BlankLine</span></code></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#typedargs.doc_parser.ContinuationLine" title="typedargs.doc_parser.ContinuationLine"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ContinuationLine</span></code></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#typedargs.doc_parser.Line" title="typedargs.doc_parser.Line"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Line</span></code></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#typedargs.doc_parser.ListItem" title="typedargs.doc_parser.ListItem"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ListItem</span></code></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#typedargs.doc_parser.ParsedDocstring" title="typedargs.doc_parser.ParsedDocstring"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ParsedDocstring</span></code></a></td>
+<td>A parser for google docstrings.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#typedargs.doc_parser.SectionHeader" title="typedargs.doc_parser.SectionHeader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SectionHeader</span></code></a></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Functions:</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#typedargs.doc_parser.parse_param" title="typedargs.doc_parser.parse_param"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_param</span></code></a></td>
+<td>Parse a single typed parameter statement.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#typedargs.doc_parser.parse_return" title="typedargs.doc_parser.parse_return"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_return</span></code></a></td>
+<td>Parse a single return statement declaration.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="reference">
+<h2>Reference<a class="headerlink" href="#reference" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="typedargs.doc_parser.BlankLine">
+<em class="property">class </em><code class="descclassname">typedargs.doc_parser.</code><code class="descname">BlankLine</code><span class="sig-paren">(</span><em>contents</em><span class="sig-paren">)</span><a class="headerlink" href="#typedargs.doc_parser.BlankLine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a></p>
+<dl class="attribute">
+<dt id="typedargs.doc_parser.BlankLine.contents">
+<code class="descname">contents</code><a class="headerlink" href="#typedargs.doc_parser.BlankLine.contents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="typedargs.doc_parser.SectionHeader">
+<em class="property">class </em><code class="descclassname">typedargs.doc_parser.</code><code class="descname">SectionHeader</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#typedargs.doc_parser.SectionHeader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a></p>
+<dl class="attribute">
+<dt id="typedargs.doc_parser.SectionHeader.name">
+<code class="descname">name</code><a class="headerlink" href="#typedargs.doc_parser.SectionHeader.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="typedargs.doc_parser.ContinuationLine">
+<em class="property">class </em><code class="descclassname">typedargs.doc_parser.</code><code class="descname">ContinuationLine</code><span class="sig-paren">(</span><em>contents</em><span class="sig-paren">)</span><a class="headerlink" href="#typedargs.doc_parser.ContinuationLine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a></p>
+<dl class="attribute">
+<dt id="typedargs.doc_parser.ContinuationLine.contents">
+<code class="descname">contents</code><a class="headerlink" href="#typedargs.doc_parser.ContinuationLine.contents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="typedargs.doc_parser.Line">
+<em class="property">class </em><code class="descclassname">typedargs.doc_parser.</code><code class="descname">Line</code><span class="sig-paren">(</span><em>contents</em><span class="sig-paren">)</span><a class="headerlink" href="#typedargs.doc_parser.Line" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a></p>
+<dl class="attribute">
+<dt id="typedargs.doc_parser.Line.contents">
+<code class="descname">contents</code><a class="headerlink" href="#typedargs.doc_parser.Line.contents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="typedargs.doc_parser.ListItem">
+<em class="property">class </em><code class="descclassname">typedargs.doc_parser.</code><code class="descname">ListItem</code><span class="sig-paren">(</span><em>marker</em>, <em>contents</em><span class="sig-paren">)</span><a class="headerlink" href="#typedargs.doc_parser.ListItem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a></p>
+<dl class="attribute">
+<dt id="typedargs.doc_parser.ListItem.contents">
+<code class="descname">contents</code><a class="headerlink" href="#typedargs.doc_parser.ListItem.contents" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="typedargs.doc_parser.ListItem.marker">
+<code class="descname">marker</code><a class="headerlink" href="#typedargs.doc_parser.ListItem.marker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="typedargs.doc_parser.ParsedDocstring">
+<em class="property">class </em><code class="descclassname">typedargs.doc_parser.</code><code class="descname">ParsedDocstring</code><span class="sig-paren">(</span><em>doc</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/doc_parser.html#ParsedDocstring"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.doc_parser.ParsedDocstring" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>A parser for google docstrings.</p>
+<p>The parser will collect all of the sections and parse them into
+paragraphs that are separated by blank lines or indented sections
+depending on what kind of section it is.</p>
+<dl class="attribute">
+<dt id="typedargs.doc_parser.ParsedDocstring.MAIN_SECTION">
+<code class="descname">MAIN_SECTION</code><em class="property"> = 0</em><a class="headerlink" href="#typedargs.doc_parser.ParsedDocstring.MAIN_SECTION" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="typedargs.doc_parser.ParsedDocstring.ARGS_SECTION">
+<code class="descname">ARGS_SECTION</code><em class="property"> = 1</em><a class="headerlink" href="#typedargs.doc_parser.ParsedDocstring.ARGS_SECTION" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="typedargs.doc_parser.ParsedDocstring.RETURN_SECTION">
+<code class="descname">RETURN_SECTION</code><em class="property"> = 2</em><a class="headerlink" href="#typedargs.doc_parser.ParsedDocstring.RETURN_SECTION" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="typedargs.doc_parser.ParsedDocstring.short_desc">
+<code class="descname">short_desc</code><a class="headerlink" href="#typedargs.doc_parser.ParsedDocstring.short_desc" title="Permalink to this definition">¶</a></dt>
+<dd><p>One line description of this parsed docstring.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="typedargs.doc_parser.ParsedDocstring.wrap_and_format">
+<code class="descname">wrap_and_format</code><span class="sig-paren">(</span><em>width=None</em>, <em>include_params=False</em>, <em>include_return=False</em>, <em>excluded_params=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/doc_parser.html#ParsedDocstring.wrap_and_format"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.doc_parser.ParsedDocstring.wrap_and_format" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrap, format and print this docstring for a specific width.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>width</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – The number of characters per line.  If set to None
+this will be inferred from the terminal width and default
+to 80 if not passed or if passed as None and the terminal
+width cannot be determined.</li>
+<li><strong>include_return</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Include the return information section
+in the output.</li>
+<li><strong>include_params</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Include a parameter information section
+in the output.</li>
+<li><strong>excluded_params</strong> (<a class="reference internal" href="typedargs.types.list.html#typedargs.types.list.list" title="typedargs.types.list.list"><em>list</em></a>) – An optional list of parameter names to exclude.
+Options for excluding things are, for example, ‘self’ or ‘cls’.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="typedargs.doc_parser.parse_param">
+<code class="descclassname">typedargs.doc_parser.</code><code class="descname">parse_param</code><span class="sig-paren">(</span><em>param</em>, <em>include_desc=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/doc_parser.html#parse_param"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.doc_parser.parse_param" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse a single typed parameter statement.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="typedargs.doc_parser.parse_return">
+<code class="descclassname">typedargs.doc_parser.</code><code class="descname">parse_return</code><span class="sig-paren">(</span><em>return_line</em>, <em>include_desc=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/doc_parser.html#parse_return"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.doc_parser.parse_return" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse a single return statement declaration.</p>
+<p>The valid types of return declarion are a Returns: section heading
+followed a line that looks like:
+type [format-as formatter]: description</p>
+<p>OR</p>
+<p>type [show-as (string | context)]: description sentence</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="typedargs.exceptions.html" class="btn btn-neutral float-right" title="typedargs.exceptions module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="typedargs.doc_annotate.html" class="btn btn-neutral" title="typedargs.doc_annotate module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018 Arch Systems Inc.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

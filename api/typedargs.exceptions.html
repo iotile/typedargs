@@ -1,0 +1,423 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>typedargs.exceptions module &mdash; typedargs latest documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="typedargs.lint module" href="typedargs.lint.html" />
+    <link rel="prev" title="typedargs.doc_parser module" href="typedargs.doc_parser.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> typedargs
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                latest
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="typedargs.html">typedargs package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="typedargs.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="typedargs.annotate.html">typedargs.annotate module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.basic_structures.html">typedargs.basic_structures module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.doc_annotate.html">typedargs.doc_annotate module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.doc_parser.html">typedargs.doc_parser module</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">typedargs.exceptions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.lint.html">typedargs.lint module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.metadata.html">typedargs.metadata module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.shell.html">typedargs.shell module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.terminal.html">typedargs.terminal module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.typeinfo.html">typedargs.typeinfo module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.utils.html">typedargs.utils module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="typedargs.html#subpackages">Subpackages</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../release.html">Release Notes</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">typedargs</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../api.html">API Reference</a> &raquo;</li>
+        
+          <li><a href="typedargs.html">typedargs package</a> &raquo;</li>
+        
+      <li>typedargs.exceptions module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/api/typedargs.exceptions.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-typedargs.exceptions">
+<span id="typedargs-exceptions-module"></span><h1>typedargs.exceptions module<a class="headerlink" href="#module-typedargs.exceptions" title="Permalink to this headline">¶</a></h1>
+<p>A generic key-value based exception class.</p>
+<div class="section" id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Permalink to this headline">¶</a></h2>
+<p>Exceptions:</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#typedargs.exceptions.ArgumentError" title="typedargs.exceptions.ArgumentError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ArgumentError</span></code></a></td>
+<td>There is a problem with one of the arguments to the function.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#typedargs.exceptions.ConversionError" title="typedargs.exceptions.ConversionError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ConversionError</span></code></a></td>
+<td>An error occurred converted an argument to its specified type.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#typedargs.exceptions.InternalError" title="typedargs.exceptions.InternalError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">InternalError</span></code></a></td>
+<td>An unexpected internal error prevented method completion.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#typedargs.exceptions.KeyValueException" title="typedargs.exceptions.KeyValueException"><code class="xref py py-obj docutils literal notranslate"><span class="pre">KeyValueException</span></code></a></td>
+<td>An exception taking key value pairs containing exception information.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#typedargs.exceptions.NotFoundError" title="typedargs.exceptions.NotFoundError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NotFoundError</span></code></a></td>
+<td>A method was invoked by name that does not exist.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#typedargs.exceptions.TypeSystemError" title="typedargs.exceptions.TypeSystemError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TypeSystemError</span></code></a></td>
+<td>An unspecified internal error occurred in the typedargs type system.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#typedargs.exceptions.ValidationError" title="typedargs.exceptions.ValidationError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ValidationError</span></code></a></td>
+<td>The type validators attached to a parameter failed.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="reference">
+<h2>Reference<a class="headerlink" href="#reference" title="Permalink to this headline">¶</a></h2>
+<dl class="exception">
+<dt id="typedargs.exceptions.KeyValueException">
+<em class="property">exception </em><code class="descclassname">typedargs.exceptions.</code><code class="descname">KeyValueException</code><span class="sig-paren">(</span><em>msg</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/exceptions.html#KeyValueException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.exceptions.KeyValueException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
+<p>An exception taking key value pairs containing exception information.</p>
+<p>KeyValueExceptions provide a convenient way to include additional information
+about the source or context of an exception without having to convert it all to
+a formatted string.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>msg</strong> (<em>string</em>) – A short message about the cause of this exception, not including
+its type or any placeholders</li>
+<li><strong>**kwargs</strong> – Any named parameters that you would like included with this exception</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="typedargs.exceptions.KeyValueException.format">
+<code class="descname">format</code><span class="sig-paren">(</span><em>exclude_class=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/exceptions.html#KeyValueException.format"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.exceptions.KeyValueException.format" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format this exception as a string including class name.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>exclude_class</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Whether to exclude the exception class
+name when formatting this exception</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="docutils">
+<dt>a multiline string with the message, class name and</dt>
+<dd>key value parameters passed to create the exception.</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">string</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="typedargs.exceptions.KeyValueException.format_msg">
+<code class="descname">format_msg</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/exceptions.html#KeyValueException.format_msg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.exceptions.KeyValueException.format_msg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format this exception as a string excluding class name.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><dl class="docutils">
+<dt>a multiline string with the message and</dt>
+<dd>key value parameters passed to create the exception.</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">string</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="typedargs.exceptions.KeyValueException.to_dict">
+<code class="descname">to_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/exceptions.html#KeyValueException.to_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.exceptions.KeyValueException.to_dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert this exception to a dictionary.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><dl class="docutils">
+<dt>A dictionary of information about this exception,</dt>
+<dd>Has a ‘reason’ key, a ‘type’ key  and a dictionary of params</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">dist</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="typedargs.exceptions.ArgumentError">
+<em class="property">exception </em><code class="descclassname">typedargs.exceptions.</code><code class="descname">ArgumentError</code><span class="sig-paren">(</span><em>msg</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/exceptions.html#ArgumentError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.exceptions.ArgumentError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#typedargs.exceptions.KeyValueException" title="typedargs.exceptions.KeyValueException"><code class="xref py py-class docutils literal notranslate"><span class="pre">typedargs.exceptions.KeyValueException</span></code></a></p>
+<p>There is a problem with one of the arguments to the function.</p>
+<p>The method could not be called with the arguments passed.  This
+differs from InternalError in that when ArgumentError is returned,
+it is known that these arguments can never work for this function.</p>
+<p>An example would be passing three arguments to a function requiring
+4 arguments.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="typedargs.exceptions.ValidationError">
+<em class="property">exception </em><code class="descclassname">typedargs.exceptions.</code><code class="descname">ValidationError</code><span class="sig-paren">(</span><em>msg</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/exceptions.html#ValidationError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.exceptions.ValidationError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#typedargs.exceptions.KeyValueException" title="typedargs.exceptions.KeyValueException"><code class="xref py py-class docutils literal notranslate"><span class="pre">typedargs.exceptions.KeyValueException</span></code></a></p>
+<p>The type validators attached to a parameter failed.</p>
+<p>API routines can impose validation criteria on` their arguments in
+addition to requiring simply a certain type of argument.  A clasic
+example is the “path” type which can have validators like “readable”
+or “exists”.  When validation fails, this error is thrown.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="typedargs.exceptions.ConversionError">
+<em class="property">exception </em><code class="descclassname">typedargs.exceptions.</code><code class="descname">ConversionError</code><span class="sig-paren">(</span><em>msg</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/exceptions.html#ConversionError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.exceptions.ConversionError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#typedargs.exceptions.KeyValueException" title="typedargs.exceptions.KeyValueException"><code class="xref py py-class docutils literal notranslate"><span class="pre">typedargs.exceptions.KeyValueException</span></code></a></p>
+<p>An error occurred converted an argument to its specified type.</p>
+<p>All API functions take typed parameters.  Each type defines conversion
+operators for python types that are logically related to it.  When no
+valid conversion exists for the data type passed, this error is thrown.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="typedargs.exceptions.NotFoundError">
+<em class="property">exception </em><code class="descclassname">typedargs.exceptions.</code><code class="descname">NotFoundError</code><span class="sig-paren">(</span><em>msg</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/exceptions.html#NotFoundError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.exceptions.NotFoundError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#typedargs.exceptions.KeyValueException" title="typedargs.exceptions.KeyValueException"><code class="xref py py-class docutils literal notranslate"><span class="pre">typedargs.exceptions.KeyValueException</span></code></a></p>
+<p>A method was invoked by name that does not exist.</p>
+<p>Thrown when an attempt to execute an API method is made and the API
+method does not exist.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="typedargs.exceptions.TypeSystemError">
+<em class="property">exception </em><code class="descclassname">typedargs.exceptions.</code><code class="descname">TypeSystemError</code><span class="sig-paren">(</span><em>msg</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/exceptions.html#TypeSystemError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.exceptions.TypeSystemError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#typedargs.exceptions.KeyValueException" title="typedargs.exceptions.KeyValueException"><code class="xref py py-class docutils literal notranslate"><span class="pre">typedargs.exceptions.KeyValueException</span></code></a></p>
+<p>An unspecified internal error occurred in the typedargs type system.</p>
+<p>There was an error with the type system.  This can be due to improperly
+specifying an unknown type or because the required type was not properly loaded
+from an external module before a function that used that type was needed.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="typedargs.exceptions.InternalError">
+<em class="property">exception </em><code class="descclassname">typedargs.exceptions.</code><code class="descname">InternalError</code><span class="sig-paren">(</span><em>msg</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/exceptions.html#InternalError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.exceptions.InternalError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#typedargs.exceptions.KeyValueException" title="typedargs.exceptions.KeyValueException"><code class="xref py py-class docutils literal notranslate"><span class="pre">typedargs.exceptions.KeyValueException</span></code></a></p>
+<p>An unexpected internal error prevented method completion.</p>
+<p>The method could not be completed with the user input passed for
+an unexpected reason.  This does not signify a bug in the API
+method code.  More details should be passed in the arguments.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="typedargs.lint.html" class="btn btn-neutral float-right" title="typedargs.lint module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="typedargs.doc_parser.html" class="btn btn-neutral" title="typedargs.doc_parser module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018 Arch Systems Inc.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

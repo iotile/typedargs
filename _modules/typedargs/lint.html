@@ -1,0 +1,317 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>typedargs.lint &mdash; typedargs latest documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> typedargs
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                latest
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../release.html">Release Notes</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">typedargs</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>typedargs.lint</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for typedargs.lint</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;A pylint plugin that checks for errors in typedargs declarations.</span>
+
+<span class="sd">This should be run using pylint in the following way:</span>
+
+<span class="sd">```</span>
+<span class="sd">pylint --load-plugins typedargs.lint &lt;path to source files&gt;</span>
+<span class="sd">```</span>
+
+<span class="sd">It will return errors if there are problems with annotated</span>
+<span class="sd">functions or if the docstring for an @docannotate function</span>
+<span class="sd">is not correctly formatted.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1">#pylint: disable=all; Work in progress that should not be linted yet</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="p">(</span><span class="n">unicode_literals</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">absolute_import</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">from</span> <span class="nn">builtins</span> <span class="k">import</span> <span class="nb">str</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">namedtuple</span>
+<span class="kn">import</span> <span class="nn">astroid</span>
+<span class="kn">import</span> <span class="nn">astroid.scoped_nodes</span>
+<span class="kn">import</span> <span class="nn">astroid.node_classes</span>
+<span class="kn">from</span> <span class="nn">pylint.checkers</span> <span class="k">import</span> <span class="n">BaseChecker</span>
+<span class="kn">from</span> <span class="nn">pylint.interfaces</span> <span class="k">import</span> <span class="n">IAstroidChecker</span>
+<span class="kn">from</span> <span class="nn">.metadata</span> <span class="k">import</span> <span class="n">ParameterInfo</span><span class="p">,</span> <span class="n">ReturnInfo</span>
+
+
+<span class="n">AnnotationList</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;AnnotationList&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">,</span> <span class="s1">&#39;returns&#39;</span><span class="p">,</span> <span class="s1">&#39;use_doc&#39;</span><span class="p">])</span>
+
+
+<div class="viewcode-block" id="AnnotatedFunctionChecker"><a class="viewcode-back" href="../../api/typedargs.lint.html#typedargs.lint.AnnotatedFunctionChecker">[docs]</a><span class="k">class</span> <span class="nc">AnnotatedFunctionChecker</span><span class="p">(</span><span class="n">BaseChecker</span><span class="p">):</span>
+    <span class="n">__implements__</span> <span class="o">=</span> <span class="n">IAstroidChecker</span>
+    <span class="n">priority</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+<div class="viewcode-block" id="AnnotatedFunctionChecker.process_param"><a class="viewcode-back" href="../../api/typedargs.lint.html#typedargs.lint.AnnotatedFunctionChecker.process_param">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">process_param</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Process an @param decorator into a ParameterInfo.&quot;&quot;&quot;</span>
+
+        <span class="c1">#FIXME: process params here</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="AnnotatedFunctionChecker.process_return_type"><a class="viewcode-back" href="../../api/typedargs.lint.html#typedargs.lint.AnnotatedFunctionChecker.process_return_type">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">process_return_type</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">return_type</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Process an @return_type decorator.&quot;&quot;&quot;</span>
+
+        <span class="n">ret_type</span> <span class="o">=</span> <span class="n">return_type</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1">#FIXME: process return info here</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="AnnotatedFunctionChecker.extract_annotations"><a class="viewcode-back" href="../../api/typedargs.lint.html#typedargs.lint.AnnotatedFunctionChecker.extract_annotations">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">extract_annotations</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">astroid</span><span class="o">.</span><span class="n">scoped_nodes</span><span class="o">.</span><span class="n">FunctionDef</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">decorators</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">annotated</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">returns</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">use_doc</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">for</span> <span class="n">dec</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">decorators</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dec</span><span class="p">,</span> <span class="n">astroid</span><span class="o">.</span><span class="n">node_classes</span><span class="o">.</span><span class="n">Name</span><span class="p">):</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">dec</span><span class="o">.</span><span class="n">name</span>
+                <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;annotated&#39;</span><span class="p">:</span>
+                    <span class="n">annotated</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;docannotate&#39;</span><span class="p">:</span>
+                    <span class="n">annotated</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">use_doc</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dec</span><span class="p">,</span> <span class="n">astroid</span><span class="o">.</span><span class="n">node_classes</span><span class="o">.</span><span class="n">Call</span><span class="p">):</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">dec</span><span class="o">.</span><span class="n">func</span><span class="o">.</span><span class="n">name</span>
+
+                <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;param&#39;</span><span class="p">:</span>
+                    <span class="n">annotated</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">param</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">process_param</span><span class="p">(</span><span class="n">dec</span><span class="p">)</span>
+                    <span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;returns&#39;</span><span class="p">:</span>
+                    <span class="n">annotated</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">returns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dec</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;return_type&#39;</span><span class="p">:</span>
+                    <span class="n">annotated</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">rets</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">process_return_type</span><span class="p">(</span><span class="n">dec</span><span class="p">)</span>
+                    <span class="n">returns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rets</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">annotated</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="n">AnnotationList</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">returns</span><span class="p">,</span> <span class="n">use_doc</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="DocannotationChecker"><a class="viewcode-back" href="../../api/typedargs.lint.html#typedargs.lint.DocannotationChecker">[docs]</a><span class="k">class</span> <span class="nc">DocannotationChecker</span><span class="p">(</span><span class="n">AnnotatedFunctionChecker</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;typedargs-annotation&#39;</span>
+
+    <span class="n">msgs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;W6701&#39;</span><span class="p">:</span> <span class="p">(</span>
+            <span class="s1">&#39;Doc-annotation parameter or return does not correspond to a known type&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;typedargs-unknown-type&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;All types annotated using typedargs should resolve to known types.&#39;</span>
+        <span class="p">)</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">linter</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">DocannotationChecker</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">linter</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DocannotationChecker.visit_functiondef"><a class="viewcode-back" href="../../api/typedargs.lint.html#typedargs.lint.DocannotationChecker.visit_functiondef">[docs]</a>    <span class="k">def</span> <span class="nf">visit_functiondef</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+        <span class="n">annotations</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_annotations</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">annotations</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="n">annotations</span><span class="o">.</span><span class="n">use_doc</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">node</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="register"><a class="viewcode-back" href="../../api/typedargs.lint.html#typedargs.lint.register">[docs]</a><span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="n">linter</span><span class="p">):</span>
+    <span class="n">linter</span><span class="o">.</span><span class="n">register_checker</span><span class="p">(</span><span class="n">DocannotationChecker</span><span class="p">(</span><span class="n">linter</span><span class="p">))</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018 Arch Systems Inc.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,480 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>typedargs.annotate module &mdash; typedargs latest documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="typedargs.basic_structures module" href="typedargs.basic_structures.html" />
+    <link rel="prev" title="typedargs package" href="typedargs.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> typedargs
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                latest
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="typedargs.html">typedargs package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="typedargs.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">typedargs.annotate module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.basic_structures.html">typedargs.basic_structures module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.doc_annotate.html">typedargs.doc_annotate module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.doc_parser.html">typedargs.doc_parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.exceptions.html">typedargs.exceptions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.lint.html">typedargs.lint module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.metadata.html">typedargs.metadata module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.shell.html">typedargs.shell module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.terminal.html">typedargs.terminal module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.typeinfo.html">typedargs.typeinfo module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.utils.html">typedargs.utils module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="typedargs.html#subpackages">Subpackages</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../release.html">Release Notes</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">typedargs</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../api.html">API Reference</a> &raquo;</li>
+        
+          <li><a href="typedargs.html">typedargs package</a> &raquo;</li>
+        
+      <li>typedargs.annotate module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/api/typedargs.annotate.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-typedargs.annotate">
+<span id="typedargs-annotate-module"></span><h1>typedargs.annotate module<a class="headerlink" href="#module-typedargs.annotate" title="Permalink to this headline">¶</a></h1>
+<p>Decorators that allow you to annotate type information with a function or class.</p>
+<div class="section" id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Permalink to this headline">¶</a></h2>
+<p>Functions:</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#typedargs.annotate.annotated" title="typedargs.annotate.annotated"><code class="xref py py-obj docutils literal notranslate"><span class="pre">annotated</span></code></a></td>
+<td>Mark a function as callable from the command line.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#typedargs.annotate.context" title="typedargs.annotate.context"><code class="xref py py-obj docutils literal notranslate"><span class="pre">context</span></code></a></td>
+<td>Declare that a class defines a context.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#typedargs.annotate.context_from_module" title="typedargs.annotate.context_from_module"><code class="xref py py-obj docutils literal notranslate"><span class="pre">context_from_module</span></code></a></td>
+<td>Given a module, create a context from all of the top level annotated symbols in that module.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#typedargs.annotate.docannotate" title="typedargs.annotate.docannotate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">docannotate</span></code></a></td>
+<td>Annotate a function using information from its docstring.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#typedargs.annotate.finalizer" title="typedargs.annotate.finalizer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">finalizer</span></code></a></td>
+<td>Indicate that this function destroys the context in which it is invoked, such as a quit method on a subprocess or a delete method on an object.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#typedargs.annotate.get_help" title="typedargs.annotate.get_help"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_help</span></code></a></td>
+<td>Return usage information about a context or function.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#typedargs.annotate.param" title="typedargs.annotate.param"><code class="xref py py-obj docutils literal notranslate"><span class="pre">param</span></code></a></td>
+<td>Decorate a function to give type information about its parameters.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#typedargs.annotate.return_type" title="typedargs.annotate.return_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">return_type</span></code></a></td>
+<td>Specify that this function returns a typed value.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#typedargs.annotate.returns" title="typedargs.annotate.returns"><code class="xref py py-obj docutils literal notranslate"><span class="pre">returns</span></code></a></td>
+<td>Specify how the return value of this function should be handled.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#typedargs.annotate.short_description" title="typedargs.annotate.short_description"><code class="xref py py-obj docutils literal notranslate"><span class="pre">short_description</span></code></a></td>
+<td>Given an object with a docstring, return the first line of the docstring</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#typedargs.annotate.stringable" title="typedargs.annotate.stringable"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stringable</span></code></a></td>
+<td>Specify that the return value should just be printed as a string.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#typedargs.annotate.takes_cmdline" title="typedargs.annotate.takes_cmdline"><code class="xref py py-obj docutils literal notranslate"><span class="pre">takes_cmdline</span></code></a></td>
+<td>Annotate that a function should take the entire command line.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="reference">
+<h2>Reference<a class="headerlink" href="#reference" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="typedargs.annotate.context_from_module">
+<code class="descclassname">typedargs.annotate.</code><code class="descname">context_from_module</code><span class="sig-paren">(</span><em>module</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/annotate.html#context_from_module"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.annotate.context_from_module" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a module, create a context from all of the top level annotated
+symbols in that module.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="typedargs.annotate.get_help">
+<code class="descclassname">typedargs.annotate.</code><code class="descname">get_help</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/annotate.html#get_help"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.annotate.get_help" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return usage information about a context or function.</p>
+<p>For contexts, just return the context name and its docstring
+For functions, return the function signature as well as its
+argument types.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>func</strong> (<em>callable</em>) – An annotated callable function</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The formatted help text</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="typedargs.annotate.param">
+<code class="descclassname">typedargs.annotate.</code><code class="descname">param</code><span class="sig-paren">(</span><em>name</em>, <em>type_name</em>, <em>*validators</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/annotate.html#param"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.annotate.param" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorate a function to give type information about its parameters.</p>
+<p>This function stores a type name, optional description and optional list
+of validation functions along with the decorated function it is called
+on in order to allow run time type conversions and validation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<em>string</em>) – name of the parameter</li>
+<li><strong>type_name</strong> (<em>string</em>) – The name of a type that will be known to the type
+system by the time this function is called for the first time.  Types
+are lazily loaded so it is not required that the type resolve correctly
+at the point in the module where this function is defined.</li>
+<li><strong>validators</strong> (<a class="reference internal" href="typedargs.types.list.html#typedargs.types.list.list" title="typedargs.types.list.list"><em>list</em></a><em>(</em><em>string</em><em> or </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.7)"><em>tuple</em></a><em>)</em>) – <p>A list of validators.  Each validator
+can be defined either using a string name or as an n-tuple of the form
+[name, *extra_args].  The name is used to look up a validator function
+of the form validate_name, which is called on the parameters value to
+determine if it is valid.  If extra_args are given, they are passed
+as extra arguments to the validator function, which is called as:</p>
+<p>validator(value, *extra_args)</p>
+</li>
+<li><strong>desc</strong> (<em>string</em>) – An optional descriptioon for this parameter that must be
+passed as a keyword argument.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A decorated function with additional type metadata</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">callable</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="typedargs.annotate.returns">
+<code class="descclassname">typedargs.annotate.</code><code class="descname">returns</code><span class="sig-paren">(</span><em>desc=None</em>, <em>printer=None</em>, <em>data=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/annotate.html#returns"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.annotate.returns" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specify how the return value of this function should be handled.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>desc</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – A deprecated description of the return value</li>
+<li><strong>printer</strong> (<em>callable</em>) – A callable function that can format this return value</li>
+<li><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – A deprecated parameter for specifying that this function
+returns data.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="typedargs.annotate.stringable">
+<code class="descclassname">typedargs.annotate.</code><code class="descname">stringable</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/annotate.html#stringable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.annotate.stringable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specify that the return value should just be printed as a string.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>func</strong> (<em>callable</em>) – The function that we wish to annotate.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="typedargs.annotate.return_type">
+<code class="descclassname">typedargs.annotate.</code><code class="descname">return_type</code><span class="sig-paren">(</span><em>type_name</em>, <em>formatter=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/annotate.html#return_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.annotate.return_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specify that this function returns a typed value.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>type_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – A type name known to the global typedargs type system</li>
+<li><strong>formatter</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – An optional name of a formatting function specified
+for the type given in type_name.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="typedargs.annotate.context">
+<code class="descclassname">typedargs.annotate.</code><code class="descname">context</code><span class="sig-paren">(</span><em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/annotate.html#context"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.annotate.context" title="Permalink to this definition">¶</a></dt>
+<dd><p>Declare that a class defines a context.</p>
+<p>Contexts are for use with HierarchicalShell for discovering
+and using functionality from the command line.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Optional name for this context if you don’t want
+to just use the class name.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="typedargs.annotate.finalizer">
+<code class="descclassname">typedargs.annotate.</code><code class="descname">finalizer</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/annotate.html#finalizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.annotate.finalizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Indicate that this function destroys the context in which it is invoked, such as a quit method
+on a subprocess or a delete method on an object.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="typedargs.annotate.takes_cmdline">
+<code class="descclassname">typedargs.annotate.</code><code class="descname">takes_cmdline</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/annotate.html#takes_cmdline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.annotate.takes_cmdline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Annotate that a function should take the entire command line.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="typedargs.annotate.docannotate">
+<code class="descclassname">typedargs.annotate.</code><code class="descname">docannotate</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/annotate.html#docannotate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.annotate.docannotate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Annotate a function using information from its docstring.</p>
+<p>The annotation actually happens at the time the function is first called
+to improve startup time.  For this function to work, the docstring must be
+formatted correctly.  You should use the typedargs pylint plugin to make
+sure there are no errors in the docstring.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="typedargs.annotate.annotated">
+<code class="descclassname">typedargs.annotate.</code><code class="descname">annotated</code><span class="sig-paren">(</span><em>func</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/annotate.html#annotated"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.annotate.annotated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mark a function as callable from the command line.</p>
+<p>This function is meant to be called as decorator.  This function
+also initializes metadata about the function’s arguments that is
+built up by the param decorator.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>func</strong> (<em>callable</em>) – The function that we wish to mark as callable
+from the command line.</li>
+<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Optional string that will override the function’s
+built-in name.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="typedargs.annotate.short_description">
+<code class="descclassname">typedargs.annotate.</code><code class="descname">short_description</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/annotate.html#short_description"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.annotate.short_description" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given an object with a docstring, return the first line of the docstring</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="typedargs.basic_structures.html" class="btn btn-neutral float-right" title="typedargs.basic_structures module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="typedargs.html" class="btn btn-neutral" title="typedargs package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018 Arch Systems Inc.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

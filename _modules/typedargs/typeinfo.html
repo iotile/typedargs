@@ -1,0 +1,582 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>typedargs.typeinfo &mdash; typedargs latest documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> typedargs
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                latest
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../release.html">Release Notes</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">typedargs</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>typedargs.typeinfo</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for typedargs.typeinfo</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Define the global type system that allows adding strong type information to python objects.&quot;&quot;&quot;</span>
+
+<span class="c1"># This file is adapted from python code released by WellDone International</span>
+<span class="c1"># under the terms of the LGPLv3.  WellDone International&#39;s contact information is</span>
+<span class="c1"># info@welldone.org</span>
+<span class="c1"># http://welldone.org</span>
+<span class="c1">#</span>
+<span class="c1"># Modifications to this file from the original created at WellDone International</span>
+<span class="c1"># are copyright Arch Systems Inc.</span>
+
+<span class="c1">#typeinfo.py</span>
+<span class="c1">#Basic routines for converting information from string or other binary</span>
+<span class="c1">#formats to python types and for displaying those types in supported</span>
+<span class="c1">#formats</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="p">(</span><span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span>
+                        <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">builtins</span> <span class="k">import</span> <span class="nb">str</span>
+
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">import</span> <span class="nn">imp</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">typedargs.exceptions</span> <span class="k">import</span> <span class="n">ValidationError</span><span class="p">,</span> <span class="n">ArgumentError</span><span class="p">,</span> <span class="n">KeyValueException</span>
+<span class="kn">from</span> <span class="nn">typedargs</span> <span class="k">import</span> <span class="n">types</span>
+
+
+<div class="viewcode-block" id="TypeSystem"><a class="viewcode-back" href="../../api/typedargs.typeinfo.html#typedargs.typeinfo.TypeSystem">[docs]</a><span class="k">class</span> <span class="nc">TypeSystem</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    TypeSystem permits the inspection of defined types and supports</span>
+<span class="sd">    converted string and binary values to and from these types.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a TypeSystem by importing all of the types defined in modules passed</span>
+<span class="sd">        as arguments to this function.  Each module is imported using</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">interactive</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">known_types</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type_factories</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">load_type_module</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lazy_type_sources</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">failed_sources</span> <span class="o">=</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="TypeSystem.register_type_source"><a class="viewcode-back" href="../../api/typedargs.typeinfo.html#typedargs.typeinfo.TypeSystem.register_type_source">[docs]</a>    <span class="k">def</span> <span class="nf">register_type_source</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Register an external source of types.</span>
+
+<span class="sd">        This function does not actually load any external types, it just</span>
+<span class="sd">        keeps track of the source, which must either be a str that is</span>
+<span class="sd">        interpreted as a python entry_point group or a callable that</span>
+<span class="sd">        will be passed an instance of this type system.</span>
+
+<span class="sd">        External type sources will only be loaded in an as needed basis when</span>
+<span class="sd">        a type is encountered (and needed) that is not currently known.  At</span>
+<span class="sd">        that point external type sources will be considered until the type</span>
+<span class="sd">        in question is found.</span>
+
+<span class="sd">        If an external type source fails to load for some reason, it is logged</span>
+<span class="sd">        but the error is not fatal.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            source (str or callable): Either a pkg_resources entry_point</span>
+<span class="sd">                group that will be searched for external types or a callable</span>
+<span class="sd">                function that will be called as source(self) where self</span>
+<span class="sd">                refers to this TypeSystem object.</span>
+<span class="sd">            name (str): Optional short name to use for reporting errors having</span>
+<span class="sd">                to do with this source of types.  This is most useful to pass</span>
+<span class="sd">                when source is a callable.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lazy_type_sources</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">source</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="TypeSystem.convert_to_type"><a class="viewcode-back" href="../../api/typedargs.typeinfo.html#typedargs.typeinfo.TypeSystem.convert_to_type">[docs]</a>    <span class="k">def</span> <span class="nf">convert_to_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">typename</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert value to type &#39;typename&#39;</span>
+
+<span class="sd">        If the conversion routine takes various kwargs to</span>
+<span class="sd">        modify the conversion process, \\**kwargs is passed</span>
+<span class="sd">        through to the underlying conversion function</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert_from_binary</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">typename</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+            <span class="n">typeobj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_type</span><span class="p">(</span><span class="n">typename</span><span class="p">)</span>
+
+            <span class="n">conv</span> <span class="o">=</span> <span class="n">typeobj</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">conv</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="s2">&quot;Could not convert value&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">typename</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span> <span class="n">error_message</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="TypeSystem.convert_from_binary"><a class="viewcode-back" href="../../api/typedargs.typeinfo.html#typedargs.typeinfo.TypeSystem.convert_from_binary">[docs]</a>    <span class="k">def</span> <span class="nf">convert_from_binary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binvalue</span><span class="p">,</span> <span class="nb">type</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert binary data to type &#39;type&#39;.</span>
+
+<span class="sd">        &#39;type&#39; must have a convert_binary function.  If &#39;type&#39;</span>
+<span class="sd">        supports size checking, the size function is called to ensure</span>
+<span class="sd">        that binvalue is the correct size for deserialization</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_type_size</span><span class="p">(</span><span class="nb">type</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">binvalue</span><span class="p">)</span> <span class="o">!=</span> <span class="n">size</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ArgumentError</span><span class="p">(</span><span class="s2">&quot;Could not convert type from binary since the data was not the correct size&quot;</span><span class="p">,</span> <span class="n">required_size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">actual_size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">binvalue</span><span class="p">),</span> <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">)</span>
+
+        <span class="n">typeobj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_type</span><span class="p">(</span><span class="nb">type</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">typeobj</span><span class="p">,</span> <span class="s1">&#39;convert_binary&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ArgumentError</span><span class="p">(</span><span class="s2">&quot;Type does not support conversion from binary&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">typeobj</span><span class="o">.</span><span class="n">convert_binary</span><span class="p">(</span><span class="n">binvalue</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TypeSystem.get_type_size"><a class="viewcode-back" href="../../api/typedargs.typeinfo.html#typedargs.typeinfo.TypeSystem.get_type_size">[docs]</a>    <span class="k">def</span> <span class="nf">get_type_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the size of this type for converting a hex string to the</span>
+<span class="sd">        type. Return 0 if the size is not known.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">typeobj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_type</span><span class="p">(</span><span class="nb">type</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">typeobj</span><span class="p">,</span> <span class="s1">&#39;size&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">typeobj</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="mi">0</span></div>
+
+<div class="viewcode-block" id="TypeSystem.format_value"><a class="viewcode-back" href="../../api/typedargs.typeinfo.html#typedargs.typeinfo.TypeSystem.format_value">[docs]</a>    <span class="k">def</span> <span class="nf">format_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="nb">type</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert value to type and format it as a string</span>
+
+<span class="sd">        type must be a known type in the type system and format,</span>
+<span class="sd">        if given, must specify a valid formatting option for the</span>
+<span class="sd">        specified type.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">typed_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert_to_type</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">type</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">typeobj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_type</span><span class="p">(</span><span class="nb">type</span><span class="p">)</span>
+
+        <span class="c1">#Allow types to specify default formatting functions as &#39;default_formatter&#39;</span>
+        <span class="c1">#otherwise if not format is specified, just convert the value to a string</span>
+        <span class="k">if</span> <span class="nb">format</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">typeobj</span><span class="p">,</span> <span class="s1">&#39;default_formatter&#39;</span><span class="p">):</span>
+                <span class="n">format_func</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typeobj</span><span class="p">,</span> <span class="s1">&#39;default_formatter&#39;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">format_func</span><span class="p">(</span><span class="n">typed_val</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">typed_val</span><span class="p">)</span>
+
+        <span class="n">formatter</span> <span class="o">=</span> <span class="s2">&quot;format_</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">format</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">typeobj</span><span class="p">,</span> <span class="n">formatter</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ArgumentError</span><span class="p">(</span><span class="s2">&quot;Unknown format for type&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span> <span class="n">formatter_function</span><span class="o">=</span><span class="n">formatter</span><span class="p">)</span>
+
+        <span class="n">format_func</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typeobj</span><span class="p">,</span> <span class="n">formatter</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">format_func</span><span class="p">(</span><span class="n">typed_val</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_validate_type</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">typeobj</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Validate that all required type methods are implemented.</span>
+
+<span class="sd">        At minimum a type must have:</span>
+<span class="sd">        - a convert() or convert_binary() function</span>
+<span class="sd">        - a default_formatter() function</span>
+
+<span class="sd">        Raises an ArgumentError if the type is not valid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">typeobj</span><span class="p">,</span> <span class="s2">&quot;convert&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">typeobj</span><span class="p">,</span> <span class="s2">&quot;convert_binary&quot;</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="n">ArgumentError</span><span class="p">(</span><span class="s2">&quot;type is invalid, does not have convert or convert_binary function&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">typeobj</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="nb">dir</span><span class="p">(</span><span class="n">typeobj</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">typeobj</span><span class="p">,</span> <span class="s2">&quot;default_formatter&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ArgumentError</span><span class="p">(</span><span class="s2">&quot;type is invalid, does not have default_formatter function&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">typeobj</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="nb">dir</span><span class="p">(</span><span class="n">typeobj</span><span class="p">))</span>
+
+<div class="viewcode-block" id="TypeSystem.is_known_type"><a class="viewcode-back" href="../../api/typedargs.typeinfo.html#typedargs.typeinfo.TypeSystem.is_known_type">[docs]</a>    <span class="k">def</span> <span class="nf">is_known_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">type_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Check if type is known to the type system.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if the type is a known instantiated simple type, False otherwise</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">type_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">type_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">type_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">known_types</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="TypeSystem.split_type"><a class="viewcode-back" href="../../api/typedargs.typeinfo.html#typedargs.typeinfo.TypeSystem.split_type">[docs]</a>    <span class="k">def</span> <span class="nf">split_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">typename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Given a potentially complex type, split it into its base type and specializers</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_canonicalize_type</span><span class="p">(</span><span class="n">typename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;(&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">name</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="p">[]</span>
+
+        <span class="n">base</span><span class="p">,</span> <span class="n">sub</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sub</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">sub</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;)&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ArgumentError</span><span class="p">(</span><span class="s2">&quot;syntax error in complex type, no matching ) found&quot;</span><span class="p">,</span> <span class="n">passed_type</span><span class="o">=</span><span class="n">typename</span><span class="p">,</span> <span class="n">basetype</span><span class="o">=</span><span class="n">base</span><span class="p">,</span> <span class="n">subtype_string</span><span class="o">=</span><span class="n">sub</span><span class="p">)</span>
+
+        <span class="n">sub</span> <span class="o">=</span> <span class="n">sub</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">subs</span> <span class="o">=</span> <span class="n">sub</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">base</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">subs</span></div>
+
+<div class="viewcode-block" id="TypeSystem.instantiate_type"><a class="viewcode-back" href="../../api/typedargs.typeinfo.html#typedargs.typeinfo.TypeSystem.instantiate_type">[docs]</a>    <span class="k">def</span> <span class="nf">instantiate_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">typename</span><span class="p">,</span> <span class="n">base</span><span class="p">,</span> <span class="n">subtypes</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Instantiate a complex type.&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">base</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_factories</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ArgumentError</span><span class="p">(</span><span class="s2">&quot;unknown complex base type specified&quot;</span><span class="p">,</span> <span class="n">passed_type</span><span class="o">=</span><span class="n">typename</span><span class="p">,</span> <span class="n">base_type</span><span class="o">=</span><span class="n">base</span><span class="p">)</span>
+
+        <span class="n">base_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_factories</span><span class="p">[</span><span class="n">base</span><span class="p">]</span>
+
+        <span class="c1">#Make sure all of the subtypes are valid</span>
+        <span class="k">for</span> <span class="n">sub_type</span> <span class="ow">in</span> <span class="n">subtypes</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">get_type</span><span class="p">(</span><span class="n">sub_type</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">KeyValueException</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ArgumentError</span><span class="p">(</span><span class="s2">&quot;could not instantiate subtype for complex type&quot;</span><span class="p">,</span> <span class="n">passed_type</span><span class="o">=</span><span class="n">typename</span><span class="p">,</span> <span class="n">sub_type</span><span class="o">=</span><span class="n">sub_type</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="n">exc</span><span class="p">)</span>
+
+        <span class="n">typeobj</span> <span class="o">=</span> <span class="n">base_type</span><span class="o">.</span><span class="n">Build</span><span class="p">(</span><span class="o">*</span><span class="n">subtypes</span><span class="p">,</span> <span class="n">type_system</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inject_type</span><span class="p">(</span><span class="n">typename</span><span class="p">,</span> <span class="n">typeobj</span><span class="p">)</span></div>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_canonicalize_type</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">typename</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">typename</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_is_factory</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">typeobj</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Determine if typeobj is a factory for producing complex types</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">typeobj</span><span class="p">,</span> <span class="s1">&#39;Build&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="k">return</span> <span class="kc">False</span>
+
+<div class="viewcode-block" id="TypeSystem.get_type"><a class="viewcode-back" href="../../api/typedargs.typeinfo.html#typedargs.typeinfo.TypeSystem.get_type">[docs]</a>    <span class="k">def</span> <span class="nf">get_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">type_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the type object corresponding to a type name.</span>
+
+<span class="sd">        If type_name is not found, this triggers the loading of</span>
+<span class="sd">        external types until a matching type is found or until there</span>
+<span class="sd">        are no more external type sources.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">type_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_canonicalize_type</span><span class="p">(</span><span class="n">type_name</span><span class="p">)</span>
+
+        <span class="c1"># Add basic transformations on common abbreviations</span>
+        <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">type_name</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
+            <span class="n">type_name</span> <span class="o">=</span> <span class="s1">&#39;integer&#39;</span>
+        <span class="k">elif</span> <span class="nb">str</span><span class="p">(</span><span class="n">type_name</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
+            <span class="n">type_name</span> <span class="o">=</span> <span class="s1">&#39;string&#39;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_known_type</span><span class="p">(</span><span class="n">type_name</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">known_types</span><span class="p">[</span><span class="n">type_name</span><span class="p">]</span>
+
+        <span class="n">base_type</span><span class="p">,</span> <span class="n">is_complex</span><span class="p">,</span> <span class="n">subtypes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">split_type</span><span class="p">(</span><span class="n">type_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">is_complex</span> <span class="ow">and</span> <span class="n">base_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_factories</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">instantiate_type</span><span class="p">(</span><span class="n">type_name</span><span class="p">,</span> <span class="n">base_type</span><span class="p">,</span> <span class="n">subtypes</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">known_types</span><span class="p">[</span><span class="n">type_name</span><span class="p">]</span>
+
+        <span class="c1"># If we&#39;re here, this is a type that we don&#39;t know anything about, so go find it.</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lazy_type_sources</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="kn">import</span> <span class="nn">pkg_resources</span>
+
+                <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">pkg_resources</span><span class="o">.</span><span class="n">iter_entry_points</span><span class="p">(</span><span class="n">source</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">mod</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+                        <span class="n">type_system</span><span class="o">.</span><span class="n">load_type_module</span><span class="p">(</span><span class="n">mod</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>  <span class="c1">#pylint:disable=W0702; We want to catch everything here since we don&#39;t want external plugins breaking us</span>
+                        <span class="n">fail_info</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Entry point group: </span><span class="si">%s</span><span class="s2">, name: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">entry</span><span class="o">.</span><span class="n">name</span><span class="p">),</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">)</span>
+                        <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;Error loading external type source from entry point, group: </span><span class="si">%s</span><span class="s2">, name: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">entry</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">failed_sources</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fail_info</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">source</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>  <span class="c1">#pylint:disable=W0702; We want to catch everything here since we don&#39;t want external plugins breaking us</span>
+                    <span class="n">fail_info</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;source: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">name</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">)</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;Error loading external type source, source: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">failed_sources</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fail_info</span><span class="p">)</span>
+
+            <span class="c1"># Only load as many external sources as we need to resolve this type_name</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_known_type</span><span class="p">(</span><span class="n">type_name</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">is_complex</span> <span class="ow">and</span> <span class="n">base_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_factories</span><span class="p">):</span>
+                <span class="k">break</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lazy_type_sources</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lazy_type_sources</span><span class="p">[</span><span class="n">i</span><span class="p">:]</span>
+
+        <span class="c1"># If we&#39;ve loaded everything and we still can&#39;t find it then there&#39;s a configuration error somewhere</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">is_known_type</span><span class="p">(</span><span class="n">type_name</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">is_complex</span> <span class="ow">and</span> <span class="n">base_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_factories</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="n">ArgumentError</span><span class="p">(</span><span class="s2">&quot;get_type called on unknown type&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">type_name</span><span class="p">,</span> <span class="n">failed_external_sources</span><span class="o">=</span><span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">failed_sources</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_type</span><span class="p">(</span><span class="n">type_name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TypeSystem.is_known_format"><a class="viewcode-back" href="../../api/typedargs.typeinfo.html#typedargs.typeinfo.TypeSystem.is_known_format">[docs]</a>    <span class="k">def</span> <span class="nf">is_known_format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">,</span> <span class="nb">format</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check if format is known for given type.</span>
+
+<span class="sd">        Returns boolean indicating if format is valid for the specified type.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">typeobj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_type</span><span class="p">(</span><span class="nb">type</span><span class="p">)</span>
+
+        <span class="n">formatter</span> <span class="o">=</span> <span class="s2">&quot;format_</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">format</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">typeobj</span><span class="p">,</span> <span class="n">formatter</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="TypeSystem.inject_type"><a class="viewcode-back" href="../../api/typedargs.typeinfo.html#typedargs.typeinfo.TypeSystem.inject_type">[docs]</a>    <span class="k">def</span> <span class="nf">inject_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">typeobj</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Given a module-like object that defines a type, add it to our type system so that</span>
+<span class="sd">        it can be used with the iotile tool and with other annotated API functions.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_canonicalize_type</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">is_complex</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">split_type</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_known_type</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ArgumentError</span><span class="p">(</span><span class="s2">&quot;attempting to inject a type that is already defined&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">is_complex</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_factory</span><span class="p">(</span><span class="n">typeobj</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_factories</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ArgumentError</span><span class="p">(</span><span class="s2">&quot;attempted to inject a complex type factory that is already defined&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">type_factories</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">typeobj</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_validate_type</span><span class="p">(</span><span class="n">typeobj</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">known_types</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">typeobj</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">typeobj</span><span class="p">,</span> <span class="s2">&quot;default_formatter&quot;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ArgumentError</span><span class="p">(</span><span class="s2">&quot;type is invalid, does not have default_formatter function&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">typeobj</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="nb">dir</span><span class="p">(</span><span class="n">typeobj</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="TypeSystem.load_type_module"><a class="viewcode-back" href="../../api/typedargs.typeinfo.html#typedargs.typeinfo.TypeSystem.load_type_module">[docs]</a>    <span class="k">def</span> <span class="nf">load_type_module</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Given a module that contains a list of some types find all symbols in the module that</span>
+<span class="sd">        do not start with _ and attempt to import them as types.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">module</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">x</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)):</span>
+            <span class="n">typeobj</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">inject_type</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">typeobj</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">ArgumentError</span><span class="p">:</span>
+                <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="TypeSystem.load_external_types"><a class="viewcode-back" href="../../api/typedargs.typeinfo.html#typedargs.typeinfo.TypeSystem.load_external_types">[docs]</a>    <span class="k">def</span> <span class="nf">load_external_types</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Given a path to a python package or module, load that module, search for all defined variables</span>
+<span class="sd">        inside of it that do not start with _ or __ and inject them into the type system.  If any of the</span>
+<span class="sd">        types cannot be injected, silently ignore them unless verbose is True.  If path points to a module</span>
+<span class="sd">        it should not contain the trailing .py since this is added automatically by the python import system</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">folder</span><span class="p">,</span> <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">fileobj</span><span class="p">,</span> <span class="n">pathname</span><span class="p">,</span> <span class="n">description</span> <span class="o">=</span> <span class="n">imp</span><span class="o">.</span><span class="n">find_module</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="p">[</span><span class="n">folder</span><span class="p">])</span>
+            <span class="n">mod</span> <span class="o">=</span> <span class="n">imp</span><span class="o">.</span><span class="n">load_module</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">fileobj</span><span class="p">,</span> <span class="n">pathname</span><span class="p">,</span> <span class="n">description</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ArgumentError</span><span class="p">(</span><span class="s2">&quot;could not import module in order to load external types&quot;</span><span class="p">,</span> <span class="n">module_path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">parent_directory</span><span class="o">=</span><span class="n">folder</span><span class="p">,</span> <span class="n">module_name</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_type_module</span><span class="p">(</span><span class="n">mod</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="iprint"><a class="viewcode-back" href="../../api/typedargs.typeinfo.html#typedargs.typeinfo.iprint">[docs]</a><span class="k">def</span> <span class="nf">iprint</span><span class="p">(</span><span class="n">stringable</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A simple function to only print text if in an interactive session.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">type_system</span><span class="o">.</span><span class="n">interactive</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">stringable</span><span class="p">)</span></div>
+
+
+<span class="c1">#In order to support function annotations that must be resolved to types when modules</span>
+<span class="c1">#are imported, create a default TypeSystem object that is used globally to store type</span>
+<span class="c1">#information</span>
+
+<span class="n">type_system</span> <span class="o">=</span> <span class="n">TypeSystem</span><span class="p">(</span><span class="n">types</span><span class="p">)</span>  <span class="c1"># pylint: disable=invalid-name</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018 Arch Systems Inc.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

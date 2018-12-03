@@ -1,0 +1,538 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>typedargs.shell module &mdash; typedargs latest documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="typedargs.terminal module" href="typedargs.terminal.html" />
+    <link rel="prev" title="typedargs.metadata module" href="typedargs.metadata.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> typedargs
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                latest
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="typedargs.html">typedargs package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="typedargs.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="typedargs.annotate.html">typedargs.annotate module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.basic_structures.html">typedargs.basic_structures module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.doc_annotate.html">typedargs.doc_annotate module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.doc_parser.html">typedargs.doc_parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.exceptions.html">typedargs.exceptions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.lint.html">typedargs.lint module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.metadata.html">typedargs.metadata module</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">typedargs.shell module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.terminal.html">typedargs.terminal module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.typeinfo.html">typedargs.typeinfo module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.utils.html">typedargs.utils module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="typedargs.html#subpackages">Subpackages</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../release.html">Release Notes</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">typedargs</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../api.html">API Reference</a> &raquo;</li>
+        
+          <li><a href="typedargs.html">typedargs package</a> &raquo;</li>
+        
+      <li>typedargs.shell module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/api/typedargs.shell.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-typedargs.shell">
+<span id="typedargs-shell-module"></span><h1>typedargs.shell module<a class="headerlink" href="#module-typedargs.shell" title="Permalink to this headline">¶</a></h1>
+<p>Hierarchical Shell provides as REPL like environment for executing commmands.</p>
+<div class="section" id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Permalink to this headline">¶</a></h2>
+<p>Classes:</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#typedargs.shell.HierarchicalShell" title="typedargs.shell.HierarchicalShell"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HierarchicalShell</span></code></a></td>
+<td>A hierarchical shell for navigating through python package API functions.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#typedargs.shell.InitialContext" title="typedargs.shell.InitialContext"><code class="xref py py-obj docutils literal notranslate"><span class="pre">InitialContext</span></code></a></td>
+<td>A basic context for holding the root callable functions for a shell.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="reference">
+<h2>Reference<a class="headerlink" href="#reference" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="typedargs.shell.InitialContext">
+<em class="property">class </em><code class="descclassname">typedargs.shell.</code><code class="descname">InitialContext</code><a class="reference internal" href="../_modules/typedargs/shell.html#InitialContext"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.shell.InitialContext" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a></p>
+<p>A basic context for holding the root callable functions for a shell.</p>
+<dl class="attribute">
+<dt id="typedargs.shell.InitialContext.context">
+<code class="descname">context</code><em class="property"> = True</em><a class="headerlink" href="#typedargs.shell.InitialContext.context" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="typedargs.shell.InitialContext.decorated">
+<code class="descname">decorated</code><em class="property"> = False</em><a class="headerlink" href="#typedargs.shell.InitialContext.decorated" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="typedargs.shell.InitialContext.finalizer">
+<code class="descname">finalizer</code><em class="property"> = False</em><a class="headerlink" href="#typedargs.shell.InitialContext.finalizer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="typedargs.shell.InitialContext.metadata">
+<code class="descname">metadata</code><em class="property"> = &lt;typedargs.metadata.AnnotatedMetadata object&gt;</em><a class="headerlink" href="#typedargs.shell.InitialContext.metadata" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="typedargs.shell.InitialContext.takes_cmdline">
+<code class="descname">takes_cmdline</code><em class="property"> = False</em><a class="headerlink" href="#typedargs.shell.InitialContext.takes_cmdline" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="typedargs.shell.HierarchicalShell">
+<em class="property">class </em><code class="descclassname">typedargs.shell.</code><code class="descname">HierarchicalShell</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/shell.html#HierarchicalShell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.shell.HierarchicalShell" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>A hierarchical shell for navigating through python package API functions.</p>
+<dl class="method">
+<dt id="typedargs.shell.HierarchicalShell.add_builtin">
+<code class="descname">add_builtin</code><span class="sig-paren">(</span><em>name</em>, <em>callable</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/shell.html#HierarchicalShell.add_builtin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.shell.HierarchicalShell.add_builtin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a builtin function callable from all contexts.</p>
+<p>Callable should be an annotated function like any other that you
+want to call from a HierarchicalShell</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The name of the function</li>
+<li><strong>callable</strong> (<em>callable</em>) – The annotated function that we should call</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="typedargs.shell.HierarchicalShell.root_update">
+<code class="descname">root_update</code><span class="sig-paren">(</span><em>dict_like</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/shell.html#HierarchicalShell.root_update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.shell.HierarchicalShell.root_update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add entries to root from a dict_line object.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="typedargs.shell.HierarchicalShell.root_add">
+<code class="descname">root_add</code><span class="sig-paren">(</span><em>name</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/shell.html#HierarchicalShell.root_add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.shell.HierarchicalShell.root_add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a single function to the root context.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The name of the callable to add</li>
+<li><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em> or </em><em>callable</em>) – The callable function or a string to
+lazily resolve to the callable later.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="typedargs.shell.HierarchicalShell.context_name">
+<code class="descname">context_name</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/shell.html#HierarchicalShell.context_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.shell.HierarchicalShell.context_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the string name of the current context.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="typedargs.shell.HierarchicalShell.finished">
+<code class="descname">finished</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/shell.html#HierarchicalShell.finished"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.shell.HierarchicalShell.finished" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if we have finalized all contexts.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if there are no nested contexts left, False otherwise</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)">bool</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="typedargs.shell.HierarchicalShell.valid_identifiers">
+<code class="descname">valid_identifiers</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/shell.html#HierarchicalShell.valid_identifiers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.shell.HierarchicalShell.valid_identifiers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a list of all valid identifiers for the current context.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A list of all of the valid identifiers for this context</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="typedargs.types.list.html#typedargs.types.list.list" title="typedargs.types.list.list">list</a>(<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)">str</a>)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="typedargs.shell.HierarchicalShell.find_function">
+<code class="descname">find_function</code><span class="sig-paren">(</span><em>context</em>, <em>funname</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/shell.html#HierarchicalShell.find_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.shell.HierarchicalShell.find_function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find a function in the given context by name.</p>
+<p>This function will first search the list of builtins and if the
+desired function is not a builtin, it will continue to search
+the given context.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>context</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><em>object</em></a>) – A dict or class that is a typedargs context</li>
+<li><strong>funname</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The name of the function to find</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The found function.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">callable</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="typedargs.shell.HierarchicalShell.list_dir">
+<code class="descname">list_dir</code><span class="sig-paren">(</span><em>context</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/shell.html#HierarchicalShell.list_dir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.shell.HierarchicalShell.list_dir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a listing of all of the functions in this context including builtins.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>context</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><em>object</em></a>) – The context to print a directory for.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="typedargs.shell.HierarchicalShell.process_arguments">
+<code class="descname">process_arguments</code><span class="sig-paren">(</span><em>func</em>, <em>args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/shell.html#HierarchicalShell.process_arguments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.shell.HierarchicalShell.process_arguments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process arguments from the command line into positional and kw args.</p>
+<p>Arguments are consumed until the argument spec for the function is filled
+or a – is found or there are no more arguments.  Keyword arguments can be
+specified using –field=value, -f value or –field value.  Positional
+arguments are specified just on the command line itself.</p>
+<p>If a keyword argument (<cite>field</cite>) is a boolean, it can be set to True by just passing
+–field or -f without needing to explicitly pass True unless this would cause
+ambiguity in parsing since the next expected positional argument is also a boolean
+or a string.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>func</strong> (<em>callable</em>) – A function previously annotated with type information</li>
+<li><strong>args</strong> (<a class="reference internal" href="typedargs.types.list.html#typedargs.types.list.list" title="typedargs.types.list.list"><em>list</em></a>) – A list of all of the potential arguments to this function.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><dl class="docutils">
+<dt>A tuple with a list of args, a dict of</dt>
+<dd><p class="first last">keyword args and a list of any unused args that were not processed.</p>
+</dd>
+</dl>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(args, kw_args, unused args)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="typedargs.shell.HierarchicalShell.invoke_one">
+<code class="descname">invoke_one</code><span class="sig-paren">(</span><em>line</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/shell.html#HierarchicalShell.invoke_one"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.shell.HierarchicalShell.invoke_one" title="Permalink to this definition">¶</a></dt>
+<dd><p>Invoke a function given a list of arguments with the function listed first.</p>
+<p>The function is searched for using the current context on the context stack
+and its annotated type information is used to convert all of the string parameters
+passed in line to appropriate python types.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>line</strong> (<a class="reference internal" href="typedargs.types.list.html#typedargs.types.list.list" title="typedargs.types.list.list"><em>list</em></a>) – The list of command line arguments.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="docutils">
+<dt>A tuple containing the return value of the function, if any,</dt>
+<dd>a boolean specifying if the function created a new context (False if a new context
+was created) and a list with the remainder of the command line if this function
+did not consume all arguments.</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">(<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)">object</a>, <a class="reference internal" href="typedargs.types.list.html#typedargs.types.list.list" title="typedargs.types.list.list">list</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)">bool</a>)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="typedargs.shell.HierarchicalShell.invoke">
+<code class="descname">invoke</code><span class="sig-paren">(</span><em>line</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/shell.html#HierarchicalShell.invoke"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.shell.HierarchicalShell.invoke" title="Permalink to this definition">¶</a></dt>
+<dd><p>Invoke a one or more function given a list of arguments.</p>
+<p>The functions are searched for using the current context on the context stack
+and its annotated type information is used to convert all of the string parameters
+passed in line to appropriate python types.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>line</strong> (<a class="reference internal" href="typedargs.types.list.html#typedargs.types.list.list" title="typedargs.types.list.list"><em>list</em></a>) – The list of command line arguments.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="docutils">
+<dt>A boolean specifying if the last function created a new context</dt>
+<dd>(False if a new context was created) and a list with the remainder of the
+command line if this function did not consume all arguments.)</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)">bool</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="typedargs.shell.HierarchicalShell.invoke_string">
+<code class="descname">invoke_string</code><span class="sig-paren">(</span><em>line</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/shell.html#HierarchicalShell.invoke_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.shell.HierarchicalShell.invoke_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse and invoke a string line.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>line</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The line that we want to parse and invoke.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="docutils">
+<dt>A boolean specifying if the last function created a new context</dt>
+<dd>(False if a new context was created) and a list with the remainder of the
+command line if this function did not consume all arguments.)</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)">bool</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="typedargs.terminal.html" class="btn btn-neutral float-right" title="typedargs.terminal module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="typedargs.metadata.html" class="btn btn-neutral" title="typedargs.metadata module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018 Arch Systems Inc.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

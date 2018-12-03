@@ -1,0 +1,350 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>typedargs.exceptions &mdash; typedargs latest documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> typedargs
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                latest
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../release.html">Release Notes</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">typedargs</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>typedargs.exceptions</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for typedargs.exceptions</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;A generic key-value based exception class.&quot;&quot;&quot;</span>
+
+<span class="c1"># This file is adapted from python code released by WellDone International</span>
+<span class="c1"># under the terms of the LGPLv3.  WellDone International&#39;s contact information is</span>
+<span class="c1"># info@welldone.org</span>
+<span class="c1"># http://welldone.org</span>
+<span class="c1">#</span>
+<span class="c1"># Modifications to this file from the original created at WellDone International</span>
+<span class="c1"># are copyright Arch Systems Inc.</span>
+
+<span class="kn">from</span> <span class="nn">future.utils</span> <span class="k">import</span> <span class="n">iteritems</span>
+
+
+<div class="viewcode-block" id="KeyValueException"><a class="viewcode-back" href="../../api/typedargs.exceptions.html#typedargs.exceptions.KeyValueException">[docs]</a><span class="k">class</span> <span class="nc">KeyValueException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;An exception taking key value pairs containing exception information.</span>
+
+<span class="sd">    KeyValueExceptions provide a convenient way to include additional information</span>
+<span class="sd">    about the source or context of an exception without having to convert it all to</span>
+<span class="sd">    a formatted string.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        msg (string): A short message about the cause of this exception, not including</span>
+<span class="sd">            its type or any placeholders</span>
+<span class="sd">        **kwargs: Any named parameters that you would like included with this exception</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">kwargs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="o">=</span> <span class="n">msg</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">KeyValueException</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+<div class="viewcode-block" id="KeyValueException.format"><a class="viewcode-back" href="../../api/typedargs.exceptions.html#typedargs.exceptions.KeyValueException.format">[docs]</a>    <span class="k">def</span> <span class="nf">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exclude_class</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Format this exception as a string including class name.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            exclude_class (bool): Whether to exclude the exception class</span>
+<span class="sd">                name when formatting this exception</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            string: a multiline string with the message, class name and</span>
+<span class="sd">                key value parameters passed to create the exception.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">exclude_class</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">msg</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">paramstring</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">)])</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Additional Information:</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">paramstring</span>
+
+        <span class="k">return</span> <span class="n">msg</span></div>
+
+<div class="viewcode-block" id="KeyValueException.format_msg"><a class="viewcode-back" href="../../api/typedargs.exceptions.html#typedargs.exceptions.KeyValueException.format_msg">[docs]</a>    <span class="k">def</span> <span class="nf">format_msg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Format this exception as a string excluding class name.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            string: a multiline string with the message and</span>
+<span class="sd">                key value parameters passed to create the exception.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">exclude_class</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="KeyValueException.to_dict"><a class="viewcode-back" href="../../api/typedargs.exceptions.html#typedargs.exceptions.KeyValueException.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Convert this exception to a dictionary.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dist: A dictionary of information about this exception,</span>
+<span class="sd">                Has a &#39;reason&#39; key, a &#39;type&#39; key  and a dictionary of params</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">out</span><span class="p">[</span><span class="s1">&#39;reason&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">msg</span>
+        <span class="n">out</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="n">out</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span>
+
+        <span class="k">return</span> <span class="n">out</span></div>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="ArgumentError"><a class="viewcode-back" href="../../api/typedargs.exceptions.html#typedargs.exceptions.ArgumentError">[docs]</a><span class="k">class</span> <span class="nc">ArgumentError</span><span class="p">(</span><span class="n">KeyValueException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;There is a problem with one of the arguments to the function.</span>
+
+<span class="sd">    The method could not be called with the arguments passed.  This</span>
+<span class="sd">    differs from InternalError in that when ArgumentError is returned,</span>
+<span class="sd">    it is known that these arguments can never work for this function.</span>
+
+<span class="sd">    An example would be passing three arguments to a function requiring</span>
+<span class="sd">    4 arguments.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ValidationError"><a class="viewcode-back" href="../../api/typedargs.exceptions.html#typedargs.exceptions.ValidationError">[docs]</a><span class="k">class</span> <span class="nc">ValidationError</span><span class="p">(</span><span class="n">KeyValueException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The type validators attached to a parameter failed.</span>
+
+<span class="sd">    API routines can impose validation criteria on` their arguments in</span>
+<span class="sd">    addition to requiring simply a certain type of argument.  A clasic</span>
+<span class="sd">    example is the &quot;path&quot; type which can have validators like &quot;readable&quot;</span>
+<span class="sd">    or &quot;exists&quot;.  When validation fails, this error is thrown.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ConversionError"><a class="viewcode-back" href="../../api/typedargs.exceptions.html#typedargs.exceptions.ConversionError">[docs]</a><span class="k">class</span> <span class="nc">ConversionError</span><span class="p">(</span><span class="n">KeyValueException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;An error occurred converted an argument to its specified type.</span>
+
+<span class="sd">    All API functions take typed parameters.  Each type defines conversion</span>
+<span class="sd">    operators for python types that are logically related to it.  When no</span>
+<span class="sd">    valid conversion exists for the data type passed, this error is thrown.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="NotFoundError"><a class="viewcode-back" href="../../api/typedargs.exceptions.html#typedargs.exceptions.NotFoundError">[docs]</a><span class="k">class</span> <span class="nc">NotFoundError</span><span class="p">(</span><span class="n">KeyValueException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A method was invoked by name that does not exist.</span>
+
+<span class="sd">    Thrown when an attempt to execute an API method is made and the API</span>
+<span class="sd">    method does not exist.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="TypeSystemError"><a class="viewcode-back" href="../../api/typedargs.exceptions.html#typedargs.exceptions.TypeSystemError">[docs]</a><span class="k">class</span> <span class="nc">TypeSystemError</span><span class="p">(</span><span class="n">KeyValueException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;An unspecified internal error occurred in the typedargs type system.</span>
+
+<span class="sd">    There was an error with the type system.  This can be due to improperly</span>
+<span class="sd">    specifying an unknown type or because the required type was not properly loaded</span>
+<span class="sd">    from an external module before a function that used that type was needed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="InternalError"><a class="viewcode-back" href="../../api/typedargs.exceptions.html#typedargs.exceptions.InternalError">[docs]</a><span class="k">class</span> <span class="nc">InternalError</span><span class="p">(</span><span class="n">KeyValueException</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;An unexpected internal error prevented method completion.</span>
+
+<span class="sd">    The method could not be completed with the user input passed for</span>
+<span class="sd">    an unexpected reason.  This does not signify a bug in the API</span>
+<span class="sd">    method code.  More details should be passed in the arguments.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">pass</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018 Arch Systems Inc.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

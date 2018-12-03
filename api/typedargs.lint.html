@@ -1,0 +1,360 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>typedargs.lint module &mdash; typedargs latest documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="typedargs.metadata module" href="typedargs.metadata.html" />
+    <link rel="prev" title="typedargs.exceptions module" href="typedargs.exceptions.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> typedargs
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                latest
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="typedargs.html">typedargs package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="typedargs.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="typedargs.annotate.html">typedargs.annotate module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.basic_structures.html">typedargs.basic_structures module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.doc_annotate.html">typedargs.doc_annotate module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.doc_parser.html">typedargs.doc_parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.exceptions.html">typedargs.exceptions module</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">typedargs.lint module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.metadata.html">typedargs.metadata module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.shell.html">typedargs.shell module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.terminal.html">typedargs.terminal module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.typeinfo.html">typedargs.typeinfo module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.utils.html">typedargs.utils module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="typedargs.html#subpackages">Subpackages</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../release.html">Release Notes</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">typedargs</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../api.html">API Reference</a> &raquo;</li>
+        
+          <li><a href="typedargs.html">typedargs package</a> &raquo;</li>
+        
+      <li>typedargs.lint module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/api/typedargs.lint.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-typedargs.lint">
+<span id="typedargs-lint-module"></span><h1>typedargs.lint module<a class="headerlink" href="#module-typedargs.lint" title="Permalink to this headline">¶</a></h1>
+<p>A pylint plugin that checks for errors in typedargs declarations.</p>
+<p>This should be run using pylint in the following way:</p>
+<p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">pylint</span> <span class="pre">--load-plugins</span> <span class="pre">typedargs.lint</span> <span class="pre">&lt;path</span> <span class="pre">to</span> <span class="pre">source</span> <span class="pre">files&gt;</span>
+<span class="pre">`</span></code></p>
+<p>It will return errors if there are problems with annotated
+functions or if the docstring for an &#64;docannotate function
+is not correctly formatted.</p>
+<div class="section" id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Permalink to this headline">¶</a></h2>
+<p>Classes:</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#typedargs.lint.AnnotatedFunctionChecker" title="typedargs.lint.AnnotatedFunctionChecker"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AnnotatedFunctionChecker</span></code></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#typedargs.lint.AnnotationList" title="typedargs.lint.AnnotationList"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AnnotationList</span></code></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#typedargs.lint.DocannotationChecker" title="typedargs.lint.DocannotationChecker"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DocannotationChecker</span></code></a></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Functions:</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#typedargs.lint.register" title="typedargs.lint.register"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register</span></code></a></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="reference">
+<h2>Reference<a class="headerlink" href="#reference" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="typedargs.lint.AnnotationList">
+<em class="property">class </em><code class="descclassname">typedargs.lint.</code><code class="descname">AnnotationList</code><span class="sig-paren">(</span><em>params</em>, <em>returns</em>, <em>use_doc</em><span class="sig-paren">)</span><a class="headerlink" href="#typedargs.lint.AnnotationList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a></p>
+<dl class="attribute">
+<dt id="typedargs.lint.AnnotationList.params">
+<code class="descname">params</code><a class="headerlink" href="#typedargs.lint.AnnotationList.params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="typedargs.lint.AnnotationList.returns">
+<code class="descname">returns</code><a class="headerlink" href="#typedargs.lint.AnnotationList.returns" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="typedargs.lint.AnnotationList.use_doc">
+<code class="descname">use_doc</code><a class="headerlink" href="#typedargs.lint.AnnotationList.use_doc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="typedargs.lint.AnnotatedFunctionChecker">
+<em class="property">class </em><code class="descclassname">typedargs.lint.</code><code class="descname">AnnotatedFunctionChecker</code><span class="sig-paren">(</span><em>linter=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/lint.html#AnnotatedFunctionChecker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.lint.AnnotatedFunctionChecker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pylint.checkers.BaseChecker</span></code></p>
+<dl class="attribute">
+<dt id="typedargs.lint.AnnotatedFunctionChecker.priority">
+<code class="descname">priority</code><em class="property"> = -1</em><a class="headerlink" href="#typedargs.lint.AnnotatedFunctionChecker.priority" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="typedargs.lint.AnnotatedFunctionChecker.process_param">
+<em class="property">classmethod </em><code class="descname">process_param</code><span class="sig-paren">(</span><em>param</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/lint.html#AnnotatedFunctionChecker.process_param"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.lint.AnnotatedFunctionChecker.process_param" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process an &#64;param decorator into a ParameterInfo.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="typedargs.lint.AnnotatedFunctionChecker.process_return_type">
+<em class="property">classmethod </em><code class="descname">process_return_type</code><span class="sig-paren">(</span><em>return_type</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/lint.html#AnnotatedFunctionChecker.process_return_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.lint.AnnotatedFunctionChecker.process_return_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process an &#64;return_type decorator.</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="typedargs.lint.AnnotatedFunctionChecker.extract_annotations">
+<em class="property">classmethod </em><code class="descname">extract_annotations</code><span class="sig-paren">(</span><em>node</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/lint.html#AnnotatedFunctionChecker.extract_annotations"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.lint.AnnotatedFunctionChecker.extract_annotations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="typedargs.lint.DocannotationChecker">
+<em class="property">class </em><code class="descclassname">typedargs.lint.</code><code class="descname">DocannotationChecker</code><span class="sig-paren">(</span><em>linter=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/lint.html#DocannotationChecker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.lint.DocannotationChecker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#typedargs.lint.AnnotatedFunctionChecker" title="typedargs.lint.AnnotatedFunctionChecker"><code class="xref py py-class docutils literal notranslate"><span class="pre">typedargs.lint.AnnotatedFunctionChecker</span></code></a></p>
+<dl class="attribute">
+<dt id="typedargs.lint.DocannotationChecker.name">
+<code class="descname">name</code><em class="property"> = 'typedargs-annotation'</em><a class="headerlink" href="#typedargs.lint.DocannotationChecker.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="typedargs.lint.DocannotationChecker.msgs">
+<code class="descname">msgs</code><em class="property"> = {'W6701': ('Doc-annotation parameter or return does not correspond to a known type', 'typedargs-unknown-type', 'All types annotated using typedargs should resolve to known types.')}</em><a class="headerlink" href="#typedargs.lint.DocannotationChecker.msgs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="typedargs.lint.DocannotationChecker.visit_functiondef">
+<code class="descname">visit_functiondef</code><span class="sig-paren">(</span><em>node</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/lint.html#DocannotationChecker.visit_functiondef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.lint.DocannotationChecker.visit_functiondef" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="typedargs.lint.register">
+<code class="descclassname">typedargs.lint.</code><code class="descname">register</code><span class="sig-paren">(</span><em>linter</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/lint.html#register"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.lint.register" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="typedargs.metadata.html" class="btn btn-neutral float-right" title="typedargs.metadata module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="typedargs.exceptions.html" class="btn btn-neutral" title="typedargs.exceptions module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018 Arch Systems Inc.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

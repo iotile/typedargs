@@ -1,0 +1,561 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>typedargs.metadata module &mdash; typedargs latest documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="typedargs.shell module" href="typedargs.shell.html" />
+    <link rel="prev" title="typedargs.lint module" href="typedargs.lint.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> typedargs
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                latest
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="typedargs.html">typedargs package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="typedargs.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="typedargs.annotate.html">typedargs.annotate module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.basic_structures.html">typedargs.basic_structures module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.doc_annotate.html">typedargs.doc_annotate module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.doc_parser.html">typedargs.doc_parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.exceptions.html">typedargs.exceptions module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.lint.html">typedargs.lint module</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">typedargs.metadata module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.shell.html">typedargs.shell module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.terminal.html">typedargs.terminal module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.typeinfo.html">typedargs.typeinfo module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.utils.html">typedargs.utils module</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="typedargs.html#subpackages">Subpackages</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../release.html">Release Notes</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">typedargs</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../api.html">API Reference</a> &raquo;</li>
+        
+          <li><a href="typedargs.html">typedargs package</a> &raquo;</li>
+        
+      <li>typedargs.metadata module</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/api/typedargs.metadata.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-typedargs.metadata">
+<span id="typedargs-metadata-module"></span><h1>typedargs.metadata module<a class="headerlink" href="#module-typedargs.metadata" title="Permalink to this headline">¶</a></h1>
+<p>The basic class that is used to store metadata about a function.</p>
+<div class="section" id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Permalink to this headline">¶</a></h2>
+<p>Classes:</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#typedargs.metadata.AnnotatedMetadata" title="typedargs.metadata.AnnotatedMetadata"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AnnotatedMetadata</span></code></a></td>
+<td>All of the associated metadata for an annotated function or class.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="reference">
+<h2>Reference<a class="headerlink" href="#reference" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="typedargs.metadata.AnnotatedMetadata">
+<em class="property">class </em><code class="descclassname">typedargs.metadata.</code><code class="descname">AnnotatedMetadata</code><span class="sig-paren">(</span><em>func</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/metadata.html#AnnotatedMetadata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.metadata.AnnotatedMetadata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>All of the associated metadata for an annotated function or class.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>func</strong> (<em>callable</em>) – The function that we are annotated so that
+we can pull out relevant argument spec information.  If func
+is a class, we pull arguments from its __init__ routine</li>
+<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – An optional name that will overwrite the default name
+of this function</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="typedargs.metadata.AnnotatedMetadata.spec_filled">
+<code class="descname">spec_filled</code><span class="sig-paren">(</span><em>pos_args</em>, <em>kw_args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/metadata.html#AnnotatedMetadata.spec_filled"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.metadata.AnnotatedMetadata.spec_filled" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if we have enough arguments to call this function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pos_args</strong> (<a class="reference internal" href="typedargs.types.list.html#typedargs.types.list.list" title="typedargs.types.list.list"><em>list</em></a>) – A list of all the positional values we have.</li>
+<li><strong>kw_args</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – A dict of all of the keyword args we have.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">True if we have a filled spec, False otherwise.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)">bool</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="typedargs.metadata.AnnotatedMetadata.add_param">
+<code class="descname">add_param</code><span class="sig-paren">(</span><em>name</em>, <em>type_name</em>, <em>validators</em>, <em>desc=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/metadata.html#AnnotatedMetadata.add_param"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.metadata.AnnotatedMetadata.add_param" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add type information for a parameter by name.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The name of the parameter we wish to annotate</li>
+<li><strong>type_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The name of the parameter’s type</li>
+<li><strong>validators</strong> (<a class="reference internal" href="typedargs.types.list.html#typedargs.types.list.list" title="typedargs.types.list.list"><em>list</em></a>) – A list of either strings or n tuples that each
+specify a validator defined for type_name.  If a string is passed,
+the validator is invoked with no extra arguments.  If a tuple is
+passed, the validator will be invoked with the extra arguments.</li>
+<li><strong>desc</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Optional parameter description.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="typedargs.metadata.AnnotatedMetadata.typed_returnvalue">
+<code class="descname">typed_returnvalue</code><span class="sig-paren">(</span><em>type_name</em>, <em>formatter=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/metadata.html#AnnotatedMetadata.typed_returnvalue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.metadata.AnnotatedMetadata.typed_returnvalue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add type information to the return value of this function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>type_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The name of the type of the return value.</li>
+<li><strong>formatter</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – An optional name of a formatting function specified
+for the type given in type_name.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="typedargs.metadata.AnnotatedMetadata.string_returnvalue">
+<code class="descname">string_returnvalue</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/metadata.html#AnnotatedMetadata.string_returnvalue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.metadata.AnnotatedMetadata.string_returnvalue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mark the return value as data that should be converted with str.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="typedargs.metadata.AnnotatedMetadata.custom_returnvalue">
+<code class="descname">custom_returnvalue</code><span class="sig-paren">(</span><em>printer</em>, <em>desc=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/metadata.html#AnnotatedMetadata.custom_returnvalue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.metadata.AnnotatedMetadata.custom_returnvalue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use a custom function to print the return value.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>printer</strong> (<em>callable</em>) – A function that should take in the return
+value and convert it to a string.</li>
+<li><strong>desc</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – An optional description of the return value.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="typedargs.metadata.AnnotatedMetadata.has_varargs">
+<code class="descname">has_varargs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/metadata.html#AnnotatedMetadata.has_varargs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.metadata.AnnotatedMetadata.has_varargs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if this function supports variable arguments.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="typedargs.metadata.AnnotatedMetadata.has_kwargs">
+<code class="descname">has_kwargs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/metadata.html#AnnotatedMetadata.has_kwargs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.metadata.AnnotatedMetadata.has_kwargs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if this function supports arbitrary keyword arguments.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="typedargs.metadata.AnnotatedMetadata.returns_data">
+<code class="descname">returns_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/metadata.html#AnnotatedMetadata.returns_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.metadata.AnnotatedMetadata.returns_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if this function returns data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="typedargs.metadata.AnnotatedMetadata.match_shortname">
+<code class="descname">match_shortname</code><span class="sig-paren">(</span><em>name</em>, <em>filled_args=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/metadata.html#AnnotatedMetadata.match_shortname"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.metadata.AnnotatedMetadata.match_shortname" title="Permalink to this definition">¶</a></dt>
+<dd><p>Try to convert a prefix into a parameter name.</p>
+<p>If the result could be ambiguous or there is no matching
+parameter, throw an ArgumentError</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – A prefix for a parameter name</li>
+<li><strong>filled_args</strong> (<a class="reference internal" href="typedargs.types.list.html#typedargs.types.list.list" title="typedargs.types.list.list"><em>list</em></a>) – A list of filled positional arguments that will be
+removed from consideration.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The full matching parameter name</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)">str</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="typedargs.metadata.AnnotatedMetadata.param_type">
+<code class="descname">param_type</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/metadata.html#AnnotatedMetadata.param_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.metadata.AnnotatedMetadata.param_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the parameter type information by name.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The full name of a parameter.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The type name or None if no type information is given.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="typedargs.metadata.AnnotatedMetadata.signature">
+<code class="descname">signature</code><span class="sig-paren">(</span><em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/metadata.html#AnnotatedMetadata.signature"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.metadata.AnnotatedMetadata.signature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return our function signature as a string.</p>
+<p>By default this function uses the annotated name of the function
+however if you need to override that with a custom name you can
+pass name=&lt;custom name&gt;</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Optional name to override the default name given
+in the function signature.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The formatted function signature</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="typedargs.metadata.AnnotatedMetadata.format_returnvalue">
+<code class="descname">format_returnvalue</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/metadata.html#AnnotatedMetadata.format_returnvalue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.metadata.AnnotatedMetadata.format_returnvalue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format the return value of this function as a string.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><em>object</em></a>) – The return value that we are supposed to format.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><dl class="docutils">
+<dt>The formatted return value, or None if this function indicates</dt>
+<dd>that it does not return data</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="typedargs.metadata.AnnotatedMetadata.convert_positional_argument">
+<code class="descname">convert_positional_argument</code><span class="sig-paren">(</span><em>index</em>, <em>arg_value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/metadata.html#AnnotatedMetadata.convert_positional_argument"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.metadata.AnnotatedMetadata.convert_positional_argument" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert and validate a positional argument.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>index</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – The positional index of the argument</li>
+<li><strong>arg_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><em>object</em></a>) – The value to convert and validate</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The converted value.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)">object</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="typedargs.metadata.AnnotatedMetadata.check_spec">
+<code class="descname">check_spec</code><span class="sig-paren">(</span><em>pos_args</em>, <em>kwargs=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/metadata.html#AnnotatedMetadata.check_spec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.metadata.AnnotatedMetadata.check_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if there are any missing or duplicate arguments.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pos_args</strong> (<a class="reference internal" href="typedargs.types.list.html#typedargs.types.list.list" title="typedargs.types.list.list"><em>list</em></a>) – A list of arguments that will be passed as positional
+arguments.</li>
+<li><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – A dictionary of the keyword arguments that will be passed.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><dl class="docutils">
+<dt>A dictionary of argument name to argument value, pulled from either</dt>
+<dd><p class="first last">the value passed or the default value if no argument is passed.</p>
+</dd>
+</dl>
+</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)">dict</a></p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<li><code class="xref py py-exc docutils literal notranslate"><span class="pre">ArgumentError</span></code> – If a positional or keyword argument does not fit in the spec.</li>
+<li><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValidationError</span></code> – If an argument is passed twice.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="typedargs.metadata.AnnotatedMetadata.convert_argument">
+<code class="descname">convert_argument</code><span class="sig-paren">(</span><em>arg_name</em>, <em>arg_value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/metadata.html#AnnotatedMetadata.convert_argument"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.metadata.AnnotatedMetadata.convert_argument" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a parameter with type information, convert and validate it.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>arg_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The name of the argument to convert and validate</li>
+<li><strong>arg_value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><em>object</em></a>) – The value to convert and validate</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The converted value.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)">object</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="typedargs.shell.html" class="btn btn-neutral float-right" title="typedargs.shell module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="typedargs.lint.html" class="btn btn-neutral" title="typedargs.lint module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018 Arch Systems Inc.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

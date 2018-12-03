@@ -1,0 +1,585 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>typedargs.doc_parser &mdash; typedargs latest documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> typedargs
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                latest
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../release.html">Release Notes</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">typedargs</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>typedargs.doc_parser</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for typedargs.doc_parser</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Experimental module for better google docstring parsing.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">unicode_literals</span><span class="p">,</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">builtins</span> <span class="k">import</span> <span class="nb">str</span>
+<span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">from</span> <span class="nn">io</span> <span class="k">import</span> <span class="n">StringIO</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">namedtuple</span>
+<span class="kn">from</span> <span class="nn">textwrap</span> <span class="k">import</span> <span class="n">fill</span><span class="p">,</span> <span class="n">dedent</span>
+<span class="kn">from</span> <span class="nn">future.utils</span> <span class="k">import</span> <span class="n">viewitems</span>
+<span class="kn">from</span> <span class="nn">.basic_structures</span> <span class="k">import</span> <span class="n">ParameterInfo</span><span class="p">,</span> <span class="n">ReturnInfo</span>
+<span class="kn">from</span> <span class="nn">.exceptions</span> <span class="k">import</span> <span class="n">ValidationError</span>
+<span class="kn">from</span> <span class="nn">.terminal</span> <span class="k">import</span> <span class="n">get_terminal_size</span>
+
+
+<span class="n">BlankLine</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;BlankLine&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;contents&#39;</span><span class="p">])</span>
+<span class="n">SectionHeader</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;SectionHeader&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">])</span>
+<span class="n">ContinuationLine</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;ContinuationLine&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;contents&#39;</span><span class="p">])</span>
+<span class="n">Line</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;Line&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;contents&#39;</span><span class="p">])</span>
+<span class="n">ListItem</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;ListItem&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;marker&#39;</span><span class="p">,</span> <span class="s1">&#39;contents&#39;</span><span class="p">])</span>
+
+
+<span class="c1"># pylint: disable=too-few-public-methods;Experimental class</span>
+<div class="viewcode-block" id="ParsedDocstring"><a class="viewcode-back" href="../../api/typedargs.doc_parser.html#typedargs.doc_parser.ParsedDocstring">[docs]</a><span class="k">class</span> <span class="nc">ParsedDocstring</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;A parser for google docstrings.</span>
+
+<span class="sd">    The parser will collect all of the sections and parse them into</span>
+<span class="sd">    paragraphs that are separated by blank lines or indented sections</span>
+<span class="sd">    depending on what kind of section it is.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">MAIN_SECTION</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">ARGS_SECTION</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">RETURN_SECTION</span> <span class="o">=</span> <span class="mi">2</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">doc</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sections</span> <span class="o">=</span> <span class="p">{</span><span class="n">ParsedDocstring</span><span class="o">.</span><span class="n">MAIN_SECTION</span><span class="p">:</span> <span class="p">[],</span> <span class="n">ParsedDocstring</span><span class="o">.</span><span class="n">ARGS_SECTION</span><span class="p">:</span> <span class="p">[],</span> <span class="n">ParsedDocstring</span><span class="o">.</span><span class="n">RETURN_SECTION</span><span class="p">:</span> <span class="p">[]}</span>
+
+        <span class="n">sections</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collect_sections</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">order</span><span class="p">,</span> <span class="n">section</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">sections</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="n">sections</span><span class="p">[(</span><span class="n">order</span><span class="p">,</span> <span class="n">section</span><span class="p">)]</span>
+            <span class="n">sec_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_classify_section</span><span class="p">(</span><span class="n">section</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">sec_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="n">BlankLine</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">),</span> <span class="n">Line</span><span class="p">(</span><span class="n">section</span> <span class="o">+</span> <span class="s2">&quot;:&quot;</span><span class="p">),</span> <span class="n">BlankLine</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)]</span> <span class="o">+</span> <span class="n">lines</span> <span class="o">+</span> <span class="p">[</span><span class="n">BlankLine</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)]</span>
+                <span class="n">sec_type</span> <span class="o">=</span> <span class="n">ParsedDocstring</span><span class="o">.</span><span class="n">MAIN_SECTION</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sections</span><span class="p">[</span><span class="n">sec_type</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">section</span><span class="p">,</span> <span class="n">lines</span> <span class="ow">in</span> <span class="n">viewitems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sections</span><span class="p">):</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_merge_blank_lines</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sections</span><span class="p">[</span><span class="n">section</span><span class="p">]</span> <span class="o">=</span> <span class="n">lines</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">param_info</span> <span class="o">=</span> <span class="p">{</span><span class="n">parse_param</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">contents</span><span class="p">,</span> <span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span> <span class="n">parse_param</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">contents</span><span class="p">,</span> <span class="kc">True</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sections</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ARGS_SECTION</span><span class="p">,</span> <span class="p">[])</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">Line</span><span class="p">)}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sections</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ParsedDocstring</span><span class="o">.</span><span class="n">RETURN_SECTION</span><span class="p">,</span> <span class="p">[]))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span> <span class="o">=</span> <span class="n">parse_return</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sections</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">RETURN_SECTION</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">contents</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">maindoc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_merge_adjacent_lines</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sections</span><span class="p">[</span><span class="n">ParsedDocstring</span><span class="o">.</span><span class="n">MAIN_SECTION</span><span class="p">])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">short_desc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;One line description of this parsed docstring.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">maindoc</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">maindoc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">contents</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_merge_adjacent_lines</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">lines</span><span class="p">):</span>
+        <span class="n">out_lines</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">Line</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">out_lines</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out_lines</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">Line</span><span class="p">):</span>
+                <span class="n">out_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">out_lines</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">Line</span><span class="p">(</span><span class="n">out_lines</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">contents</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">line</span><span class="o">.</span><span class="n">contents</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">out_lines</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_merge_blank_lines</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">lines</span><span class="p">):</span>
+        <span class="n">out_lines</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">BlankLine</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">out_lines</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out_lines</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">BlankLine</span><span class="p">):</span>
+                <span class="n">out_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">out_lines</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out_lines</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">BlankLine</span><span class="p">):</span>
+            <span class="n">out_lines</span> <span class="o">=</span> <span class="n">out_lines</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">out_lines</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out_lines</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">BlankLine</span><span class="p">):</span>
+            <span class="n">out_lines</span> <span class="o">=</span> <span class="n">out_lines</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+        <span class="k">return</span> <span class="n">out_lines</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_merge_continuations</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">lines</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+
+        <span class="n">out_lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">curr_line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">ContinuationLine</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">curr_line</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">out_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Line</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">contents</span><span class="p">))</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">curr_line</span><span class="p">,</span> <span class="n">Line</span><span class="p">):</span>
+                    <span class="n">curr_line</span> <span class="o">=</span> <span class="n">Line</span><span class="p">(</span><span class="n">curr_line</span><span class="o">.</span><span class="n">contents</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">line</span><span class="o">.</span><span class="n">contents</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">curr_line</span><span class="p">,</span> <span class="n">ListItem</span><span class="p">):</span>
+                    <span class="n">curr_line</span> <span class="o">=</span> <span class="n">ListItem</span><span class="p">(</span><span class="n">curr_line</span><span class="o">.</span><span class="n">marker</span><span class="p">,</span> <span class="n">curr_line</span><span class="o">.</span><span class="n">contents</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">line</span><span class="o">.</span><span class="n">contents</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">curr_line</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">out_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">curr_line</span><span class="p">)</span>
+
+                <span class="n">curr_line</span> <span class="o">=</span> <span class="kc">None</span>
+
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">BlankLine</span><span class="p">):</span>
+                    <span class="n">out_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">curr_line</span> <span class="o">=</span> <span class="n">line</span>
+
+        <span class="k">if</span> <span class="n">curr_line</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">curr_line</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">out_lines</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_classify_section</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">section</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Attempt to find the canonical name of this section.&quot;&quot;&quot;</span>
+
+        <span class="n">name</span> <span class="o">=</span> <span class="n">section</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">frozenset</span><span class="p">([</span><span class="s1">&#39;args&#39;</span><span class="p">,</span> <span class="s1">&#39;arguments&#39;</span><span class="p">,</span> <span class="s2">&quot;params&quot;</span><span class="p">,</span> <span class="s2">&quot;parameters&quot;</span><span class="p">]):</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">ARGS_SECTION</span>
+
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">frozenset</span><span class="p">([</span><span class="s1">&#39;returns&#39;</span><span class="p">,</span> <span class="s1">&#39;return&#39;</span><span class="p">]):</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">RETURN_SECTION</span>
+
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">frozenset</span><span class="p">([</span><span class="s1">&#39;main&#39;</span><span class="p">]):</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">MAIN_SECTION</span>
+
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_classify_line</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Classify a line into a type of object.&quot;&quot;&quot;</span>
+
+        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">BlankLine</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s1">&#39; &#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">line</span> <span class="ow">and</span> <span class="n">line</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">):</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">line</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">SectionHeader</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;  &#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">ContinuationLine</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">lstrip</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39; - &#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">ListItem</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">line</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span><span class="o">.</span><span class="n">lstrip</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;- &#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">ListItem</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">line</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">lstrip</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="n">Line</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_parse_sections</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">lines</span><span class="p">):</span>
+        <span class="n">curr_section</span> <span class="o">=</span> <span class="s2">&quot;Main&quot;</span>
+        <span class="n">curr_lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">sections</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">section_counter</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+            <span class="n">line_obj</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_classify_line</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">line_obj</span><span class="p">,</span> <span class="n">SectionHeader</span><span class="p">):</span>
+                <span class="n">sections</span><span class="p">[(</span><span class="n">section_counter</span><span class="p">,</span> <span class="n">curr_section</span><span class="p">)]</span> <span class="o">=</span> <span class="n">curr_lines</span>
+                <span class="n">curr_lines</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">curr_section</span> <span class="o">=</span> <span class="n">line_obj</span><span class="o">.</span><span class="n">name</span>
+                <span class="n">section_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">curr_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+
+        <span class="n">sections</span><span class="p">[(</span><span class="n">section_counter</span><span class="p">,</span> <span class="n">curr_section</span><span class="p">)]</span> <span class="o">=</span> <span class="n">curr_lines</span>
+        <span class="k">return</span> <span class="n">sections</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_dedent_and_parse</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">lines</span><span class="p">):</span>
+        <span class="n">paragraph</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+        <span class="n">dedented</span> <span class="o">=</span> <span class="n">dedent</span><span class="p">(</span><span class="n">paragraph</span><span class="p">)</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">dedented</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">cls</span><span class="o">.</span><span class="n">_classify_line</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">]</span>
+
+    <span class="c1">#pylint:disable=too-many-branches</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_collect_sections</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">doc</span><span class="p">):</span>
+        <span class="n">doc</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">cleandoc</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+
+        <span class="n">sections</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_parse_sections</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">section</span> <span class="ow">in</span> <span class="n">sections</span><span class="p">:</span>
+            <span class="n">reclassified</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_dedent_and_parse</span><span class="p">(</span><span class="n">sections</span><span class="p">[</span><span class="n">section</span><span class="p">])</span>
+            <span class="n">sections</span><span class="p">[</span><span class="n">section</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_merge_continuations</span><span class="p">(</span><span class="n">reclassified</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">sections</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_join_paragraph</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">lines</span><span class="p">,</span> <span class="n">leading_blanks</span><span class="p">,</span> <span class="n">trailing_blanks</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">leading_blanks</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">remove_count</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">remove_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+            <span class="k">if</span> <span class="n">remove_count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">lines</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">remove_count</span><span class="p">:]</span>
+
+        <span class="k">if</span> <span class="n">trailing_blanks</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">remove_count</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">remove_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+            <span class="k">if</span> <span class="n">remove_count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">lines</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[:</span><span class="o">-</span><span class="n">remove_count</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_join_paragraphs</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">lines</span><span class="p">,</span> <span class="n">use_indent</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">leading_blanks</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">trailing_blanks</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Join adjacent lines together into paragraphs using either a blank line or indent as separator.&quot;&quot;&quot;</span>
+
+        <span class="n">curr_para</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">paragraphs</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">use_indent</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">):</span>
+                    <span class="n">curr_para</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">lstrip</span><span class="p">())</span>
+                    <span class="k">continue</span>
+                <span class="k">elif</span> <span class="n">line</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">curr_para</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">paragraphs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_join_paragraph</span><span class="p">(</span><span class="n">curr_para</span><span class="p">,</span> <span class="n">leading_blanks</span><span class="p">,</span> <span class="n">trailing_blanks</span><span class="p">))</span>
+
+                    <span class="n">curr_para</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">curr_para</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">paragraphs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_join_paragraph</span><span class="p">(</span><span class="n">curr_para</span><span class="p">,</span> <span class="n">leading_blanks</span><span class="p">,</span> <span class="n">trailing_blanks</span><span class="p">))</span>
+                    <span class="n">curr_para</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># Finish the last paragraph if there is one</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">curr_para</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">paragraphs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_join_paragraph</span><span class="p">(</span><span class="n">curr_para</span><span class="p">,</span> <span class="n">leading_blanks</span><span class="p">,</span> <span class="n">trailing_blanks</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">paragraphs</span>
+
+<div class="viewcode-block" id="ParsedDocstring.wrap_and_format"><a class="viewcode-back" href="../../api/typedargs.doc_parser.html#typedargs.doc_parser.ParsedDocstring.wrap_and_format">[docs]</a>    <span class="k">def</span> <span class="nf">wrap_and_format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">include_params</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">include_return</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">excluded_params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Wrap, format and print this docstring for a specific width.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            width (int): The number of characters per line.  If set to None</span>
+<span class="sd">                this will be inferred from the terminal width and default</span>
+<span class="sd">                to 80 if not passed or if passed as None and the terminal</span>
+<span class="sd">                width cannot be determined.</span>
+<span class="sd">            include_return (bool): Include the return information section</span>
+<span class="sd">                in the output.</span>
+<span class="sd">            include_params (bool): Include a parameter information section</span>
+<span class="sd">                in the output.</span>
+<span class="sd">            excluded_params (list): An optional list of parameter names to exclude.</span>
+<span class="sd">                Options for excluding things are, for example, &#39;self&#39; or &#39;cls&#39;.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">excluded_params</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">excluded_params</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="n">StringIO</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">width</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">width</span><span class="p">,</span> <span class="n">_height</span> <span class="o">=</span> <span class="n">get_terminal_size</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">maindoc</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">Line</span><span class="p">):</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fill</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">contents</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">))</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">BlankLine</span><span class="p">):</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">ListItem</span><span class="p">):</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fill</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">contents</span><span class="p">,</span> <span class="n">initial_indent</span><span class="o">=</span><span class="s2">&quot; </span><span class="si">%s</span><span class="s2"> &quot;</span> <span class="o">%</span> <span class="n">line</span><span class="o">.</span><span class="n">marker</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">subsequent_indent</span><span class="o">=</span><span class="s2">&quot;   &quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">))</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">include_params</span><span class="p">:</span>
+            <span class="n">included_params</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">param_info</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">excluded_params</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">included_params</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Parameters:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+                <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">included_params</span><span class="p">:</span>
+                    <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">param_info</span><span class="p">[</span><span class="n">param</span><span class="p">]</span>
+                    <span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot; - </span><span class="si">%s</span><span class="s2"> (</span><span class="si">%s</span><span class="s2">):</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">type_name</span><span class="p">))</span>
+                    <span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fill</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">desc</span><span class="p">,</span> <span class="n">initial_indent</span><span class="o">=</span><span class="s2">&quot;   &quot;</span><span class="p">,</span> <span class="n">subsequent_indent</span><span class="o">=</span><span class="s2">&quot;   &quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">))</span>
+                    <span class="n">out</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">include_return</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Returns:&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;    &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">type_name</span><span class="p">)</span>
+            <span class="c1">#pylint:disable=fixme; Issue tracked in #32</span>
+            <span class="c1"># TODO: Also include description information here</span>
+
+        <span class="k">return</span> <span class="n">out</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="parse_param"><a class="viewcode-back" href="../../api/typedargs.doc_parser.html#typedargs.doc_parser.parse_param">[docs]</a><span class="k">def</span> <span class="nf">parse_param</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">include_desc</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Parse a single typed parameter statement.&quot;&quot;&quot;</span>
+
+    <span class="n">param_def</span><span class="p">,</span> <span class="n">_colon</span><span class="p">,</span> <span class="n">desc</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">include_desc</span><span class="p">:</span>
+        <span class="n">desc</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">desc</span> <span class="o">=</span> <span class="n">desc</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">_colon</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="s2">&quot;Invalid parameter declaration in docstring, missing colon&quot;</span><span class="p">,</span> <span class="n">declaration</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>
+
+    <span class="n">param_name</span><span class="p">,</span> <span class="n">_space</span><span class="p">,</span> <span class="n">param_type</span> <span class="o">=</span> <span class="n">param_def</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">param_type</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="ow">or</span> <span class="n">param_type</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;(&#39;</span> <span class="ow">or</span> <span class="n">param_type</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;)&#39;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="s2">&quot;Invalid parameter type string not enclosed in ( ) characters&quot;</span><span class="p">,</span> <span class="n">param_string</span><span class="o">=</span><span class="n">param_def</span><span class="p">,</span> <span class="n">type_string</span><span class="o">=</span><span class="n">param_type</span><span class="p">)</span>
+
+    <span class="n">param_type</span> <span class="o">=</span> <span class="n">param_type</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">ParameterInfo</span><span class="p">(</span><span class="n">param_type</span><span class="p">,</span> <span class="p">[],</span> <span class="n">desc</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="parse_return"><a class="viewcode-back" href="../../api/typedargs.doc_parser.html#typedargs.doc_parser.parse_return">[docs]</a><span class="k">def</span> <span class="nf">parse_return</span><span class="p">(</span><span class="n">return_line</span><span class="p">,</span> <span class="n">include_desc</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Parse a single return statement declaration.</span>
+
+<span class="sd">    The valid types of return declarion are a Returns: section heading</span>
+<span class="sd">    followed a line that looks like:</span>
+<span class="sd">    type [format-as formatter]: description</span>
+
+<span class="sd">    OR</span>
+
+<span class="sd">    type [show-as (string | context)]: description sentence</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ret_def</span><span class="p">,</span> <span class="n">_colon</span><span class="p">,</span> <span class="n">desc</span> <span class="o">=</span> <span class="n">return_line</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">_colon</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="s2">&quot;Invalid return declaration in docstring, missing colon&quot;</span><span class="p">,</span> <span class="n">declaration</span><span class="o">=</span><span class="n">ret_def</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">include_desc</span><span class="p">:</span>
+        <span class="n">desc</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="s1">&#39;show-as&#39;</span> <span class="ow">in</span> <span class="n">ret_def</span><span class="p">:</span>
+        <span class="n">ret_type</span><span class="p">,</span> <span class="n">_showas</span><span class="p">,</span> <span class="n">show_type</span> <span class="o">=</span> <span class="n">ret_def</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">&#39;show-as&#39;</span><span class="p">)</span>
+        <span class="n">ret_type</span> <span class="o">=</span> <span class="n">ret_type</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">show_type</span> <span class="o">=</span> <span class="n">show_type</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">show_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;string&#39;</span><span class="p">,</span> <span class="s1">&#39;context&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="s2">&quot;Unkown show-as formatting specifier&quot;</span><span class="p">,</span> <span class="n">found</span><span class="o">=</span><span class="n">show_type</span><span class="p">,</span> <span class="n">expected</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;string&#39;</span><span class="p">,</span> <span class="s1">&#39;context&#39;</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">show_type</span> <span class="o">==</span> <span class="s1">&#39;string&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ReturnInfo</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ReturnInfo</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">desc</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s1">&#39;format-as&#39;</span> <span class="ow">in</span> <span class="n">ret_def</span><span class="p">:</span>
+        <span class="n">ret_type</span><span class="p">,</span> <span class="n">_showas</span><span class="p">,</span> <span class="n">formatter</span> <span class="o">=</span> <span class="n">ret_def</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">&#39;format-as&#39;</span><span class="p">)</span>
+        <span class="n">ret_type</span> <span class="o">=</span> <span class="n">ret_type</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">formatter</span> <span class="o">=</span> <span class="n">formatter</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">ReturnInfo</span><span class="p">(</span><span class="n">ret_type</span><span class="p">,</span> <span class="n">formatter</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ReturnInfo</span><span class="p">(</span><span class="n">ret_def</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018 Arch Systems Inc.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

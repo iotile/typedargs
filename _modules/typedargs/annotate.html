@@ -1,0 +1,493 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>typedargs.annotate &mdash; typedargs latest documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> typedargs
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                latest
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../release.html">Release Notes</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">typedargs</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>typedargs.annotate</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for typedargs.annotate</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Decorators that allow you to annotate type information with a function or class.&quot;&quot;&quot;</span>
+
+<span class="c1"># This file is adapted from python code released by WellDone International</span>
+<span class="c1"># under the terms of the LGPLv3.  WellDone International&#39;s contact information is</span>
+<span class="c1"># info@welldone.org</span>
+<span class="c1"># http://welldone.org</span>
+<span class="c1">#</span>
+<span class="c1"># Modifications to this file from the original created at WellDone International</span>
+<span class="c1"># are copyright Arch Systems Inc.</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="p">(</span><span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span>
+                        <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">builtins</span> <span class="k">import</span> <span class="nb">range</span><span class="p">,</span> <span class="nb">str</span>  <span class="c1"># pylint: disable=W0611</span>
+<span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">from</span> <span class="nn">future.utils</span> <span class="k">import</span> <span class="n">iteritems</span>
+<span class="kn">from</span> <span class="nn">decorator</span> <span class="k">import</span> <span class="n">decorate</span>
+<span class="kn">from</span> <span class="nn">typedargs.exceptions</span> <span class="k">import</span> <span class="n">ArgumentError</span>
+<span class="kn">from</span> <span class="nn">typedargs.utils</span> <span class="k">import</span> <span class="n">find_all</span><span class="p">,</span> <span class="n">_check_and_execute</span><span class="p">,</span> <span class="n">_parse_validators</span><span class="p">,</span> <span class="n">context_name</span>
+<span class="kn">from</span> <span class="nn">typedargs.metadata</span> <span class="k">import</span> <span class="n">AnnotatedMetadata</span>
+<span class="kn">from</span> <span class="nn">typedargs.typeinfo</span> <span class="k">import</span> <span class="n">type_system</span>  <span class="c1">#pylint: disable=W0611; this is needed for backward compatibility</span>
+
+
+<div class="viewcode-block" id="context_from_module"><a class="viewcode-back" href="../../api/typedargs.annotate.html#typedargs.annotate.context_from_module">[docs]</a><span class="k">def</span> <span class="nf">context_from_module</span><span class="p">(</span><span class="n">module</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given a module, create a context from all of the top level annotated</span>
+<span class="sd">    symbols in that module.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">con</span> <span class="o">=</span> <span class="n">find_all</span><span class="p">(</span><span class="n">module</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="s2">&quot;__doc__&quot;</span><span class="p">):</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">con</span><span class="p">,</span> <span class="s2">&quot;__doc__&quot;</span><span class="p">,</span> <span class="n">module</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">)</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="vm">__name__</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="s2">&quot;_name_&quot;</span><span class="p">):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">module</span><span class="o">.</span><span class="n">_name_</span>  <span class="c1"># pylint: disable=W0212</span>
+
+    <span class="n">con</span> <span class="o">=</span> <span class="n">annotated</span><span class="p">(</span><span class="n">con</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="n">con</span><span class="p">,</span> <span class="s1">&#39;context&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">name</span><span class="p">,</span> <span class="n">con</span></div>
+
+
+<div class="viewcode-block" id="get_help"><a class="viewcode-back" href="../../api/typedargs.annotate.html#typedargs.annotate.get_help">[docs]</a><span class="k">def</span> <span class="nf">get_help</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return usage information about a context or function.</span>
+
+<span class="sd">    For contexts, just return the context name and its docstring</span>
+<span class="sd">    For functions, return the function signature as well as its</span>
+<span class="sd">    argument types.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        func (callable): An annotated callable function</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: The formatted help text</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">help_text</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">context_name</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+
+        <span class="n">help_text</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+        <span class="n">doc</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getdoc</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">doc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">doc</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">cleandoc</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+            <span class="n">help_text</span> <span class="o">+=</span> <span class="n">doc</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+        <span class="k">return</span> <span class="n">help_text</span>
+
+    <span class="n">sig</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">signature</span><span class="p">()</span>
+    <span class="n">doc</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getdoc</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">doc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">doc</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">cleandoc</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+
+    <span class="n">help_text</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">sig</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+    <span class="k">if</span> <span class="n">doc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">help_text</span> <span class="o">+=</span> <span class="n">doc</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+    <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+        <span class="n">func</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="fm">__init__</span>
+
+    <span class="c1"># If we derived the parameter annotations from a docstring,</span>
+    <span class="c1"># don&#39;t insert a custom arguments section since it already</span>
+    <span class="c1"># exists.</span>
+    <span class="k">if</span> <span class="n">func</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">load_from_doc</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">help_text</span>
+
+    <span class="n">help_text</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Arguments:</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">iteritems</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">annotated_params</span><span class="p">):</span>
+        <span class="n">type_name</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">type_name</span>
+        <span class="n">desc</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">desc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">desc</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">desc</span>
+
+        <span class="n">help_text</span> <span class="o">+=</span> <span class="s2">&quot;  - </span><span class="si">%s</span><span class="s2"> (</span><span class="si">%s</span><span class="s2">): </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">type_name</span><span class="p">,</span> <span class="n">desc</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">help_text</span></div>
+
+<span class="c1"># Decorators</span>
+
+
+<div class="viewcode-block" id="param"><a class="viewcode-back" href="../../api/typedargs.annotate.html#typedargs.annotate.param">[docs]</a><span class="k">def</span> <span class="nf">param</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">type_name</span><span class="p">,</span> <span class="o">*</span><span class="n">validators</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Decorate a function to give type information about its parameters.</span>
+
+<span class="sd">    This function stores a type name, optional description and optional list</span>
+<span class="sd">    of validation functions along with the decorated function it is called</span>
+<span class="sd">    on in order to allow run time type conversions and validation.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        name (string): name of the parameter</span>
+<span class="sd">        type_name (string): The name of a type that will be known to the type</span>
+<span class="sd">            system by the time this function is called for the first time.  Types</span>
+<span class="sd">            are lazily loaded so it is not required that the type resolve correctly</span>
+<span class="sd">            at the point in the module where this function is defined.</span>
+<span class="sd">        validators (list(string or tuple)): A list of validators.  Each validator</span>
+<span class="sd">            can be defined either using a string name or as an n-tuple of the form</span>
+<span class="sd">            [name, \\*extra_args].  The name is used to look up a validator function</span>
+<span class="sd">            of the form validate_name, which is called on the parameters value to</span>
+<span class="sd">            determine if it is valid.  If extra_args are given, they are passed</span>
+<span class="sd">            as extra arguments to the validator function, which is called as:</span>
+
+<span class="sd">            validator(value, \\*extra_args)</span>
+<span class="sd">        desc (string): An optional descriptioon for this parameter that must be</span>
+<span class="sd">            passed as a keyword argument.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        callable: A decorated function with additional type metadata</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_param</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+        <span class="n">func</span> <span class="o">=</span> <span class="n">annotated</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+
+        <span class="n">valids</span> <span class="o">=</span> <span class="n">_parse_validators</span><span class="p">(</span><span class="n">validators</span><span class="p">)</span>
+        <span class="n">func</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">type_name</span><span class="p">,</span> <span class="n">valids</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Only decorate the function once even if we have multiple param decorators</span>
+        <span class="k">if</span> <span class="n">func</span><span class="o">.</span><span class="n">decorated</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">func</span>
+
+        <span class="n">func</span><span class="o">.</span><span class="n">decorated</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">decorate</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">_check_and_execute</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">_param</span></div>
+
+
+<div class="viewcode-block" id="returns"><a class="viewcode-back" href="../../api/typedargs.annotate.html#typedargs.annotate.returns">[docs]</a><span class="k">def</span> <span class="nf">returns</span><span class="p">(</span><span class="n">desc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">printer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Specify how the return value of this function should be handled.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        desc (str): A deprecated description of the return value</span>
+<span class="sd">        printer (callable): A callable function that can format this return value</span>
+<span class="sd">        data (bool): A deprecated parameter for specifying that this function</span>
+<span class="sd">            returns data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ArgumentError</span><span class="p">(</span><span class="s2">&quot;Specifying non data return type in returns is no longer supported&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_returns</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+        <span class="n">annotated</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+        <span class="n">func</span><span class="o">.</span><span class="n">custom_returnvalue</span><span class="p">(</span><span class="n">printer</span><span class="p">,</span> <span class="n">desc</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">func</span>
+
+    <span class="k">return</span> <span class="n">_returns</span></div>
+
+
+<div class="viewcode-block" id="stringable"><a class="viewcode-back" href="../../api/typedargs.annotate.html#typedargs.annotate.stringable">[docs]</a><span class="k">def</span> <span class="nf">stringable</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Specify that the return value should just be printed as a string.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        func (callable): The function that we wish to annotate.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">func</span> <span class="o">=</span> <span class="n">annotated</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+    <span class="n">func</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">string_returnvalue</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">func</span></div>
+
+
+<div class="viewcode-block" id="return_type"><a class="viewcode-back" href="../../api/typedargs.annotate.html#typedargs.annotate.return_type">[docs]</a><span class="k">def</span> <span class="nf">return_type</span><span class="p">(</span><span class="n">type_name</span><span class="p">,</span> <span class="n">formatter</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Specify that this function returns a typed value.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        type_name (str): A type name known to the global typedargs type system</span>
+<span class="sd">        formatter (str): An optional name of a formatting function specified</span>
+<span class="sd">            for the type given in type_name.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_returns</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+        <span class="n">annotated</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+        <span class="n">func</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">typed_returnvalue</span><span class="p">(</span><span class="n">type_name</span><span class="p">,</span> <span class="n">formatter</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">func</span>
+
+    <span class="k">return</span> <span class="n">_returns</span></div>
+
+
+<div class="viewcode-block" id="context"><a class="viewcode-back" href="../../api/typedargs.annotate.html#typedargs.annotate.context">[docs]</a><span class="k">def</span> <span class="nf">context</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Declare that a class defines a context.</span>
+
+<span class="sd">    Contexts are for use with HierarchicalShell for discovering</span>
+<span class="sd">    and using functionality from the command line.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        name (str): Optional name for this context if you don&#39;t want</span>
+<span class="sd">            to just use the class name.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_context</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="n">annotated</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">context</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">return</span> <span class="bp">cls</span>
+
+    <span class="k">return</span> <span class="n">_context</span></div>
+
+
+<div class="viewcode-block" id="finalizer"><a class="viewcode-back" href="../../api/typedargs.annotate.html#typedargs.annotate.finalizer">[docs]</a><span class="k">def</span> <span class="nf">finalizer</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Indicate that this function destroys the context in which it is invoked, such as a quit method</span>
+<span class="sd">    on a subprocess or a delete method on an object.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">func</span> <span class="o">=</span> <span class="n">annotated</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+    <span class="n">func</span><span class="o">.</span><span class="n">finalizer</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="n">func</span></div>
+
+
+<div class="viewcode-block" id="takes_cmdline"><a class="viewcode-back" href="../../api/typedargs.annotate.html#typedargs.annotate.takes_cmdline">[docs]</a><span class="k">def</span> <span class="nf">takes_cmdline</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Annotate that a function should take the entire command line.&quot;&quot;&quot;</span>
+    <span class="n">func</span> <span class="o">=</span> <span class="n">annotated</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+    <span class="n">func</span><span class="o">.</span><span class="n">takes_cmdline</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">return</span> <span class="n">func</span></div>
+
+
+<div class="viewcode-block" id="docannotate"><a class="viewcode-back" href="../../api/typedargs.annotate.html#typedargs.annotate.docannotate">[docs]</a><span class="k">def</span> <span class="nf">docannotate</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Annotate a function using information from its docstring.</span>
+
+<span class="sd">    The annotation actually happens at the time the function is first called</span>
+<span class="sd">    to improve startup time.  For this function to work, the docstring must be</span>
+<span class="sd">    formatted correctly.  You should use the typedargs pylint plugin to make</span>
+<span class="sd">    sure there are no errors in the docstring.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">func</span> <span class="o">=</span> <span class="n">annotated</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+    <span class="n">func</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">load_from_doc</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">if</span> <span class="n">func</span><span class="o">.</span><span class="n">decorated</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">func</span>
+
+    <span class="n">func</span><span class="o">.</span><span class="n">decorated</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="n">decorate</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">_check_and_execute</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="annotated"><a class="viewcode-back" href="../../api/typedargs.annotate.html#typedargs.annotate.annotated">[docs]</a><span class="k">def</span> <span class="nf">annotated</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Mark a function as callable from the command line.</span>
+
+<span class="sd">    This function is meant to be called as decorator.  This function</span>
+<span class="sd">    also initializes metadata about the function&#39;s arguments that is</span>
+<span class="sd">    built up by the param decorator.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        func (callable): The function that we wish to mark as callable</span>
+<span class="sd">            from the command line.</span>
+<span class="sd">        name (str): Optional string that will override the function&#39;s</span>
+<span class="sd">            built-in name.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="s1">&#39;metadata&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">func</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">AnnotatedMetadata</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">func</span>
+
+    <span class="n">func</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">AnnotatedMetadata</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+    <span class="n">func</span><span class="o">.</span><span class="n">finalizer</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">func</span><span class="o">.</span><span class="n">takes_cmdline</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">func</span><span class="o">.</span><span class="n">decorated</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">func</span><span class="o">.</span><span class="n">context</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">return</span> <span class="n">func</span></div>
+
+
+<div class="viewcode-block" id="short_description"><a class="viewcode-back" href="../../api/typedargs.annotate.html#typedargs.annotate.short_description">[docs]</a><span class="k">def</span> <span class="nf">short_description</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given an object with a docstring, return the first line of the docstring</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">doc</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getdoc</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">doc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">doc</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">cleandoc</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="s2">&quot;&quot;</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018 Arch Systems Inc.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../_static/doctools.js"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
