@@ -24,7 +24,7 @@
         "hash_type": "line"
     }, 
     ".multipackage/scripts/generate_api.py": {
-        "hash": "MD5:40303ACB3E7E4C76D9C3C02792290B4A", 
+        "hash": "MD5:EBF682DCAF72E84285F7E945CBB19B81", 
         "hash_type": "line"
     }, 
     ".multipackage/scripts/release_by_name.py": {
@@ -60,7 +60,7 @@
         "hash_type": "line"
     }, 
     ".travis.yml": {
-        "hash": "MD5:525F0600304809B889FCE8AC9A51C916", 
+        "hash": "MD5:970F5D80DE9E282E54F51D7E98F0C6F2", 
         "hash_type": "line"
     }, 
     "doc/_template/module.rst": {
