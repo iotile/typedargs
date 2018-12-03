@@ -9,6 +9,7 @@ environments from a python API.
   :hidden:
 
   api
+  release
 
 
 API Reference

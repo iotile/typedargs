@@ -6,4 +6,4 @@ API Reference
 .. toctree::
   :hidden:
 
-  api/typedargs
+  api/typedargs 
