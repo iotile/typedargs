@@ -1,5 +1,16 @@
 # `typedargs`
 
+## 0.13.4
+
+- Update decorated requirement
+- Add alias for basic_dict
+
+## 0.13.3
+
+- Fix nested context names for proxy modules
+- Clean up some pylint complaints
+- Port to multipackage for CI scripts
+
 ## 0.13.2
 
 - Provide more helpful error messages when an external module cannot be
