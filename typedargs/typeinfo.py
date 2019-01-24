@@ -253,6 +253,8 @@ class TypeSystem:
             type_name = 'integer'
         elif str(type_name) == 'str':
             type_name = 'string'
+        elif str(type_name) == 'dict':
+            type_name = 'basic_dict'
 
         if self.is_known_type(type_name):
             return self.known_types[type_name]

@@ -24,7 +24,7 @@ setup(
     version=version,
     license="LGPLv3",
     install_requires=[
-        "decorator>=3.4.0",
+        "decorator>=4.3.0",
         "future>=0.16.0",
         "pyreadline>=2.1.0;platform_system==\"Windows\""
     ],
