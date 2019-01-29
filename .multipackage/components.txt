@@ -15,4 +15,5 @@
 # is compatible with.  The default is a universal package that is compatible
 # with both python 2 and python 3.
 
-typedargs: ./
+typedargs: ./, compatibility=universal
+

@@ -1,3 +1,3 @@
 COMPONENTS = {
-    "typedargs": {"name": "typedargs", "path": "./", "options": {}}
+    "typedargs": {"name": "typedargs", "path": "./", "options": {"compatibility": "universal"}}
 }
