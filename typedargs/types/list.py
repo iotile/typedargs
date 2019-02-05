@@ -12,7 +12,9 @@
 
 import ast
 import collections
-from past.builtins import basestring
+import sys
+if sys.version_info >= (3,0):
+    basestring = str
 
 
 class list:  # pylint: disable=C0103

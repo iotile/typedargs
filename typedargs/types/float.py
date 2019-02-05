@@ -9,7 +9,9 @@
 # pylint: disable=unused-argument,missing-docstring
 
 from builtins import int
-from past.builtins import basestring
+import sys
+if sys.version_info >= (3,0):
+    basestring = str
 
 
 def convert(arg):
