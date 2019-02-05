@@ -1,5 +1,9 @@
 # `typedargs`
 
+## 0.13.6
+
+- Eliminate 2to3 dependence
+
 ## 0.13.5
 
 - Reduce 2to3 dependence
