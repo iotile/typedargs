@@ -1,7 +1,10 @@
 """Utility functions that are only used internally inside typedargs."""
 
 from builtins import str
-from past.builtins import basestring
+import sys
+if sys.version_info >= (3,0):
+    basestring = str
+
 from .exceptions import ValidationError
 from .metadata import AnnotatedMetadata
 
