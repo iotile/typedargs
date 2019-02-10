@@ -1,5 +1,9 @@
 # `typedargs`
 
+## 0.13.7
+
+- Fix deprecation warning getting argument signatures on python 3.
+
 ## 0.13.6
 
 - Eliminate 2to3 dependence
