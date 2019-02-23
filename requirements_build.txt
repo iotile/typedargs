@@ -7,5 +7,6 @@ wheel >= 0.32
 pylint ~= 1.9
 #END MULTIPACKAGE MANAGED SECTION
 
+decorator>=4.3.0
 future
 pytest-logging
