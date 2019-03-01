@@ -3,7 +3,6 @@
 # pylint: disable=unused-argument,redefined-outer-name,missing-docstring
 
 import pytest
-from builtins import int, str
 from typedargs import type_system, docannotate, param, return_type
 from typedargs.annotate import get_help
 from typedargs.exceptions import ValidationError, ArgumentError

@@ -8,8 +8,6 @@
 # Modifications to this file from the original created at WellDone International
 # are copyright Arch Systems Inc.
 
-from future.utils import iteritems
-
 
 class KeyValueException(Exception):
     """An exception taking key value pairs containing exception information.
@@ -48,7 +46,7 @@ class KeyValueException(Exception):
             msg = "%s: %s" % (self.__class__.__name__, self.msg)
 
         if len(self.params) != 0:
-            paramstring = "\n".join([str(key) + ": " + str(val) for key, val in iteritems(self.params)])
+            paramstring = "\n".join([str(key) + ": " + str(val) for key, val in self.params.items()])
             msg += "\nAdditional Information:\n" + paramstring
 
         return msg

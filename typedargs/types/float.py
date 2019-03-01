@@ -8,28 +8,25 @@
 
 # pylint: disable=unused-argument,missing-docstring
 
-from builtins import int
-import sys
-if sys.version_info >= (3,0):
-    basestring = str
-
 
 def convert(arg):
     if arg is None:
         return None
 
-    if isinstance(arg, (basestring, int, float)):
+    if isinstance(arg, (str, int, float)):
         return float(arg)
 
     raise TypeError("Unknown argument type")
 
-#Validation Functions
+
+# Validation Functions
 def validate_positive(arg):
     if arg is None:
         return
 
     if arg <= 0:
         raise ValueError("value is not positive")
+
 
 def validate_nonnegative(arg):
     if arg is None:
@@ -38,6 +35,7 @@ def validate_nonnegative(arg):
     if arg < 0:
         raise ValueError("value is negative")
 
+
 def validate_range(arg, lower, upper):
     if arg is None:
         return
@@ -45,6 +43,7 @@ def validate_range(arg, lower, upper):
     if arg < lower or arg > upper:
         raise ValueError("not in required range [%f, %f]" %(float(lower), float(upper)))
 
-#Formatting functions
+
+# Formatting functions
 def default_formatter(arg, **kwarg):
     return str(arg)

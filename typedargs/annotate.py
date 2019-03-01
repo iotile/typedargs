@@ -8,11 +8,7 @@
 # Modifications to this file from the original created at WellDone International
 # are copyright Arch Systems Inc.
 
-from __future__ import (absolute_import, division,
-                        print_function, unicode_literals)
-from builtins import range, str  # pylint: disable=W0611
 import inspect
-from future.utils import iteritems
 from decorator import decorate
 from typedargs.exceptions import ArgumentError
 from typedargs.utils import find_all, _check_and_execute, _parse_validators, context_name
@@ -86,7 +82,7 @@ def get_help(func):
         return help_text
 
     help_text += "\nArguments:\n"
-    for key, info in iteritems(func.metadata.annotated_params):
+    for key, info in func.metadata.annotated_params.items():
         type_name = info.type_name
         desc = ""
         if info.desc is not None:

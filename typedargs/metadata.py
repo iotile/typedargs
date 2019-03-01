@@ -1,11 +1,7 @@
 """The basic class that is used to store metadata about a function."""
 
-from __future__ import (absolute_import, division,
-                        print_function, unicode_literals)
-from builtins import range, str
 import inspect
 import sys
-from future.utils import viewitems
 from typedargs import typeinfo
 from .exceptions import TypeSystemError, ArgumentError, ValidationError, InternalError
 from .basic_structures import ParameterInfo, ReturnInfo
@@ -84,7 +80,7 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
     def _ensure_loaded(self):
         if self.load_from_doc and not self._doc_parsed:
             params, ret_info = parse_docstring(self._docstring)
-            for param_name, param_info in viewitems(params):
+            for param_name, param_info in params.items():
                 self.add_param(param_name, param_info.type_name, param_info.validators)
 
             if ret_info is not None:
@@ -339,7 +335,7 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
 
             arg_vals[i] = arg
 
-        for arg, val in viewitems(kwargs):
+        for arg, val in kwargs.items():
             index = kw_indices.get(arg)
             if index is None:
                 raise ArgumentError("Cannot find argument by name: %s" % arg)

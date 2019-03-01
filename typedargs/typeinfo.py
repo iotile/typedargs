@@ -8,14 +8,11 @@
 # Modifications to this file from the original created at WellDone International
 # are copyright Arch Systems Inc.
 
-#typeinfo.py
-#Basic routines for converting information from string or other binary
-#formats to python types and for displaying those types in supported
-#formats
+# typeinfo.py
+# Basic routines for converting information from string or other binary
+# formats to python types and for displaying those types in supported
+# formats
 
-from __future__ import (absolute_import, division,
-                        print_function, unicode_literals)
-from builtins import str
 
 import os.path
 import imp

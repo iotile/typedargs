@@ -6,7 +6,6 @@
 #bytes.py
 #Simple bytearray type
 
-from builtins import str
 import sys
 from binascii import unhexlify
 

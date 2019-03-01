@@ -8,13 +8,10 @@
 
 # pylint: disable=unused-argument,missing-docstring
 
-#list.py
+# list.py
 
 import ast
 import collections
-import sys
-if sys.version_info >= (3,0):
-    basestring = str
 
 
 class list:  # pylint: disable=C0103
@@ -35,7 +32,7 @@ class list:  # pylint: disable=C0103
             return value
 
         converted = []
-        if isinstance(value, basestring):
+        if isinstance(value, str):
             old_value = value
             value = ast.literal_eval(value)
             if not isinstance(value, collections.Sequence):

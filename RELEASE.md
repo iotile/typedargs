@@ -1,5 +1,10 @@
 # `typedargs`
 
+## 1.0.0
+
+- Drop python2 support
+- Add azure pipelines for test suite
+
 ## 0.13.7
 
 - Fix deprecation warning getting argument signatures on python 3.

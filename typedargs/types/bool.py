@@ -11,17 +11,12 @@
 # bool.py
 # Simple boolean type
 
-from builtins import str
-import sys
-if sys.version_info >= (3,0):
-    basestring = str
-
 
 def convert(arg, **kwargs):
     if arg is None:
         return arg
 
-    if isinstance(arg, basestring):
+    if isinstance(arg, str):
         comp = str(arg.lower())
 
         if comp == u'true':
