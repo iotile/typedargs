@@ -158,10 +158,8 @@
 
 <span class="c1"># pylint: disable=unused-argument,missing-docstring</span>
 
-<span class="c1">#map.py</span>
-<span class="c1">#a complex type wrapping a python dictionary</span>
-
-<span class="kn">from</span> <span class="nn">future.utils</span> <span class="k">import</span> <span class="n">viewitems</span>
+<span class="c1"># map.py</span>
+<span class="c1"># a complex type wrapping a python dictionary</span>
 
 
 <div class="viewcode-block" id="map"><a class="viewcode-back" href="../../../api/typedargs.types.map.html#typedargs.types.map.map">[docs]</a><span class="k">class</span> <span class="nc">map</span><span class="p">:</span>  <span class="c1"># pylint: disable=C0103</span>
@@ -187,7 +185,7 @@
 
 <div class="viewcode-block" id="map.default_formatter"><a class="viewcode-back" href="../../../api/typedargs.types.map.html#typedargs.types.map.map.default_formatter">[docs]</a>    <span class="k">def</span> <span class="nf">default_formatter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">forms</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">viewitems</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">keyform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_system</span><span class="o">.</span><span class="n">format_value</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">keytype</span><span class="p">)</span>
             <span class="n">valform</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_system</span><span class="o">.</span><span class="n">format_value</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">valuetype</span><span class="p">)</span>
             <span class="n">forms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">keyform</span><span class="p">,</span> <span class="n">valform</span><span class="p">))</span>

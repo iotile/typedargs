@@ -158,11 +158,7 @@
 <span class="c1"># Modifications to this file from the original created at WellDone International</span>
 <span class="c1"># are copyright Arch Systems Inc.</span>
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="p">(</span><span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span>
-                        <span class="n">print_function</span><span class="p">,</span> <span class="n">unicode_literals</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">builtins</span> <span class="k">import</span> <span class="nb">range</span><span class="p">,</span> <span class="nb">str</span>  <span class="c1"># pylint: disable=W0611</span>
 <span class="kn">import</span> <span class="nn">inspect</span>
-<span class="kn">from</span> <span class="nn">future.utils</span> <span class="k">import</span> <span class="n">iteritems</span>
 <span class="kn">from</span> <span class="nn">decorator</span> <span class="k">import</span> <span class="n">decorate</span>
 <span class="kn">from</span> <span class="nn">typedargs.exceptions</span> <span class="k">import</span> <span class="n">ArgumentError</span>
 <span class="kn">from</span> <span class="nn">typedargs.utils</span> <span class="k">import</span> <span class="n">find_all</span><span class="p">,</span> <span class="n">_check_and_execute</span><span class="p">,</span> <span class="n">_parse_validators</span><span class="p">,</span> <span class="n">context_name</span>
@@ -236,7 +232,7 @@
         <span class="k">return</span> <span class="n">help_text</span>
 
     <span class="n">help_text</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Arguments:</span><span class="se">\n</span><span class="s2">&quot;</span>
-    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">iteritems</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">annotated_params</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">func</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">annotated_params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">type_name</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">type_name</span>
         <span class="n">desc</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
         <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">desc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>

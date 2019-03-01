@@ -158,13 +158,10 @@
 
 <span class="c1"># pylint: disable=unused-argument,missing-docstring</span>
 
-<span class="c1">#list.py</span>
+<span class="c1"># list.py</span>
 
 <span class="kn">import</span> <span class="nn">ast</span>
 <span class="kn">import</span> <span class="nn">collections</span>
-<span class="kn">import</span> <span class="nn">sys</span>
-<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">0</span><span class="p">):</span>
-    <span class="n">basestring</span> <span class="o">=</span> <span class="nb">str</span>
 
 
 <div class="viewcode-block" id="list"><a class="viewcode-back" href="../../../api/typedargs.types.list.html#typedargs.types.list.list">[docs]</a><span class="k">class</span> <span class="nc">list</span><span class="p">:</span>  <span class="c1"># pylint: disable=C0103</span>
@@ -185,7 +182,7 @@
             <span class="k">return</span> <span class="n">value</span>
 
         <span class="n">converted</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">basestring</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">old_value</span> <span class="o">=</span> <span class="n">value</span>
             <span class="n">value</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">literal_eval</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Sequence</span><span class="p">):</span>
