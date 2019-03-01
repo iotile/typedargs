@@ -1,12 +1,9 @@
 """Experimental module for better google docstring parsing."""
 
-from __future__ import unicode_literals, print_function
-from builtins import str
 import inspect
 from io import StringIO
 from collections import namedtuple
 from textwrap import fill, dedent
-from future.utils import viewitems
 from .basic_structures import ParameterInfo, ReturnInfo
 from .exceptions import ValidationError
 from .terminal import get_terminal_size
@@ -46,7 +43,7 @@ class ParsedDocstring:
 
             self._sections[sec_type].extend(lines)
 
-        for section, lines in viewitems(self._sections):
+        for section, lines in self._sections.items():
             lines = self._merge_blank_lines(lines)
             self._sections[section] = lines
 

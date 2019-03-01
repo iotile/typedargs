@@ -12,14 +12,10 @@
 #Given a command line string, attempt to map it to a function and fill in
 #the parameters based on that function's annotated type information.
 
-from __future__ import (absolute_import, division,
-                        print_function, unicode_literals)
 import inspect
 import shlex
 import platform
 import importlib
-from builtins import str
-from future.utils import iteritems
 from typedargs.exceptions import ArgumentError, NotFoundError, ValidationError
 from typedargs import annotate, utils
 from typedargs import iprint
@@ -157,7 +153,7 @@ class HierarchicalShell:
         old_interactive = type_system.interactive
         type_system.interactive = False
 
-        for key, cmds in iteritems(self.init_commands):
+        for key, cmds in self.init_commands.items():
             if path.endswith(key):
                 for cmd in cmds:
                     line = self._split_line(cmd)

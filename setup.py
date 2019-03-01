@@ -25,9 +25,9 @@ setup(
     license="LGPLv3",
     install_requires=[
         "decorator>=4.3.0",
-        "future>=0.16.0",
         "pyreadline>=2.1.0;platform_system==\"Windows\""
     ],
+    python_requires=">=3.5,<4",
     description="A typechecking and shell generation program for python APIs",
     author="Arch",
     author_email="info@arch-iot.com",
@@ -35,10 +35,10 @@ setup(
     keywords=[""],
     classifiers=[
         "Programming Language :: Python",
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         "Development Status :: 5 - Production/Stable",
         "License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)",
         "Operating System :: OS Independent",
@@ -48,7 +48,7 @@ setup(
 TypedArgs
 ---------
 
-TypedArgs provides a way to annotate python 2.7 functions with type information that allows
+TypedArgs provides a way to annotate python3 functions with type information that allows
 the quick creation of custom command line shells.
 """
 )

@@ -1,10 +1,5 @@
 """Utility functions that are only used internally inside typedargs."""
 
-from builtins import str
-import sys
-if sys.version_info >= (3,0):
-    basestring = str
-
 from .exceptions import ValidationError
 from .metadata import AnnotatedMetadata
 
@@ -49,7 +44,7 @@ def _parse_validators(valids):
     outvals = []
 
     for val in valids:
-        if isinstance(val, basestring):
+        if isinstance(val, str):
             args = []
         elif len(val) > 1:
             args = val[1:]

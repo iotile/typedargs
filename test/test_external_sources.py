@@ -1,7 +1,6 @@
 import os.path
 import typedargs.typeinfo as typeinfo
 import typedargs.types as types
-import pkg_resources
 from typedargs.exceptions import ArgumentError
 import pytest
 

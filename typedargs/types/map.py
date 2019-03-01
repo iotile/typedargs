@@ -8,10 +8,8 @@
 
 # pylint: disable=unused-argument,missing-docstring
 
-#map.py
-#a complex type wrapping a python dictionary
-
-from future.utils import viewitems
+# map.py
+# a complex type wrapping a python dictionary
 
 
 class map:  # pylint: disable=C0103
@@ -37,7 +35,7 @@ class map:  # pylint: disable=C0103
 
     def default_formatter(self, value, **kwargs):
         forms = []
-        for key, val in viewitems(value):
+        for key, val in value.items():
             keyform = self.type_system.format_value(key, self.keytype)
             valform = self.type_system.format_value(val, self.valuetype)
             forms.append("%s: %s" % (keyform, valform))

@@ -9,7 +9,6 @@
 # pylint: disable=unused-argument,missing-docstring
 
 import os.path
-from builtins import str
 
 
 def convert(arg):

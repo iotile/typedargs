@@ -1,7 +1,5 @@
-"""Routines for extracting parmeter and return information from a docstring."""
+"""Routines for extracting parameter and return information from a docstring."""
 
-from __future__ import (unicode_literals, print_function, absolute_import)
-from builtins import str
 import inspect
 from .doc_parser import parse_param, parse_return
 

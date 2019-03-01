@@ -13,10 +13,6 @@ is not correctly formatted.
 
 #pylint: disable=all; Work in progress that should not be linted yet
 
-from __future__ import (unicode_literals, print_function, absolute_import)
-import sys
-import inspect
-from builtins import str
 from collections import namedtuple
 import astroid
 import astroid.scoped_nodes

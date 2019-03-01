@@ -8,19 +8,14 @@
 
 # pylint: disable=unused-argument,missing-docstring
 
-#integer type
-
-from builtins import int
-import sys
-if sys.version_info >= (3,0):
-    basestring = str
+# integer type
 
 
 def convert(arg):
     if arg is None:
         return None
 
-    if isinstance(arg, basestring):
+    if isinstance(arg, str):
         return int(arg, 0)
     if isinstance(arg, int):
         return arg
@@ -53,7 +48,7 @@ def validate_nonnegative(arg):
         raise ValueError("value is negative")
 
 
-#Formatting functions
+# Formatting functions
 def default_formatter(arg, **kwarg):
     return str(arg)
 
