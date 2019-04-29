@@ -1,5 +1,13 @@
 # `typedargs`
 
+## 1.0.1
+
+- Add support for two additional formatters for `bytes` type data: hex and
+  hexdump.  These allow the creation of functions that return binary data but
+  are still usable from the command line since the binary data will be printed
+  as either hex format or a normal hex dump such as what disassemblers show
+  for memory dumps.
+
 ## 1.0.0
 
 - Drop python2 support
