@@ -7,7 +7,7 @@ typedargs.types.bytes module
 .. currentmodule:: typedargs.types.bytes
 
 .. automodule:: typedargs.types.bytes
-    :members: convert, convert_binary, default_formatter, format_repr
+    :members: convert, convert_binary, default_formatter, format_hex, format_hexdump, format_repr
     :undoc-members:
     :show-inheritance:
     :member-order: bysource
@@ -23,6 +23,8 @@ typedargs.types.bytes module
         convert
         convert_binary
         default_formatter
+        format_hex
+        format_hexdump
         format_repr
 
 

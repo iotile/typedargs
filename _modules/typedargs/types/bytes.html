@@ -157,21 +157,23 @@
 <span class="c1">#Simple bytearray type</span>
 
 <span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">from</span> <span class="nn">binascii</span> <span class="k">import</span> <span class="n">unhexlify</span>
+<span class="kn">from</span> <span class="nn">binascii</span> <span class="k">import</span> <span class="n">unhexlify</span><span class="p">,</span> <span class="n">hexlify</span>
 
 
 <div class="viewcode-block" id="convert"><a class="viewcode-back" href="../../../api/typedargs.types.bytes.html#typedargs.types.bytes.convert">[docs]</a><span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">arg</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="ow">and</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">)):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">arg</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;0x&quot;</span><span class="p">):</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">unhexlify</span><span class="p">(</span><span class="n">arg</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">arg</span>
 
         <span class="k">return</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">arg</span>
 
-    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;You must create a bytes object from a bytearray or a hex string&quot;</span><span class="p">)</span></div>
+    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;You must create a bytes object from bytes, bytearray or a hex string&quot;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="convert_binary"><a class="viewcode-back" href="../../../api/typedargs.types.bytes.html#typedargs.types.bytes.convert_binary">[docs]</a><span class="k">def</span> <span class="nf">convert_binary</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -184,6 +186,47 @@
 
 <div class="viewcode-block" id="format_repr"><a class="viewcode-back" href="../../../api/typedargs.types.bytes.html#typedargs.types.bytes.format_repr">[docs]</a><span class="k">def</span> <span class="nf">format_repr</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
     <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="format_hex"><a class="viewcode-back" href="../../../api/typedargs.types.bytes.html#typedargs.types.bytes.format_hex">[docs]</a><span class="k">def</span> <span class="nf">format_hex</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert the bytes object to a hex string.&quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">hexlify</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="format_hexdump"><a class="viewcode-back" href="../../../api/typedargs.types.bytes.html#typedargs.types.bytes.format_hexdump">[docs]</a><span class="k">def</span> <span class="nf">format_hexdump</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert the bytes object to a hexdump.</span>
+
+<span class="sd">    The output format will be:</span>
+
+<span class="sd">    &lt;offset, 4-byte&gt;  &lt;16-bytes of output separated by 1 space&gt;  &lt;16 ascii characters&gt;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">line</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">arg</span><span class="p">),</span> <span class="mi">16</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">chunk</span> <span class="o">=</span> <span class="n">arg</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span> <span class="o">+</span> <span class="mi">16</span><span class="p">]</span>
+        <span class="n">hex_chunk</span> <span class="o">=</span> <span class="n">hexlify</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+        <span class="n">hex_line</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">hex_chunk</span><span class="p">[</span><span class="n">j</span><span class="p">:</span><span class="n">j</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">hex_chunk</span><span class="p">),</span> <span class="mi">2</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">hex_line</span><span class="p">)</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="mi">16</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">hex_line</span> <span class="o">+=</span> <span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="p">(((</span><span class="mi">3</span> <span class="o">*</span> <span class="mi">16</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">hex_line</span><span class="p">))</span>
+
+        <span class="n">ascii_line</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_convert_to_ascii</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">chunk</span><span class="p">)</span>
+        <span class="n">offset_line</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%08x</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">i</span>
+
+        <span class="n">line</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">  </span><span class="si">%s</span><span class="s2">  </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">offset_line</span><span class="p">,</span> <span class="n">hex_line</span><span class="p">,</span> <span class="n">ascii_line</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">line</span></div>
+
+
+<span class="k">def</span> <span class="nf">_convert_to_ascii</span><span class="p">(</span><span class="n">byte</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">byte</span> <span class="o">&lt;</span> <span class="mi">32</span> <span class="ow">or</span> <span class="n">byte</span> <span class="o">&gt;</span> <span class="mi">126</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;.&#39;</span>
+
+    <span class="k">return</span> <span class="nb">chr</span><span class="p">(</span><span class="n">byte</span><span class="p">)</span>
 </pre></div>
 
            </div>
