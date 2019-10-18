@@ -1,5 +1,9 @@
 # `typedargs`
 
+## 1.0.2
+
+- Fix deprecation warnings for `imp` and `collections`
+
 ## 1.0.1
 
 - Add support for two additional formatters for `bytes` type data: hex and
