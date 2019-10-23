@@ -35,7 +35,7 @@ class list:  # pylint: disable=C0103
         if isinstance(value, str):
             old_value = value
             value = ast.literal_eval(value)
-            if not isinstance(value, collections.Sequence):
+            if not isinstance(value, collections.abc.Sequence):
                 raise ValueError("converted list from a string but it did not produce a sequence: %s" % old_value)
 
         for val in value:

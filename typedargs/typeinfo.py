@@ -15,7 +15,7 @@
 
 
 import os.path
-import imp
+import importlib
 import logging
 import sys
 from typedargs.exceptions import ValidationError, ArgumentError, KeyValueException
@@ -358,8 +358,7 @@ class TypeSystem:
         folder, filename = os.path.split(path)
 
         try:
-            fileobj, pathname, description = imp.find_module(filename, [folder])
-            mod = imp.load_module(filename, fileobj, pathname, description)
+            mod = importlib.import_module(filename, folder)
         except ImportError as exc:
             raise ArgumentError("could not import module in order to load external types", module_path=path, parent_directory=folder, module_name=filename, error=str(exc))
 
