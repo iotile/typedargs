@@ -152,10 +152,10 @@
 
 <span class="kn">import</span> <span class="nn">inspect</span>
 <span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">from</span> <span class="nn">typedargs</span> <span class="k">import</span> <span class="n">typeinfo</span>
-<span class="kn">from</span> <span class="nn">.exceptions</span> <span class="k">import</span> <span class="n">TypeSystemError</span><span class="p">,</span> <span class="n">ArgumentError</span><span class="p">,</span> <span class="n">ValidationError</span><span class="p">,</span> <span class="n">InternalError</span>
-<span class="kn">from</span> <span class="nn">.basic_structures</span> <span class="k">import</span> <span class="n">ParameterInfo</span><span class="p">,</span> <span class="n">ReturnInfo</span>
-<span class="kn">from</span> <span class="nn">.doc_annotate</span> <span class="k">import</span> <span class="n">parse_docstring</span>
+<span class="kn">from</span> <span class="nn">typedargs</span> <span class="kn">import</span> <span class="n">typeinfo</span>
+<span class="kn">from</span> <span class="nn">.exceptions</span> <span class="kn">import</span> <span class="n">TypeSystemError</span><span class="p">,</span> <span class="n">ArgumentError</span><span class="p">,</span> <span class="n">ValidationError</span><span class="p">,</span> <span class="n">InternalError</span>
+<span class="kn">from</span> <span class="nn">.basic_structures</span> <span class="kn">import</span> <span class="n">ParameterInfo</span><span class="p">,</span> <span class="n">ReturnInfo</span>
+<span class="kn">from</span> <span class="nn">.doc_annotate</span> <span class="kn">import</span> <span class="n">parse_docstring</span>
 
 
 <div class="viewcode-block" id="AnnotatedMetadata"><a class="viewcode-back" href="../../api/typedargs.metadata.html#typedargs.metadata.AnnotatedMetadata">[docs]</a><span class="k">class</span> <span class="nc">AnnotatedMetadata</span><span class="p">:</span> <span class="c1">#pylint: disable=R0902; These instance variables are required.</span>
@@ -169,7 +169,7 @@
 <span class="sd">            of this function</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">annotated_params</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_has_self</span> <span class="o">=</span> <span class="kc">False</span>
 

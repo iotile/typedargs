@@ -163,13 +163,13 @@
 
 <span class="c1">#pylint: disable=all; Work in progress that should not be linted yet</span>
 
-<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">namedtuple</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
 <span class="kn">import</span> <span class="nn">astroid</span>
 <span class="kn">import</span> <span class="nn">astroid.scoped_nodes</span>
 <span class="kn">import</span> <span class="nn">astroid.node_classes</span>
-<span class="kn">from</span> <span class="nn">pylint.checkers</span> <span class="k">import</span> <span class="n">BaseChecker</span>
-<span class="kn">from</span> <span class="nn">pylint.interfaces</span> <span class="k">import</span> <span class="n">IAstroidChecker</span>
-<span class="kn">from</span> <span class="nn">.metadata</span> <span class="k">import</span> <span class="n">ParameterInfo</span><span class="p">,</span> <span class="n">ReturnInfo</span>
+<span class="kn">from</span> <span class="nn">pylint.checkers</span> <span class="kn">import</span> <span class="n">BaseChecker</span>
+<span class="kn">from</span> <span class="nn">pylint.interfaces</span> <span class="kn">import</span> <span class="n">IAstroidChecker</span>
+<span class="kn">from</span> <span class="nn">.metadata</span> <span class="kn">import</span> <span class="n">ParameterInfo</span><span class="p">,</span> <span class="n">ReturnInfo</span>
 
 
 <span class="n">AnnotationList</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;AnnotationList&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">,</span> <span class="s1">&#39;returns&#39;</span><span class="p">,</span> <span class="s1">&#39;use_doc&#39;</span><span class="p">])</span>
@@ -248,7 +248,7 @@
         <span class="p">)</span>
     <span class="p">}</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">linter</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">linter</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">DocannotationChecker</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">linter</span><span class="p">)</span>
 
 <div class="viewcode-block" id="DocannotationChecker.visit_functiondef"><a class="viewcode-back" href="../../api/typedargs.lint.html#typedargs.lint.DocannotationChecker.visit_functiondef">[docs]</a>    <span class="k">def</span> <span class="nf">visit_functiondef</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>

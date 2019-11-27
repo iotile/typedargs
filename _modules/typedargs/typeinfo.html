@@ -168,8 +168,8 @@
 <span class="kn">import</span> <span class="nn">importlib</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">from</span> <span class="nn">typedargs.exceptions</span> <span class="k">import</span> <span class="n">ValidationError</span><span class="p">,</span> <span class="n">ArgumentError</span><span class="p">,</span> <span class="n">KeyValueException</span>
-<span class="kn">from</span> <span class="nn">typedargs</span> <span class="k">import</span> <span class="n">types</span>
+<span class="kn">from</span> <span class="nn">typedargs.exceptions</span> <span class="kn">import</span> <span class="n">ValidationError</span><span class="p">,</span> <span class="n">ArgumentError</span><span class="p">,</span> <span class="n">KeyValueException</span>
+<span class="kn">from</span> <span class="nn">typedargs</span> <span class="kn">import</span> <span class="n">types</span>
 
 
 <div class="viewcode-block" id="TypeSystem"><a class="viewcode-back" href="../../api/typedargs.typeinfo.html#typedargs.typeinfo.TypeSystem">[docs]</a><span class="k">class</span> <span class="nc">TypeSystem</span><span class="p">:</span>
@@ -178,7 +178,7 @@
 <span class="sd">    converted string and binary values to and from these types.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a TypeSystem by importing all of the types defined in modules passed</span>
 <span class="sd">        as arguments to this function.  Each module is imported using</span>

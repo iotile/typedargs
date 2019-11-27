@@ -159,11 +159,11 @@
 <span class="c1"># are copyright Arch Systems Inc.</span>
 
 <span class="kn">import</span> <span class="nn">inspect</span>
-<span class="kn">from</span> <span class="nn">decorator</span> <span class="k">import</span> <span class="n">decorate</span>
-<span class="kn">from</span> <span class="nn">typedargs.exceptions</span> <span class="k">import</span> <span class="n">ArgumentError</span>
-<span class="kn">from</span> <span class="nn">typedargs.utils</span> <span class="k">import</span> <span class="n">find_all</span><span class="p">,</span> <span class="n">_check_and_execute</span><span class="p">,</span> <span class="n">_parse_validators</span><span class="p">,</span> <span class="n">context_name</span>
-<span class="kn">from</span> <span class="nn">typedargs.metadata</span> <span class="k">import</span> <span class="n">AnnotatedMetadata</span>
-<span class="kn">from</span> <span class="nn">typedargs.typeinfo</span> <span class="k">import</span> <span class="n">type_system</span>  <span class="c1">#pylint: disable=W0611; this is needed for backward compatibility</span>
+<span class="kn">from</span> <span class="nn">decorator</span> <span class="kn">import</span> <span class="n">decorate</span>
+<span class="kn">from</span> <span class="nn">typedargs.exceptions</span> <span class="kn">import</span> <span class="n">ArgumentError</span>
+<span class="kn">from</span> <span class="nn">typedargs.utils</span> <span class="kn">import</span> <span class="n">find_all</span><span class="p">,</span> <span class="n">_check_and_execute</span><span class="p">,</span> <span class="n">_parse_validators</span><span class="p">,</span> <span class="n">context_name</span>
+<span class="kn">from</span> <span class="nn">typedargs.metadata</span> <span class="kn">import</span> <span class="n">AnnotatedMetadata</span>
+<span class="kn">from</span> <span class="nn">typedargs.typeinfo</span> <span class="kn">import</span> <span class="n">type_system</span>  <span class="c1">#pylint: disable=W0611; this is needed for backward compatibility</span>
 
 
 <div class="viewcode-block" id="context_from_module"><a class="viewcode-back" href="../../api/typedargs.annotate.html#typedargs.annotate.context_from_module">[docs]</a><span class="k">def</span> <span class="nf">context_from_module</span><span class="p">(</span><span class="n">module</span><span class="p">):</span>
