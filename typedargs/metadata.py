@@ -23,7 +23,7 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
         self.annotated_params = {}
         self._has_self = False
 
-        docstring = func.__doc__
+        docstring = func.__doc__ if func.__doc__ else ''
 
         if inspect.isclass(func):
             # If we're annotating a class, the name of the class should be
