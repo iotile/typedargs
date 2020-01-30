@@ -2,7 +2,7 @@
 
 ## HEAD
 
-- Fix docstrings parsing (Issue #47) 
+- Fix docstrings parsing (Issues #47, #34) 
 
 ## 1.0.2
 

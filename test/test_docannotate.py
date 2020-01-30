@@ -67,6 +67,20 @@ def test_docannotate_basic():
     assert help_text == HELPSTRING
 
 
+def test_docannotate_no_docstring():
+    """Make sure we can docannotate a function without docstring."""
+
+    @docannotate
+    def basic_func():
+        pass
+
+    try:
+        # calling returns_data triggers docstring parsing
+        _ = basic_func.metadata.returns_data()
+    except:
+        pytest.fail('Failed to decorate with docannotate a function without docstring.')
+
+
 def test_docparse():
     """Make sure we can parse a docstring."""
 
@@ -150,5 +164,3 @@ def test_parsed_doc():
 
     assert parsed1.param_info == {u'param2': ParameterInfo(type_name=u'bool', validators=[], desc=u'The basic dict parameter'),
                                   u'param1': ParameterInfo(type_name=u'integer', validators=[], desc=u'A basic parameter')}
-
-    print
