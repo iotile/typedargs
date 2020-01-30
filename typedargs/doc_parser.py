@@ -344,7 +344,7 @@ def parse_param(param, include_desc=False):
 def parse_return(return_line, include_desc=False):
     """Parse a single return statement declaration.
 
-    The valid types of return declarion are a Returns: section heading
+    The valid types of return declaration are a Returns: section heading
     followed a line that looks like:
     type [format-as formatter]: description
 
@@ -366,7 +366,7 @@ def parse_return(return_line, include_desc=False):
         show_type = show_type.strip()
 
         if show_type not in ('string', 'context'):
-            raise ValidationError("Unkown show-as formatting specifier", found=show_type, expected=['string', 'context'])
+            raise ValidationError("Unknown show-as formatting specifier", found=show_type, expected=['string', 'context'])
 
         if show_type == 'string':
             return ReturnInfo(None, str, True, desc)
