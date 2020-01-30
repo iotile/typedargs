@@ -1,5 +1,9 @@
 # `typedargs`
 
+## HEAD
+
+- Fix docstrings parsing (Issue #47) 
+
 ## 1.0.2
 
 - Fix deprecation warnings for `imp` and `collections`
