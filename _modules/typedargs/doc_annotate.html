@@ -183,6 +183,11 @@
             <span class="n">stripped</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span>
             <span class="n">margin</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">stripped</span><span class="p">)</span>
 
+            <span class="k">if</span> <span class="n">margin</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">section</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">section_indent</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">continue</span>
+
             <span class="k">if</span> <span class="n">section_indent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">section_indent</span> <span class="o">=</span> <span class="n">margin</span>
 
