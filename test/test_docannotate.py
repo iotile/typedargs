@@ -19,6 +19,9 @@ DOCSTRING1 = """Do something.
 
         Returns:
             map(string, int): A generic struct
+
+        Raises:
+            Exception: Error description
         """
 
 HELPSTRING = """
@@ -72,6 +75,7 @@ def test_docparse():
     assert 'param1' in params
     assert 'param2' in params
     assert retinfo is not None
+    assert retinfo.type_name == 'map(string, int)'
 
 
 DOCSTRING_FORMATAS = """basic line
