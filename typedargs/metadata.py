@@ -273,6 +273,15 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
         if not self.return_info.is_data:
             return None
 
+        def ignore_not_required_arg(func):
+            def ignore_arg(arg):
+                return func()
+
+            if inspect.signature(func).parameters:
+                return func
+            else:
+                return ignore_arg
+
         # get formatter as callable function or None
         validation_err = ValidationError('Cannot convert return value to string')
 
@@ -286,6 +295,9 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
             formatter_name = 'format_{}'.format(self.return_info.formatter)
             if hasattr(value, formatter_name) and callable(getattr(value, formatter_name)):
                 formatter = getattr(value, formatter_name)
+                # Method format_<formatter> may require an argument or not require and just return a string.
+                # In case it is not we have to ignore a given argument and call the method
+                formatter = ignore_not_required_arg(formatter)
             else:
                 raise validation_err
         else:
