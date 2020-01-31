@@ -295,6 +295,7 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
             formatter_name = 'format_{}'.format(self.return_info.formatter)
             if hasattr(value, formatter_name) and callable(getattr(value, formatter_name)):
                 formatter = getattr(value, formatter_name)
+
                 # Method format_<formatter> may require an argument or not require and just return a string.
                 # In case it is not we have to ignore a given argument and call the method
                 formatter = ignore_not_required_arg(formatter)
