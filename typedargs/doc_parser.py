@@ -366,6 +366,7 @@ def parse_return(return_line, include_desc=False):
 
         if show_type == 'context':
             return ReturnInfo(None, None, False, desc)
+        
         return ReturnInfo(None, show_type, True, desc)
 
     if 'format-as' in ret_def:
