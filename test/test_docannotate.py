@@ -19,6 +19,9 @@ DOCSTRING1 = """Do something.
 
         Returns:
             map(string, int): A generic struct
+
+        Raises:
+            Exception: Error description
         """
 
 HELPSTRING = """
@@ -64,6 +67,20 @@ def test_docannotate_basic():
     assert help_text == HELPSTRING
 
 
+def test_docannotate_no_docstring():
+    """Make sure we can docannotate a function without docstring."""
+
+    @docannotate
+    def basic_func():
+        pass
+
+    try:
+        # calling returns_data triggers docstring parsing
+        _ = basic_func.metadata.returns_data()
+    except:
+        pytest.fail('Failed to decorate with docannotate a function without docstring.')
+
+
 def test_docparse():
     """Make sure we can parse a docstring."""
 
@@ -72,6 +89,7 @@ def test_docparse():
     assert 'param1' in params
     assert 'param2' in params
     assert retinfo is not None
+    assert retinfo.type_name == 'map(string, int)'
 
 
 DOCSTRING_FORMATAS = """basic line

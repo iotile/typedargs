@@ -33,6 +33,11 @@ def parse_docstring(doc):
             stripped = line.lstrip()
             margin = len(line) - len(stripped)
 
+            if margin == 0:
+                section = None
+                section_indent = None
+                continue
+
             if section_indent is None:
                 section_indent = margin
 
