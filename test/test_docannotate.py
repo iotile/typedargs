@@ -212,14 +212,6 @@ def test_return_value_formatter():
         return ReturnType()
 
     @docannotate
-    def func_string():
-        """
-        Returns:
-            ReturnType show-as string: an object with formatter method
-        """
-        return ReturnType()
-
-    @docannotate
     def func_noformatter():
         """
         Returns:
@@ -229,11 +221,31 @@ def test_return_value_formatter():
 
     ret_value_1 = func_1()
     ret_value_2 = func_2()
-    ret_value_string = func_string()
     ret_value_noformatter = func_noformatter()
     # import pdb; pdb.set_trace()
     assert func_1.metadata.format_returnvalue(ret_value_1) == 'foo bar'
     assert func_2.metadata.format_returnvalue(ret_value_2) == 'foo bar'
-    assert func_string.metadata.format_returnvalue(ret_value_string) == 'foo\nbar'
     with pytest.raises(ValidationError):
         func_noformatter.metadata.format_returnvalue(ret_value_noformatter)
+
+
+def test_return_value_formatter_string():
+    """Make sure we support `show-as string` return annotation."""
+
+    class ReturnType:
+        def __init__(self):
+            self.val = 'foo\nbar'
+
+        def __str__(self):
+            return self.val
+
+    @docannotate
+    def func_string():
+        """
+        Returns:
+            ReturnType show-as string: some description
+        """
+        return ReturnType()
+
+    ret_value = func_string()
+    assert func_string.metadata.format_returnvalue(ret_value) == 'foo\nbar'
