@@ -273,12 +273,30 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
         if not self.return_info.is_data:
             return None
 
+        # get formatter as callable function or None
+        validation_err = ValidationError('Cannot convert return value to string')
+
+        if self.return_info.formatter is None:
+            formatter = None
+        elif callable(self.return_info.formatter):
+            formatter = self.return_info.formatter
+        elif self.return_info.formatter == 'string':
+            formatter = str
+        elif isinstance(self.return_info.formatter, str):
+            formatter_name = 'format_{}'.format(self.return_info.formatter)
+            if hasattr(value, formatter_name) and callable(getattr(value, formatter_name)):
+                formatter = getattr(value, formatter_name)
+            else:
+                raise validation_err
+        else:
+            raise validation_err
+
         # If the return value is typed, use the type_system to format it
         if self.return_info.type_name is not None:
-            return typeinfo.type_system.format_value(value, self.return_info.type_name, self.return_info.formatter)
+            return typeinfo.type_system.format_value(value, self.return_info.type_name, formatter)
 
-        # Otherwise we expect a callable function to convert this value to a string
-        return self.return_info.formatter(value)
+        # Otherwise convert this value to a string with formatter function
+        return formatter(value)
 
     def convert_positional_argument(self, index, arg_value):
         """Convert and validate a positional argument.
