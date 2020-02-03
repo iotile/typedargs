@@ -2,7 +2,6 @@
 import inspect
 
 from .exceptions import ValidationError
-from .metadata import AnnotatedMetadata
 
 
 class BasicContext(dict):
@@ -90,6 +89,8 @@ def find_all(container):
     Returns:
         dict: A dict with all of the found functions in it.
     """
+    # moved from top to avoid circular import
+    from .metadata import AnnotatedMetadata
 
     if isinstance(container, dict):
         names = container.keys()
