@@ -1,4 +1,5 @@
 """Utility functions that are only used internally inside typedargs."""
+import inspect
 
 from .exceptions import ValidationError
 from .metadata import AnnotatedMetadata
@@ -58,6 +59,15 @@ def _parse_validators(valids):
     return outvals
 
 
+def call_with_optional_arg(func, arg):
+    """If func takes an argument, return func, otherwise return wrapped func to ignore the argument."""
+
+    if inspect.signature(func).parameters:
+        return func(arg)
+
+    return func()
+
+
 def context_name(con):
     """Given a context, return its proper name as a string."""
     if hasattr(con, 'metadata'):
@@ -80,7 +90,6 @@ def find_all(container):
     Returns:
         dict: A dict with all of the found functions in it.
     """
-
     if isinstance(container, dict):
         names = container.keys()
     else:

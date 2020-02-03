@@ -115,7 +115,7 @@ def test_return_parsing():
     """Make sure we can parse a show-as and format-as line."""
 
     _params, retinfo = parse_docstring(DOCSTRING_SHOWAS)
-    assert retinfo == (None, str, True, None)
+    assert retinfo == (None, 'string', True, None)
 
     _params, retinfo = parse_docstring(DOCSTRING_FORMATAS)
     assert retinfo == ("integer", "hex", True, None)
@@ -164,3 +164,88 @@ def test_parsed_doc():
 
     assert parsed1.param_info == {u'param2': ParameterInfo(type_name=u'bool', validators=[], desc=u'The basic dict parameter'),
                                   u'param1': ParameterInfo(type_name=u'integer', validators=[], desc=u'A basic parameter')}
+
+
+def test_return_value_formatter():
+    """Make sure we support formatter for return object.
+
+    Declaration of formatter for return object may look like
+
+    Returns:
+        <type> show-as <formatter>: description
+
+    Where <formatter> could be 'context' or 'string' or part of return object method name.
+    If <formatter> is not ('context' | 'string') then func.metadata.format_returnvalue(value) should look for a
+    method name format_<formatter> on a given value object to get a string representation.
+    Method format_<formatter> could be implemented as requiring argument or not requiring.
+    """
+
+    class ReturnType:
+        def __init__(self):
+            self.val = 'foo\nbar'
+
+        def __str__(self):
+            return self.val
+
+        @staticmethod
+        def format_single_string_1(val):
+            val = str(val)
+            return val.replace('\n', ' ')
+
+        def format_single_string_2(self):
+            return self.val.replace('\n', ' ')
+
+    @docannotate
+    def func_1():
+        """
+        Returns:
+            ReturnType show-as single_string_1: an object with formatter method
+        """
+        return ReturnType()
+
+    @docannotate
+    def func_2():
+        """
+        Returns:
+            ReturnType show-as single_string_2: an object with formatter method
+        """
+        return ReturnType()
+
+    @docannotate
+    def func_noformatter():
+        """
+        Returns:
+            ReturnType show-as noformatter: an object with formatter method
+        """
+        return ReturnType()
+
+    ret_value_1 = func_1()
+    ret_value_2 = func_2()
+    ret_value_noformatter = func_noformatter()
+    # import pdb; pdb.set_trace()
+    assert func_1.metadata.format_returnvalue(ret_value_1) == 'foo bar'
+    assert func_2.metadata.format_returnvalue(ret_value_2) == 'foo bar'
+    with pytest.raises(ValidationError):
+        func_noformatter.metadata.format_returnvalue(ret_value_noformatter)
+
+
+def test_return_value_formatter_string():
+    """Make sure we support `show-as string` return annotation."""
+
+    class ReturnType:
+        def __init__(self):
+            self.val = 'foo\nbar'
+
+        def __str__(self):
+            return self.val
+
+    @docannotate
+    def func_string():
+        """
+        Returns:
+            ReturnType show-as string: some description
+        """
+        return ReturnType()
+
+    ret_value = func_string()
+    assert func_string.metadata.format_returnvalue(ret_value) == 'foo\nbar'

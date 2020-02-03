@@ -344,13 +344,13 @@ def parse_param(param, include_desc=False):
 def parse_return(return_line, include_desc=False):
     """Parse a single return statement declaration.
 
-    The valid types of return declarion are a Returns: section heading
+    The valid types of return declaration are a Returns: section heading
     followed a line that looks like:
     type [format-as formatter]: description
 
     OR
 
-    type [show-as (string | context)]: description sentence
+    type [show-as (context | string | formatter)]: description sentence
     """
 
     ret_def, _colon, desc = return_line.partition(':')
@@ -362,16 +362,12 @@ def parse_return(return_line, include_desc=False):
 
     if 'show-as' in ret_def:
         ret_type, _showas, show_type = ret_def.partition('show-as')
-        ret_type = ret_type.strip()
         show_type = show_type.strip()
 
-        if show_type not in ('string', 'context'):
-            raise ValidationError("Unkown show-as formatting specifier", found=show_type, expected=['string', 'context'])
-
-        if show_type == 'string':
-            return ReturnInfo(None, str, True, desc)
-
-        return ReturnInfo(None, None, False, desc)
+        if show_type == 'context':
+            return ReturnInfo(None, None, False, desc)
+        
+        return ReturnInfo(None, show_type, True, desc)
 
     if 'format-as' in ret_def:
         ret_type, _showas, formatter = ret_def.partition('format-as')

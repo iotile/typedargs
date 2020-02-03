@@ -3,6 +3,7 @@
 ## HEAD
 
 - Fix docstrings parsing (Issues #47, #34) 
+- Extend docannotate `show-as` return annotation to support more options (Issue #60)
 
 ## 1.0.2
 

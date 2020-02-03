@@ -2,7 +2,7 @@
 
 import inspect
 import sys
-from typedargs import typeinfo
+from typedargs import typeinfo, utils
 from .exceptions import TypeSystemError, ArgumentError, ValidationError, InternalError
 from .basic_structures import ParameterInfo, ReturnInfo
 from .doc_annotate import parse_docstring
@@ -277,8 +277,26 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
         if self.return_info.type_name is not None:
             return typeinfo.type_system.format_value(value, self.return_info.type_name, self.return_info.formatter)
 
-        # Otherwise we expect a callable function to convert this value to a string
-        return self.return_info.formatter(value)
+        # Otherwise convert this value to a string with formatter function
+        validation_err = ValidationError('Cannot convert return value to string')
+
+        if self.return_info.formatter is None or self.return_info.formatter == 'string':
+            formatter = str
+        elif callable(self.return_info.formatter):
+            formatter = self.return_info.formatter
+        elif isinstance(self.return_info.formatter, str):
+            formatter_name = 'format_{}'.format(self.return_info.formatter)
+            if hasattr(value, formatter_name) and callable(getattr(value, formatter_name)):
+                formatter = getattr(value, formatter_name)
+            else:
+                raise validation_err
+        else:
+            raise validation_err
+
+        if formatter is str:
+            return str(value)
+
+        return utils.call_with_optional_arg(formatter, value)
 
     def convert_positional_argument(self, index, arg_value):
         """Convert and validate a positional argument.
