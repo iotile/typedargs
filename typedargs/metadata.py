@@ -6,6 +6,7 @@ from typedargs import typeinfo
 from .exceptions import TypeSystemError, ArgumentError, ValidationError, InternalError
 from .basic_structures import ParameterInfo, ReturnInfo
 from .doc_annotate import parse_docstring
+from .utils import _call_with_optional_arg
 
 
 class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are required.
@@ -273,43 +274,30 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
         if not self.return_info.is_data:
             return None
 
-        def ignore_not_required_arg(func):
-            def ignore_arg(arg):
-                return func()
+        # If the return value is typed, use the type_system to format it
+        if self.return_info.type_name is not None:
+            return typeinfo.type_system.format_value(value, self.return_info.type_name, self.return_info.formatter)
 
-            if inspect.signature(func).parameters:
-                return func
-            else:
-                return ignore_arg
-
-        # get formatter as callable function or None
+        # Otherwise convert this value to a string with formatter function
         validation_err = ValidationError('Cannot convert return value to string')
 
-        if self.return_info.formatter is None:
-            formatter = None
+        if self.return_info.formatter is None or self.return_info.formatter == 'string':
+            formatter = str
         elif callable(self.return_info.formatter):
             formatter = self.return_info.formatter
-        elif self.return_info.formatter == 'string':
-            formatter = str
         elif isinstance(self.return_info.formatter, str):
             formatter_name = 'format_{}'.format(self.return_info.formatter)
             if hasattr(value, formatter_name) and callable(getattr(value, formatter_name)):
                 formatter = getattr(value, formatter_name)
-
-                # Method format_<formatter> may require an argument or not require and just return a string.
-                # In case it is not we have to ignore a given argument and call the method
-                formatter = ignore_not_required_arg(formatter)
             else:
                 raise validation_err
         else:
             raise validation_err
 
-        # If the return value is typed, use the type_system to format it
-        if self.return_info.type_name is not None:
-            return typeinfo.type_system.format_value(value, self.return_info.type_name, formatter)
+        if formatter is str:
+            return str(value)
 
-        # Otherwise convert this value to a string with formatter function
-        return formatter(value)
+        return _call_with_optional_arg(formatter, value)
 
     def convert_positional_argument(self, index, arg_value):
         """Convert and validate a positional argument.

@@ -1,4 +1,5 @@
 """Utility functions that are only used internally inside typedargs."""
+import inspect
 
 from .exceptions import ValidationError
 from .metadata import AnnotatedMetadata
@@ -56,6 +57,15 @@ def _parse_validators(valids):
         outvals.append((name, args))
 
     return outvals
+
+
+def _call_with_optional_arg(func, arg):
+    """If func takes an argument, return func, otherwise return wrapped func to ignore the argument."""
+
+    if inspect.signature(func).parameters:
+        return func(arg)
+
+    return func()
 
 
 def context_name(con):
