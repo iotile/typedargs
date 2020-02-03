@@ -199,10 +199,13 @@
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#typedargs.utils.context_name" title="typedargs.utils.context_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">context_name</span></code></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="#typedargs.utils.call_with_optional_arg" title="typedargs.utils.call_with_optional_arg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">call_with_optional_arg</span></code></a></td>
+<td>If func takes an argument, return func, otherwise return wrapped func to ignore the argument.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#typedargs.utils.context_name" title="typedargs.utils.context_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">context_name</span></code></a></td>
 <td>Given a context, return its proper name as a string.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#typedargs.utils.find_all" title="typedargs.utils.find_all"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_all</span></code></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="#typedargs.utils.find_all" title="typedargs.utils.find_all"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_all</span></code></a></td>
 <td>Find all annotated function inside of a container.</td>
 </tr>
 </tbody>
@@ -215,6 +218,12 @@
 <em class="property">class </em><code class="descclassname">typedargs.utils.</code><code class="descname">BasicContext</code><a class="reference internal" href="../_modules/typedargs/utils.html#BasicContext"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.utils.BasicContext" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a></p>
 <p>A Basic context for holding functions in a Hierarchical Shell.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="typedargs.utils.call_with_optional_arg">
+<code class="descclassname">typedargs.utils.</code><code class="descname">call_with_optional_arg</code><span class="sig-paren">(</span><em>func</em>, <em>arg</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/utils.html#call_with_optional_arg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.utils.call_with_optional_arg" title="Permalink to this definition">¶</a></dt>
+<dd><p>If func takes an argument, return func, otherwise return wrapped func to ignore the argument.</p>
 </dd></dl>
 
 <dl class="function">

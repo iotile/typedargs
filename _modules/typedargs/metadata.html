@@ -152,7 +152,7 @@
 
 <span class="kn">import</span> <span class="nn">inspect</span>
 <span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">from</span> <span class="nn">typedargs</span> <span class="kn">import</span> <span class="n">typeinfo</span>
+<span class="kn">from</span> <span class="nn">typedargs</span> <span class="kn">import</span> <span class="n">typeinfo</span><span class="p">,</span> <span class="n">utils</span>
 <span class="kn">from</span> <span class="nn">.exceptions</span> <span class="kn">import</span> <span class="n">TypeSystemError</span><span class="p">,</span> <span class="n">ArgumentError</span><span class="p">,</span> <span class="n">ValidationError</span><span class="p">,</span> <span class="n">InternalError</span>
 <span class="kn">from</span> <span class="nn">.basic_structures</span> <span class="kn">import</span> <span class="n">ParameterInfo</span><span class="p">,</span> <span class="n">ReturnInfo</span>
 <span class="kn">from</span> <span class="nn">.doc_annotate</span> <span class="kn">import</span> <span class="n">parse_docstring</span>
@@ -427,8 +427,26 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">type_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">typeinfo</span><span class="o">.</span><span class="n">type_system</span><span class="o">.</span><span class="n">format_value</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">type_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">formatter</span><span class="p">)</span>
 
-        <span class="c1"># Otherwise we expect a callable function to convert this value to a string</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">formatter</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+        <span class="c1"># Otherwise convert this value to a string with formatter function</span>
+        <span class="n">validation_err</span> <span class="o">=</span> <span class="n">ValidationError</span><span class="p">(</span><span class="s1">&#39;Cannot convert return value to string&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">formatter</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">formatter</span> <span class="o">==</span> <span class="s1">&#39;string&#39;</span><span class="p">:</span>
+            <span class="n">formatter</span> <span class="o">=</span> <span class="nb">str</span>
+        <span class="k">elif</span> <span class="n">callable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">formatter</span><span class="p">):</span>
+            <span class="n">formatter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">formatter</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">formatter</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">formatter_name</span> <span class="o">=</span> <span class="s1">&#39;format_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">formatter</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">formatter_name</span><span class="p">)</span> <span class="ow">and</span> <span class="n">callable</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">formatter_name</span><span class="p">)):</span>
+                <span class="n">formatter</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">formatter_name</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">validation_err</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">validation_err</span>
+
+        <span class="k">if</span> <span class="n">formatter</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">utils</span><span class="o">.</span><span class="n">call_with_optional_arg</span><span class="p">(</span><span class="n">formatter</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="AnnotatedMetadata.convert_positional_argument"><a class="viewcode-back" href="../../api/typedargs.metadata.html#typedargs.metadata.AnnotatedMetadata.convert_positional_argument">[docs]</a>    <span class="k">def</span> <span class="nf">convert_positional_argument</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">arg_value</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Convert and validate a positional argument.</span>
