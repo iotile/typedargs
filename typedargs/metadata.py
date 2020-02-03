@@ -2,11 +2,10 @@
 
 import inspect
 import sys
-from typedargs import typeinfo
+from typedargs import typeinfo, utils
 from .exceptions import TypeSystemError, ArgumentError, ValidationError, InternalError
 from .basic_structures import ParameterInfo, ReturnInfo
 from .doc_annotate import parse_docstring
-from .utils import _call_with_optional_arg
 
 
 class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are required.
@@ -297,7 +296,7 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
         if formatter is str:
             return str(value)
 
-        return _call_with_optional_arg(formatter, value)
+        return utils.call_with_optional_arg(formatter, value)
 
     def convert_positional_argument(self, index, arg_value):
         """Convert and validate a positional argument.

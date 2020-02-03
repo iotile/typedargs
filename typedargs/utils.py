@@ -2,6 +2,7 @@
 import inspect
 
 from .exceptions import ValidationError
+from .metadata import AnnotatedMetadata
 
 
 class BasicContext(dict):
@@ -58,7 +59,7 @@ def _parse_validators(valids):
     return outvals
 
 
-def _call_with_optional_arg(func, arg):
+def call_with_optional_arg(func, arg):
     """If func takes an argument, return func, otherwise return wrapped func to ignore the argument."""
 
     if inspect.signature(func).parameters:
@@ -89,9 +90,6 @@ def find_all(container):
     Returns:
         dict: A dict with all of the found functions in it.
     """
-    # moved from top to avoid circular import
-    from .metadata import AnnotatedMetadata
-
     if isinstance(container, dict):
         names = container.keys()
     else:
