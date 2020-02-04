@@ -249,3 +249,32 @@ def test_return_value_formatter_string():
 
     ret_value = func_string()
     assert func_string.metadata.format_returnvalue(ret_value) == 'foo\nbar'
+
+
+def test_recursive_parsing_formatters():
+    """Make sure we can parse recursive return value formatters"""
+
+    class User:
+        def __init__(self, short_name):
+            self.short_name = short_name
+
+        def format_short_name(self):
+            return self.short_name
+
+    class Option:
+        def __init__(self, value):
+            self.value = value
+
+        def __str__(self):
+            return self.value
+
+    @docannotate
+    def func():
+        """
+        Returns:
+            Dict[User, Option] show-as one_line[short_name, string]: value description
+        """
+        return {User('john'): Option('opt_1'), User('bob'): Option('opt_2')}
+
+    ret_value = func()
+    assert func.metadata.format_returnvalue(ret_value) == 'john: 1; bob: 2;'
