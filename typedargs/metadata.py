@@ -42,11 +42,8 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
         # If we are called to annotate a context, we won't necessarily
         # have any arguments
         try:
-            if sys.version_info.major >= 3:
-                spec = inspect.getfullargspec(func)
-                args, varargs, kwargs, defaults = spec[:4]
-            else:
-                args, varargs, kwargs, defaults = inspect.getargspec(func)  # pylint: disable=deprecated-method
+            spec = inspect.getfullargspec(func)
+            args, varargs, kwargs, defaults = spec[:4]
 
             # Skip self argument if this is a method function
             if len(args) > 0 and args[0] == 'self':
