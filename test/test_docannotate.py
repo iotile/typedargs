@@ -162,8 +162,8 @@ def test_parsed_doc():
     assert parsed2.short_desc == u'Do something.'
     assert parsed1.short_desc == u'Do something.'
 
-    assert parsed1.param_info == {u'param2': ParameterInfo(type_name=u'bool', validators=[], desc=u'The basic dict parameter'),
-                                  u'param1': ParameterInfo(type_name=u'integer', validators=[], desc=u'A basic parameter')}
+    assert parsed1.param_info == {u'param2': ParameterInfo(type_class=None, type_name=u'bool', validators=[], desc=u'The basic dict parameter'),
+                                  u'param1': ParameterInfo(type_class=None, type_name=u'integer', validators=[], desc=u'A basic parameter')}
 
 
 def test_return_value_formatter():

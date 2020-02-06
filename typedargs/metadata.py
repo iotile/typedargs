@@ -63,7 +63,7 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
             self.arg_names = []
             self.arg_defaults = []
 
-        self.return_info = ReturnInfo(None, None, False, None)
+        self.return_info = ReturnInfo(None, None, None, False, None)
 
         if name is None:
             name = func.__name__
@@ -122,7 +122,7 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
         if name not in self.arg_names and name != self.varargs and name != self.kwargs:
             raise TypeSystemError("Annotation specified for unknown parameter", param=name)
 
-        info = ParameterInfo(type_name, validators, desc)
+        info = ParameterInfo(None, type_name, validators, desc)
         self.annotated_params[name] = info
 
     def typed_returnvalue(self, type_name, formatter=None):
@@ -133,11 +133,11 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
             formatter (str): An optional name of a formatting function specified
                 for the type given in type_name.
         """
-        self.return_info = ReturnInfo(type_name, formatter, True, None)
+        self.return_info = ReturnInfo(None, type_name, formatter, True, None)
 
     def string_returnvalue(self):
         """Mark the return value as data that should be converted with str."""
-        self.return_info = ReturnInfo(None, str, True, None)
+        self.return_info = ReturnInfo(None, None, str, True, None)
 
     def custom_returnvalue(self, printer, desc=None):
         """Use a custom function to print the return value.
@@ -147,7 +147,7 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
                 value and convert it to a string.
             desc (str): An optional description of the return value.
         """
-        self.return_info = ReturnInfo(None, printer, True, desc)
+        self.return_info = ReturnInfo(None, None, printer, True, desc)
 
     def has_varargs(self):
         """Check if this function supports variable arguments."""

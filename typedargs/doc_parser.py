@@ -338,7 +338,7 @@ def parse_param(param, include_desc=False):
         raise ValidationError("Invalid parameter type string not enclosed in ( ) characters", param_string=param_def, type_string=param_type)
 
     param_type = param_type[1:-1]
-    return param_name, ParameterInfo(param_type, [], desc)
+    return param_name, ParameterInfo(None, param_type, [], desc)
 
 
 def parse_return(return_line, include_desc=False):
@@ -365,15 +365,15 @@ def parse_return(return_line, include_desc=False):
         show_type = show_type.strip()
 
         if show_type == 'context':
-            return ReturnInfo(None, None, False, desc)
-        
-        return ReturnInfo(None, show_type, True, desc)
+            return ReturnInfo(None, None, None, False, desc)
+
+        return ReturnInfo(None, None, show_type, True, desc)
 
     if 'format-as' in ret_def:
         ret_type, _showas, formatter = ret_def.partition('format-as')
         ret_type = ret_type.strip()
         formatter = formatter.strip()
 
-        return ReturnInfo(ret_type, formatter, True, desc)
+        return ReturnInfo(None, ret_type, formatter, True, desc)
 
-    return ReturnInfo(ret_def, None, True, desc)
+    return ReturnInfo(None, ret_def, None, True, desc)
