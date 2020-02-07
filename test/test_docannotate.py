@@ -249,3 +249,70 @@ def test_return_value_formatter_string():
 
     ret_value = func_string()
     assert func_string.metadata.format_returnvalue(ret_value) == 'foo\nbar'
+
+
+def test_func_type_annotation(caplog):
+    """Make sure we support python 3 function type annotations."""
+
+    @docannotate
+    def func_ann(param: str, flag: bool = True) -> str:
+        """A function with type annotations.
+        Args:
+            param: Description
+            flag: An optional flag
+
+        Returns:
+            Some result
+        """
+        return param
+
+    @docannotate
+    def func_doc(param, flag=True):
+        """A function with types specified in docstring.
+        Args:
+            param (str): Description
+            flag (bool): An optional flag
+
+        Returns:
+            str: Some result
+        """
+        return param
+
+    @docannotate
+    def func_mismatch(param: str, flag: bool = True) -> str:
+        """A function with type info mismatch between type annotations and docstring.
+        Args:
+            param (int): Description
+            flag (bool): An optional flag
+
+        Returns:
+            str: Some result
+        """
+        return param
+
+    # trigger docstring and type annotations parsing
+    _ = func_ann.metadata.returns_data()
+    _ = func_doc.metadata.returns_data()
+    _ = func_mismatch.metadata.returns_data()
+
+    def _types_list(f):
+        types = [info.type_name for info in f.metadata.annotated_params.values()]
+        types.append(f.metadata.return_info.type_name)
+        return types
+
+    func_ann_types = _types_list(func_ann)
+    func_doc_types = _types_list(func_doc)
+    func_mismatch_types = _types_list(func_mismatch)
+
+    # Type names should be the same for parsing func_doc docstring and func_ann type annotations
+    assert func_ann_types == func_doc_types
+
+    # Check warning message about type info mismatch, it should be only one there for func_mismatch
+    assert len(caplog.records) == 1
+    warn_record = caplog.records[0]
+    assert warn_record.levelname == 'WARNING'
+    assert 'Type info mismatch' in warn_record.message and "func_mismatch" in warn_record.message
+
+    # Type annotations for func_ann and func_mismatch are the same.
+    # Check if parsed info is the same regardless of wrong param type in func_mismatch docstring
+    assert func_ann_types == func_mismatch_types
