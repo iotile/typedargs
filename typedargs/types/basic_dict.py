@@ -28,19 +28,19 @@ def default_formatter(arg, **kwargs):
     return json.dumps(arg, sort_keys=True, indent=4, separators=(',', ': '), default=_json_formatter)
 
 
-def format_one_line(dict_arg, key_formatter=None, val_formatter=None):
-    """Get string representation of arg
+def format_one_line(dict_obj, key_formatter=None, val_formatter=None):
+    """Get string representation of passed dict object.
 
     Args:
-        dict_arg (dict): object of type map
+        dict_obj (dict): dict object to translate to string.
         key_formatter (callable | string | None): formatter for dict key
         val_formatter (callable | string | None): formatter for dict value
 
     Returns:
         string: string representation of arg
     """
-    if dict_arg == {}:
-        return str(dict_arg)
+    if dict_obj == {}:
+        return str(dict_obj)
 
     def _get_callable_formatter(obj, formatter):
         validation_err = ValidationError('Cannot convert to string')
@@ -58,13 +58,13 @@ def format_one_line(dict_arg, key_formatter=None, val_formatter=None):
                 raise validation_err
         return formatter
 
-    key = list(dict_arg.keys())[0]
-    val = dict_arg[key]
+    key = list(dict_obj.keys())[0]
+    val = dict_obj[key]
     key_formatter = _get_callable_formatter(key, key_formatter)
     val_formatter = _get_callable_formatter(val, val_formatter)
 
     str_items = []
-    for key, val in dict_arg.items():
+    for key, val in dict_obj.items():
         key_str = key_formatter(key)
         val_str = val_formatter(val)
         str_items.append("{}: {}".format(key_str, val_str))
