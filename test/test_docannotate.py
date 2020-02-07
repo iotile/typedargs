@@ -296,7 +296,7 @@ def test_func_type_annotation(caplog):
     _ = func_mismatch.metadata.returns_data()
 
     def _types_list(f):
-        types = [info.type_name for info in f.metadata.annotated_params.values()]
+        types = [info.type_name for param, info in sorted(f.metadata.annotated_params.items())]
         types.append(f.metadata.return_info.type_name)
         return types
 
@@ -304,7 +304,7 @@ def test_func_type_annotation(caplog):
     func_doc_types = _types_list(func_doc)
     func_mismatch_types = _types_list(func_mismatch)
 
-    assert func_ann_types == ['str', 'bool', 'str']
+    assert func_ann_types == ['bool', 'str', 'str']
 
     # Type names should be the same for parsing func_doc docstring and func_ann type annotations
     assert func_ann_types == func_doc_types
