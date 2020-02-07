@@ -304,6 +304,8 @@ def test_func_type_annotation(caplog):
     func_doc_types = _types_list(func_doc)
     func_mismatch_types = _types_list(func_mismatch)
 
+    assert func_ann_types == ['str', 'bool', 'str']
+
     # Type names should be the same for parsing func_doc docstring and func_ann type annotations
     assert func_ann_types == func_doc_types
 
