@@ -1,9 +1,11 @@
 """Routines for extracting parameter and return information from an annotation."""
+
+from typing import Tuple, Dict
+from typedargs.typeinfo import TypeSystem
 from .basic_structures import ParameterInfo, ReturnInfo
-from .typeinfo import TypeSystem
 
 
-def parse_annotations(annotations: dict):
+def parse_annotations(annotations: dict) -> Tuple[Dict[str, ParameterInfo], ReturnInfo]:
     """Get type info for params and return value from annotations dictionary"""
 
     params = {}
