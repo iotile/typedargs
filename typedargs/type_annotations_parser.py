@@ -1,4 +1,4 @@
-"""Routines for extracting parameter and return information from an annotation."""
+"""Routines for extracting parameter and return information from type annotations."""
 
 from typing import Tuple, Dict
 from typedargs.typeinfo import TypeSystem
