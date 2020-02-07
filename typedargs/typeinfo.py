@@ -246,7 +246,7 @@ class TypeSystem:
 
         if inspect.getmodule(type_class) == typing:
 
-            # get 'type' from "typing.Type[sub, sub] or from typing.Type"
+            # get 'Type' from "typing.Type[sub, sub] or from typing.Type"
             type_name = str(type_class).split('.', 1)[-1].split('[')[0]
 
             if type_name in supported_typing_types:
