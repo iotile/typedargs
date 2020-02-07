@@ -1,7 +1,7 @@
 """The basic class that is used to store metadata about a function."""
 
 import inspect
-import sys
+import logging
 from typedargs import typeinfo, utils
 from .exceptions import TypeSystemError, ArgumentError, ValidationError, InternalError
 from .basic_structures import ParameterInfo, ReturnInfo
@@ -20,6 +20,8 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
     """
 
     def __init__(self, func, name=None):
+        self._logger = logging.getLogger(__name__)
+
         self.annotated_params = {}
         self._has_self = False
 
