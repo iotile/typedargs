@@ -6,6 +6,7 @@ from typedargs import typeinfo, utils
 from .exceptions import TypeSystemError, ArgumentError, ValidationError, InternalError
 from .basic_structures import ParameterInfo, ReturnInfo
 from .doc_annotate import parse_docstring
+from .type_annotations_parser import parse_annotations
 
 
 class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are required.
@@ -74,18 +75,78 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
 
         self.load_from_doc = False
         self._doc_parsed = False
+        self._annotations_parsed = False
         self._docstring = docstring
 
-    def _ensure_loaded(self):
-        if self.load_from_doc and not self._doc_parsed:
-            params, ret_info = parse_docstring(self._docstring)
-            for param_name, param_info in params.items():
-                self.add_param(param_name, param_info.type_name, param_info.validators)
+        # fixme: for some reason __init__ does not have __annotations__ here
+        self._type_annotations = getattr(func, '__annotations__', {})
 
-            if ret_info is not None:
-                self.return_info = ret_info
+    def _ensure_loaded(self):
+
+        if self._annotations_parsed and self.load_from_doc and self._doc_parsed:
+            return
+
+        type_info_ann = ()
+        type_info_doc = ()
+
+        # Parse type annotations
+        if self._type_annotations:
+            type_info_ann = parse_annotations(self._type_annotations)
+
+        self._annotations_parsed = True
+
+        # Parse docstring types info
+        if self.load_from_doc:
+            validate_type = not bool(self._type_annotations)
+            type_info_doc = parse_docstring(self._docstring, validate_type=validate_type)
 
             self._doc_parsed = True
+
+        # If there any type annotations then ignore docstring types.
+        # Keep arg validators and return value formatters from docstring.
+        if self._type_annotations:
+            if type_info_doc:
+                type_info_ann[1].formatter = getattr(type_info_doc[1], 'formatter', None)
+
+                for param, info in type_info_ann[0].items():
+                    if param in type_info_doc[0]:
+                        info.validators = type_info_doc[0][param].validators
+
+            self._add_annotation_info(*type_info_ann)
+
+        elif type_info_doc:
+            self._add_annotation_info(*type_info_doc)
+
+        # If type annotations and docstring types are specified then they should be the same.
+        # If they are not then show warning message.
+        if type_info_ann and type_info_doc:
+
+            # if there any type info in docstring.
+            doc_return_type = getattr(type_info_doc[1], 'type_name', None)
+            if list(filter(lambda val: val.type_name, type_info_doc[0].values())) or doc_return_type:
+
+                # do not take docstring arg descriptions where type is not specified
+                doc_arg_types = [(arg, info.type_name) for arg, info in type_info_doc[0].items() if info.type_name is not None]
+                ann_arg_types = [(arg, info.type_name) for arg, info in type_info_ann[0].items()]
+
+                ann_types = {'args': sorted(ann_arg_types), 'return': type_info_ann[1].type_name}
+                doc_types = {'args': sorted(doc_arg_types), 'return': type_info_doc[1].type_name}
+
+                if ann_types != doc_types:
+                    self._logger.warning('Type info mismatch between type annotations and docstring in "%s"', self.name)
+
+    def _add_annotation_info(self, params, return_info):
+        """Add type information for params and return value of this function
+
+        Args:
+            params: ParameterInfo object
+            return_info: ReturnInfo object
+        """
+        for param_name, param_info in params.items():
+            self.add_param(param_name, param_info.type_class, param_info.type_name, param_info.validators)
+
+        if return_info is not None:
+            self.return_info = return_info
 
     def spec_filled(self, pos_args, kw_args):
         """Check if we have enough arguments to call this function.
