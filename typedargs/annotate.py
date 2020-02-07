@@ -127,7 +127,7 @@ def param(name, type_name, *validators, **kwargs):
         func = annotated(func)
 
         valids = _parse_validators(validators)
-        func.metadata.add_param(name, type_name, valids, **kwargs)
+        func.metadata.add_param(name, None, type_name, valids, **kwargs)
 
         # Only decorate the function once even if we have multiple param decorators
         if func.decorated:

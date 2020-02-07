@@ -103,11 +103,12 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
         req = [x for x in req_names if x not in kw_args]
         return len(req) <= len(pos_args)
 
-    def add_param(self, name, type_name, validators, desc=None):
+    def add_param(self, name, type_class, type_name, validators, desc=None):
         """Add type information for a parameter by name.
 
         Args:
             name (str): The name of the parameter we wish to annotate
+            type_class (type): Parameter type class
             type_name (str): The name of the parameter's type
             validators (list): A list of either strings or n tuples that each
                 specify a validator defined for type_name.  If a string is passed,
@@ -122,7 +123,7 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
         if name not in self.arg_names and name != self.varargs and name != self.kwargs:
             raise TypeSystemError("Annotation specified for unknown parameter", param=name)
 
-        info = ParameterInfo(None, type_name, validators, desc)
+        info = ParameterInfo(type_class, type_name, validators, desc)
         self.annotated_params[name] = info
 
     def typed_returnvalue(self, type_name, formatter=None):
