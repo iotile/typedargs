@@ -115,13 +115,13 @@ def test_return_parsing():
     """Make sure we can parse a show-as and format-as line."""
 
     _params, retinfo = parse_docstring(DOCSTRING_SHOWAS)
-    assert retinfo == (None, 'string', True, None)
+    assert retinfo == (None, None, 'string', True, None)
 
     _params, retinfo = parse_docstring(DOCSTRING_FORMATAS)
-    assert retinfo == ("integer", "hex", True, None)
+    assert retinfo == (None, "integer", "hex", True, None)
 
     _params, retinfo = parse_docstring(DOCSTRING_CONTEXT)
-    assert retinfo == (None, None, False, None)
+    assert retinfo == (None, None, None, False, None)
 
 
 DOCSTRING2 = """Do something.
