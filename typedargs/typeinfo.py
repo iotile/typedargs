@@ -17,7 +17,7 @@ import os.path
 import importlib
 import logging
 import typing
-from typing import Union
+from typing import Optional
 
 import sys
 from typedargs.exceptions import ValidationError, ArgumentError, KeyValueException
@@ -237,8 +237,8 @@ class TypeSystem:
 
         return False
 
-    @staticmethod
-    def get_type_name(type_class: type) -> Union[str, None]:
+    @classmethod
+    def get_type_name(cls, type_class: type) -> Optional[str]:
 
         type_name = None
 
