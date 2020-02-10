@@ -9,7 +9,7 @@ def parse_annotations(annotations: dict) -> Tuple[Dict[str, ParameterInfo], Retu
     """Get type info for params and return value from annotations dictionary"""
 
     params = {}
-    returns = ReturnInfo(None, None, None, None, None)
+    returns = ReturnInfo(None, None, None, False, None)
 
     if 'return' in annotations:
         ret_type = annotations.pop('return')
