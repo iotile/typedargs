@@ -395,7 +395,7 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
         if kwargs is None:
             kwargs = {}
 
-        if self.varargs is not None or self.kwargs is not None:
+        if self.has_varargs() or self.has_kwargs():
             raise InternalError("check_spec cannot be called on a function that takes *args or **kwargs")
 
         missing = object()
