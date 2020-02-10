@@ -37,34 +37,32 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
 
             func = func.__init__
 
-            # If __init__ has anotated params, copy them to the class so
+            # If __init__ has annotated params, copy them to the class so
             # we print correct signatures
             if hasattr(func, 'metadata'):
                 self.annotated_params = func.metadata.annotated_params
 
-        # If we are called to annotate a context, we won't necessarily
-        # have any arguments
-        try:
-            spec = inspect.getfullargspec(func)
-            args, varargs, kwargs, defaults = spec[:4]
+        signature = inspect.signature(func)
 
-            # Skip self argument if this is a method function
-            if len(args) > 0 and args[0] == 'self':
-                args = args[1:]
-                self._has_self = True
+        varargs = [arg.name for arg in signature.parameters.values() if arg.kind == arg.VAR_POSITIONAL]
+        kwargs = [arg.name for arg in signature.parameters.values() if arg.kind == arg.VAR_KEYWORD]
+        self.varargs = varargs[0] if varargs else None
+        self.kwargs = kwargs[0] if kwargs else None
+        self.arg_names = [arg.name for arg in signature.parameters.values() if arg.kind == arg.POSITIONAL_OR_KEYWORD]
+        self.arg_defaults = [arg.default for arg in signature.parameters.values() if arg.default != arg.empty]
 
-            if defaults is None:
-                defaults = []
+        # Skip self argument if this is a method function
+        if len(self.arg_names) > 0 and self.arg_names[0] == 'self':
+            self.arg_names = self.arg_names[1:]
+            self._has_self = True
 
-            self.varargs = varargs
-            self.kwargs = kwargs
-            self.arg_names = args
-            self.arg_defaults = defaults
-        except TypeError:
-            self.varargs = None
-            self.kwargs = None
-            self.arg_names = []
-            self.arg_defaults = []
+        self._type_annotations = {}
+        for arg_name, arg_info in signature.parameters.items():
+            if arg_name != 'self' and arg_info.annotation != arg_info.empty:
+                self._type_annotations[arg_name] = arg_info.annotation
+
+        if signature.return_annotation != signature.empty:
+            self._type_annotations['return'] = signature.return_annotation
 
         self.return_info = ReturnInfo(None, None, None, False, None)
 
@@ -77,9 +75,6 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
         self._doc_parsed = False
         self._annotations_parsed = False
         self._docstring = docstring
-
-        # fixme: for some reason __init__ does not have __annotations__ here
-        self._type_annotations = getattr(func, '__annotations__', {})
 
     def _ensure_loaded(self):
 
