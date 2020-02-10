@@ -18,6 +18,6 @@ def parse_annotations(annotations: dict) -> Tuple[Dict[str, ParameterInfo], Retu
 
     for param_name, param_type in annotations.items():
         param_type_name = TypeSystem.get_type_name(param_type)
-        params.update({param_name: ParameterInfo(param_type, param_type_name, [], None)})
+        params[param_name] = ParameterInfo(param_type, param_type_name, [], None)
 
     return params, returns
