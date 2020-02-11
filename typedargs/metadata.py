@@ -94,8 +94,13 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
         elif type_info_doc:
             self._add_annotation_info(*type_info_doc)
 
-        # If type annotations and docstring types are specified then they should be the same.
-        # If they are not then show warning message.
+        self._check_type_info_mismatch(type_info_ann, type_info_doc)
+
+    def _check_type_info_mismatch(self, type_info_ann, type_info_doc):
+        """Check for type info mismatch in type annotations and docstring types.
+        If type annotations and docstring types are both specified then they should be the same.
+        If they are not then show a warning message.
+        """
         if type_info_ann and type_info_doc:
 
             # if there any type info in docstring.
