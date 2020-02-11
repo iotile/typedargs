@@ -4,6 +4,7 @@
 
 - Fix docstrings parsing (Issues #47, #34) 
 - Extend docannotate `show-as` return annotation to support more options (Issue #60)
+- Add support of function type annotations in @docannotate
 
 ## 1.0.2
 

@@ -97,6 +97,7 @@
 <li class="toctree-l4"><a class="reference internal" href="typedargs.metadata.html">typedargs.metadata module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="typedargs.shell.html">typedargs.shell module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="typedargs.terminal.html">typedargs.terminal module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.type_annotations_parser.html">typedargs.type_annotations_parser module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="typedargs.typeinfo.html">typedargs.typeinfo module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="typedargs.utils.html">typedargs.utils module</a></li>
 </ul>
@@ -197,8 +198,27 @@
 <h2>Reference<a class="headerlink" href="#reference" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="typedargs.doc_annotate.parse_docstring">
-<code class="descclassname">typedargs.doc_annotate.</code><code class="descname">parse_docstring</code><span class="sig-paren">(</span><em>doc</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/doc_annotate.html#parse_docstring"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.doc_annotate.parse_docstring" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">typedargs.doc_annotate.</code><code class="descname">parse_docstring</code><span class="sig-paren">(</span><em>doc</em>, <em>validate_type=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/doc_annotate.html#parse_docstring"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.doc_annotate.parse_docstring" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parse a docstring into ParameterInfo and ReturnInfo objects.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>doc</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – docstring to parse</li>
+<li><strong>validate_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – True if ValidationError should be raised
+where type is not specified for arg or return value.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">type information from passed docstring</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Tuple[Dict[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a>, <a class="reference internal" href="typedargs.basic_structures.html#typedargs.basic_structures.ParameterInfo" title="typedargs.basic_structures.ParameterInfo">ParameterInfo</a>], Union[<a class="reference internal" href="typedargs.basic_structures.html#typedargs.basic_structures.ReturnInfo" title="typedargs.basic_structures.ReturnInfo">ReturnInfo</a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.8)">None</a>]]</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>

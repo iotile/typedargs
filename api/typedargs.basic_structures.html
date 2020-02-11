@@ -97,6 +97,7 @@
 <li class="toctree-l4"><a class="reference internal" href="typedargs.metadata.html">typedargs.metadata module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="typedargs.shell.html">typedargs.shell module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="typedargs.terminal.html">typedargs.terminal module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.type_annotations_parser.html">typedargs.type_annotations_parser module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="typedargs.typeinfo.html">typedargs.typeinfo module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="typedargs.utils.html">typedargs.utils module</a></li>
 </ul>
@@ -200,56 +201,14 @@
 <h2>Reference<a class="headerlink" href="#reference" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="typedargs.basic_structures.ParameterInfo">
-<em class="property">class </em><code class="descclassname">typedargs.basic_structures.</code><code class="descname">ParameterInfo</code><span class="sig-paren">(</span><em>type_name</em>, <em>validators</em>, <em>desc</em><span class="sig-paren">)</span><a class="headerlink" href="#typedargs.basic_structures.ParameterInfo" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a></p>
-<dl class="attribute">
-<dt id="typedargs.basic_structures.ParameterInfo.desc">
-<code class="descname">desc</code><a class="headerlink" href="#typedargs.basic_structures.ParameterInfo.desc" title="Permalink to this definition">¶</a></dt>
-<dd><p>Alias for field number 2</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="typedargs.basic_structures.ParameterInfo.type_name">
-<code class="descname">type_name</code><a class="headerlink" href="#typedargs.basic_structures.ParameterInfo.type_name" title="Permalink to this definition">¶</a></dt>
-<dd><p>Alias for field number 0</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="typedargs.basic_structures.ParameterInfo.validators">
-<code class="descname">validators</code><a class="headerlink" href="#typedargs.basic_structures.ParameterInfo.validators" title="Permalink to this definition">¶</a></dt>
-<dd><p>Alias for field number 1</p>
-</dd></dl>
-
+<em class="property">class </em><code class="descclassname">typedargs.basic_structures.</code><code class="descname">ParameterInfo</code><span class="sig-paren">(</span><em>type_class</em>, <em>type_name</em>, <em>validators</em>, <em>desc</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/basic_structures.html#ParameterInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.basic_structures.ParameterInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 </dd></dl>
 
 <dl class="class">
 <dt id="typedargs.basic_structures.ReturnInfo">
-<em class="property">class </em><code class="descclassname">typedargs.basic_structures.</code><code class="descname">ReturnInfo</code><span class="sig-paren">(</span><em>type_name</em>, <em>formatter</em>, <em>is_data</em>, <em>desc</em><span class="sig-paren">)</span><a class="headerlink" href="#typedargs.basic_structures.ReturnInfo" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a></p>
-<dl class="attribute">
-<dt id="typedargs.basic_structures.ReturnInfo.desc">
-<code class="descname">desc</code><a class="headerlink" href="#typedargs.basic_structures.ReturnInfo.desc" title="Permalink to this definition">¶</a></dt>
-<dd><p>Alias for field number 3</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="typedargs.basic_structures.ReturnInfo.formatter">
-<code class="descname">formatter</code><a class="headerlink" href="#typedargs.basic_structures.ReturnInfo.formatter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Alias for field number 1</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="typedargs.basic_structures.ReturnInfo.is_data">
-<code class="descname">is_data</code><a class="headerlink" href="#typedargs.basic_structures.ReturnInfo.is_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Alias for field number 2</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="typedargs.basic_structures.ReturnInfo.type_name">
-<code class="descname">type_name</code><a class="headerlink" href="#typedargs.basic_structures.ReturnInfo.type_name" title="Permalink to this definition">¶</a></dt>
-<dd><p>Alias for field number 0</p>
-</dd></dl>
-
+<em class="property">class </em><code class="descclassname">typedargs.basic_structures.</code><code class="descname">ReturnInfo</code><span class="sig-paren">(</span><em>type_class</em>, <em>type_name</em>, <em>formatter</em>, <em>is_data</em>, <em>desc</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/basic_structures.html#ReturnInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.basic_structures.ReturnInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 </dd></dl>
 
 </div>

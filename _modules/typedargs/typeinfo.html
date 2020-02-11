@@ -162,11 +162,13 @@
 <span class="c1"># Basic routines for converting information from string or other binary</span>
 <span class="c1"># formats to python types and for displaying those types in supported</span>
 <span class="c1"># formats</span>
-
-
+<span class="kn">import</span> <span class="nn">inspect</span>
 <span class="kn">import</span> <span class="nn">os.path</span>
 <span class="kn">import</span> <span class="nn">importlib</span>
 <span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">typedargs.exceptions</span> <span class="kn">import</span> <span class="n">ValidationError</span><span class="p">,</span> <span class="n">ArgumentError</span><span class="p">,</span> <span class="n">KeyValueException</span>
 <span class="kn">from</span> <span class="nn">typedargs</span> <span class="kn">import</span> <span class="n">types</span>
@@ -384,6 +386,26 @@
             <span class="k">return</span> <span class="kc">True</span>
 
         <span class="k">return</span> <span class="kc">False</span>
+
+<div class="viewcode-block" id="TypeSystem.get_type_name"><a class="viewcode-back" href="../../api/typedargs.typeinfo.html#typedargs.typeinfo.TypeSystem.get_type_name">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_type_name</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">type_class</span><span class="p">:</span> <span class="nb">type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+
+        <span class="n">type_name</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">supported_typing_types</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Dict&#39;</span><span class="p">,</span> <span class="s1">&#39;Tuple&#39;</span><span class="p">,</span> <span class="s1">&#39;List&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getmodule</span><span class="p">(</span><span class="n">type_class</span><span class="p">)</span> <span class="o">==</span> <span class="n">typing</span><span class="p">:</span>
+
+            <span class="c1"># get &#39;Type&#39; from &quot;typing.Type[sub, sub] or from typing.Type&quot;</span>
+            <span class="n">type_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">type_class</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;[&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">type_name</span> <span class="ow">in</span> <span class="n">supported_typing_types</span><span class="p">:</span>
+                <span class="n">type_name</span> <span class="o">=</span> <span class="n">type_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">type_class</span><span class="p">,</span> <span class="s1">&#39;__name__&#39;</span><span class="p">):</span>
+            <span class="n">type_name</span> <span class="o">=</span> <span class="n">type_class</span><span class="o">.</span><span class="vm">__name__</span>
+
+        <span class="k">return</span> <span class="n">type_name</span></div>
 
 <div class="viewcode-block" id="TypeSystem.get_type"><a class="viewcode-back" href="../../api/typedargs.typeinfo.html#typedargs.typeinfo.TypeSystem.get_type">[docs]</a>    <span class="k">def</span> <span class="nf">get_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">type_name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return the type object corresponding to a type name.</span>

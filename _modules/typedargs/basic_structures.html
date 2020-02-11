@@ -150,11 +150,44 @@
   <h1>Source code for typedargs.basic_structures</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Basic structures used to describe parameters and return values.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
+
+<div class="viewcode-block" id="ParameterInfo"><a class="viewcode-back" href="../../api/typedargs.basic_structures.html#typedargs.basic_structures.ParameterInfo">[docs]</a><span class="k">class</span> <span class="nc">ParameterInfo</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">type_class</span><span class="p">,</span> <span class="n">type_name</span><span class="p">,</span> <span class="n">validators</span><span class="p">,</span> <span class="n">desc</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type_class</span> <span class="o">=</span> <span class="n">type_class</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type_name</span> <span class="o">=</span> <span class="n">type_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">validators</span> <span class="o">=</span> <span class="n">validators</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">desc</span> <span class="o">=</span> <span class="n">desc</span>
+
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="n">other</span>
+
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type_class</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">validators</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">desc</span><span class="p">):</span>
+            <span class="k">yield</span> <span class="n">prop</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span></div>
 
 
-<span class="n">ParameterInfo</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;ParameterInfo&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;type_name&#39;</span><span class="p">,</span> <span class="s1">&#39;validators&#39;</span><span class="p">,</span> <span class="s1">&#39;desc&#39;</span><span class="p">])</span>
-<span class="n">ReturnInfo</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;ReturnInfo&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;type_name&#39;</span><span class="p">,</span> <span class="s1">&#39;formatter&#39;</span><span class="p">,</span> <span class="s1">&#39;is_data&#39;</span><span class="p">,</span> <span class="s1">&#39;desc&#39;</span><span class="p">])</span>
+<div class="viewcode-block" id="ReturnInfo"><a class="viewcode-back" href="../../api/typedargs.basic_structures.html#typedargs.basic_structures.ReturnInfo">[docs]</a><span class="k">class</span> <span class="nc">ReturnInfo</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">type_class</span><span class="p">,</span> <span class="n">type_name</span><span class="p">,</span> <span class="n">formatter</span><span class="p">,</span> <span class="n">is_data</span><span class="p">,</span> <span class="n">desc</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type_class</span> <span class="o">=</span> <span class="n">type_class</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type_name</span> <span class="o">=</span> <span class="n">type_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span> <span class="o">=</span> <span class="n">formatter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_data</span> <span class="o">=</span> <span class="n">is_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">desc</span> <span class="o">=</span> <span class="n">desc</span>
+
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="n">other</span>
+
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type_class</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">desc</span><span class="p">):</span>
+            <span class="k">yield</span> <span class="n">prop</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span></div>
 </pre></div>
 
            </div>

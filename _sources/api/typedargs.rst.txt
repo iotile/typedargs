@@ -26,6 +26,7 @@ Submodules
     ~typedargs.metadata
     ~typedargs.shell
     ~typedargs.terminal
+    ~typedargs.type_annotations_parser
     ~typedargs.typeinfo
     ~typedargs.utils
 

@@ -97,6 +97,7 @@
 <li class="toctree-l4"><a class="reference internal" href="typedargs.metadata.html">typedargs.metadata module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="typedargs.shell.html">typedargs.shell module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="typedargs.terminal.html">typedargs.terminal module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.type_annotations_parser.html">typedargs.type_annotations_parser module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="typedargs.typeinfo.html">typedargs.typeinfo module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="typedargs.utils.html">typedargs.utils module</a></li>
 </ul>
@@ -358,13 +359,13 @@ Options for excluding things are, for example, ‘self’ or ‘cls’.</li>
 
 <dl class="function">
 <dt id="typedargs.doc_parser.parse_param">
-<code class="descclassname">typedargs.doc_parser.</code><code class="descname">parse_param</code><span class="sig-paren">(</span><em>param</em>, <em>include_desc=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/doc_parser.html#parse_param"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.doc_parser.parse_param" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">typedargs.doc_parser.</code><code class="descname">parse_param</code><span class="sig-paren">(</span><em>param</em>, <em>include_desc=False</em>, <em>validate_type=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/doc_parser.html#parse_param"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.doc_parser.parse_param" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parse a single typed parameter statement.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="typedargs.doc_parser.parse_return">
-<code class="descclassname">typedargs.doc_parser.</code><code class="descname">parse_return</code><span class="sig-paren">(</span><em>return_line</em>, <em>include_desc=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/doc_parser.html#parse_return"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.doc_parser.parse_return" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">typedargs.doc_parser.</code><code class="descname">parse_return</code><span class="sig-paren">(</span><em>return_line</em>, <em>include_desc=False</em>, <em>validate_type=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/doc_parser.html#parse_return"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.doc_parser.parse_return" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parse a single return statement declaration.</p>
 <p>The valid types of return declaration are a Returns: section heading
 followed a line that looks like:

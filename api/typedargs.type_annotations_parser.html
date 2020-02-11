@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>typedargs.terminal module &mdash; typedargs latest documentation</title>
+  <title>typedargs.type_annotations_parser module &mdash; typedargs latest documentation</title>
   
 
   
@@ -35,8 +35,8 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="typedargs.type_annotations_parser module" href="typedargs.type_annotations_parser.html" />
-    <link rel="prev" title="typedargs.shell module" href="typedargs.shell.html" /> 
+    <link rel="next" title="typedargs.typeinfo module" href="typedargs.typeinfo.html" />
+    <link rel="prev" title="typedargs.terminal module" href="typedargs.terminal.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -96,8 +96,8 @@
 <li class="toctree-l4"><a class="reference internal" href="typedargs.lint.html">typedargs.lint module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="typedargs.metadata.html">typedargs.metadata module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="typedargs.shell.html">typedargs.shell module</a></li>
-<li class="toctree-l4 current"><a class="current reference internal" href="#">typedargs.terminal module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="typedargs.type_annotations_parser.html">typedargs.type_annotations_parser module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.terminal.html">typedargs.terminal module</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">typedargs.type_annotations_parser module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="typedargs.typeinfo.html">typedargs.typeinfo module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="typedargs.utils.html">typedargs.utils module</a></li>
 </ul>
@@ -157,13 +157,13 @@
         
           <li><a href="typedargs.html">typedargs package</a> &raquo;</li>
         
-      <li>typedargs.terminal module</li>
+      <li>typedargs.type_annotations_parser module</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/api/typedargs.terminal.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/api/typedargs.type_annotations_parser.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -176,10 +176,9 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-typedargs.terminal">
-<span id="typedargs-terminal-module"></span><h1>typedargs.terminal module<a class="headerlink" href="#module-typedargs.terminal" title="Permalink to this headline">¶</a></h1>
-<p>Code to determine terminal size on mac, windows and linux.</p>
-<p>Adapted from <a class="reference external" href="https://gist.github.com/jtriley/1108174">https://gist.github.com/jtriley/1108174</a></p>
+  <div class="section" id="module-typedargs.type_annotations_parser">
+<span id="typedargs-type-annotations-parser-module"></span><h1>typedargs.type_annotations_parser module<a class="headerlink" href="#module-typedargs.type_annotations_parser" title="Permalink to this headline">¶</a></h1>
+<p>Routines for extracting parameter and return information from type annotations.</p>
 <div class="section" id="summary">
 <h2>Summary<a class="headerlink" href="#summary" title="Permalink to this headline">¶</a></h2>
 <p>Functions:</p>
@@ -189,8 +188,8 @@
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#typedargs.terminal.get_terminal_size" title="typedargs.terminal.get_terminal_size"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_terminal_size</span></code></a></td>
-<td>getTerminalSize() - get width and height of console - works on linux,os x,windows,cygwin(windows) originally retrieved from: <a class="reference external" href="http://stackoverflow.com/questions/566746/how-to-get-console-window-width-in-python">http://stackoverflow.com/questions/566746/how-to-get-console-window-width-in-python</a></td>
+<tr class="row-odd"><td><a class="reference internal" href="#typedargs.type_annotations_parser.parse_annotations" title="typedargs.type_annotations_parser.parse_annotations"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_annotations</span></code></a></td>
+<td>Get type info for params and return value from annotations dictionary</td>
 </tr>
 </tbody>
 </table>
@@ -198,13 +197,9 @@
 <div class="section" id="reference">
 <h2>Reference<a class="headerlink" href="#reference" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
-<dt id="typedargs.terminal.get_terminal_size">
-<code class="descclassname">typedargs.terminal.</code><code class="descname">get_terminal_size</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/terminal.html#get_terminal_size"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.terminal.get_terminal_size" title="Permalink to this definition">¶</a></dt>
-<dd><p>getTerminalSize()
-- get width and height of console
-- works on linux,os x,windows,cygwin(windows)
-originally retrieved from:
-<a class="reference external" href="http://stackoverflow.com/questions/566746/how-to-get-console-window-width-in-python">http://stackoverflow.com/questions/566746/how-to-get-console-window-width-in-python</a></p>
+<dt id="typedargs.type_annotations_parser.parse_annotations">
+<code class="descclassname">typedargs.type_annotations_parser.</code><code class="descname">parse_annotations</code><span class="sig-paren">(</span><em>annotations: dict</em><span class="sig-paren">)</span> &#x2192; Tuple[Dict[str, typedargs.basic_structures.ParameterInfo], typedargs.basic_structures.ReturnInfo]<a class="reference internal" href="../_modules/typedargs/type_annotations_parser.html#parse_annotations"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.type_annotations_parser.parse_annotations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get type info for params and return value from annotations dictionary</p>
 </dd></dl>
 
 </div>
@@ -218,10 +213,10 @@ originally retrieved from:
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="typedargs.type_annotations_parser.html" class="btn btn-neutral float-right" title="typedargs.type_annotations_parser module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="typedargs.typeinfo.html" class="btn btn-neutral float-right" title="typedargs.typeinfo module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="typedargs.shell.html" class="btn btn-neutral float-left" title="typedargs.shell module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="typedargs.terminal.html" class="btn btn-neutral float-left" title="typedargs.terminal module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

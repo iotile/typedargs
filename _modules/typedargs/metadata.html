@@ -151,11 +151,12 @@
 <span></span><span class="sd">&quot;&quot;&quot;The basic class that is used to store metadata about a function.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">inspect</span>
-<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">from</span> <span class="nn">typedargs</span> <span class="kn">import</span> <span class="n">typeinfo</span><span class="p">,</span> <span class="n">utils</span>
 <span class="kn">from</span> <span class="nn">.exceptions</span> <span class="kn">import</span> <span class="n">TypeSystemError</span><span class="p">,</span> <span class="n">ArgumentError</span><span class="p">,</span> <span class="n">ValidationError</span><span class="p">,</span> <span class="n">InternalError</span>
 <span class="kn">from</span> <span class="nn">.basic_structures</span> <span class="kn">import</span> <span class="n">ParameterInfo</span><span class="p">,</span> <span class="n">ReturnInfo</span>
 <span class="kn">from</span> <span class="nn">.doc_annotate</span> <span class="kn">import</span> <span class="n">parse_docstring</span>
+<span class="kn">from</span> <span class="nn">.type_annotations_parser</span> <span class="kn">import</span> <span class="n">parse_annotations</span>
 
 
 <div class="viewcode-block" id="AnnotatedMetadata"><a class="viewcode-back" href="../../api/typedargs.metadata.html#typedargs.metadata.AnnotatedMetadata">[docs]</a><span class="k">class</span> <span class="nc">AnnotatedMetadata</span><span class="p">:</span> <span class="c1">#pylint: disable=R0902; These instance variables are required.</span>
@@ -170,6 +171,8 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">annotated_params</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_has_self</span> <span class="o">=</span> <span class="kc">False</span>
 
@@ -184,39 +187,16 @@
 
             <span class="n">func</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="fm">__init__</span>
 
-            <span class="c1"># If __init__ has anotated params, copy them to the class so</span>
+            <span class="c1"># If __init__ has annotated params, copy them to the class so</span>
             <span class="c1"># we print correct signatures</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="s1">&#39;metadata&#39;</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">annotated_params</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">annotated_params</span>
 
-        <span class="c1"># If we are called to annotate a context, we won&#39;t necessarily</span>
-        <span class="c1"># have any arguments</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="o">.</span><span class="n">major</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">:</span>
-                <span class="n">spec</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getfullargspec</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
-                <span class="n">args</span><span class="p">,</span> <span class="n">varargs</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">defaults</span> <span class="o">=</span> <span class="n">spec</span><span class="p">[:</span><span class="mi">4</span><span class="p">]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">args</span><span class="p">,</span> <span class="n">varargs</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">defaults</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getargspec</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>  <span class="c1"># pylint: disable=deprecated-method</span>
+        <span class="n">signature</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">varargs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">arg_names</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">arg_defaults</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_self</span> <span class="o">=</span> <span class="n">_get_param_info</span><span class="p">(</span><span class="n">signature</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_type_annotations</span> <span class="o">=</span> <span class="n">_get_type_annotations</span><span class="p">(</span><span class="n">signature</span><span class="p">)</span>
 
-            <span class="c1"># Skip self argument if this is a method function</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;self&#39;</span><span class="p">:</span>
-                <span class="n">args</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_has_self</span> <span class="o">=</span> <span class="kc">True</span>
-
-            <span class="k">if</span> <span class="n">defaults</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">defaults</span> <span class="o">=</span> <span class="p">[]</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">varargs</span> <span class="o">=</span> <span class="n">varargs</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">arg_names</span> <span class="o">=</span> <span class="n">args</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">arg_defaults</span> <span class="o">=</span> <span class="n">defaults</span>
-        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">varargs</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">arg_names</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">arg_defaults</span> <span class="o">=</span> <span class="p">[]</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span> <span class="o">=</span> <span class="n">ReturnInfo</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span> <span class="o">=</span> <span class="n">ReturnInfo</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">name</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span>
@@ -225,18 +205,80 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">load_from_doc</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_doc_parsed</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_annotations_parsed</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_docstring</span> <span class="o">=</span> <span class="n">docstring</span>
 
     <span class="k">def</span> <span class="nf">_ensure_loaded</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_from_doc</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_doc_parsed</span><span class="p">:</span>
-            <span class="n">params</span><span class="p">,</span> <span class="n">ret_info</span> <span class="o">=</span> <span class="n">parse_docstring</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_docstring</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">param_info</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="n">param_name</span><span class="p">,</span> <span class="n">param_info</span><span class="o">.</span><span class="n">type_name</span><span class="p">,</span> <span class="n">param_info</span><span class="o">.</span><span class="n">validators</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">ret_info</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span> <span class="o">=</span> <span class="n">ret_info</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_annotations_parsed</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_from_doc</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_doc_parsed</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="n">type_info_ann</span> <span class="o">=</span> <span class="p">()</span>
+        <span class="n">type_info_doc</span> <span class="o">=</span> <span class="p">()</span>
+
+        <span class="c1"># Parse type annotations</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_annotations</span><span class="p">:</span>
+            <span class="n">type_info_ann</span> <span class="o">=</span> <span class="n">parse_annotations</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_type_annotations</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_annotations_parsed</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># Parse docstring types info</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_from_doc</span><span class="p">:</span>
+            <span class="n">validate_type</span> <span class="o">=</span> <span class="ow">not</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_type_annotations</span><span class="p">)</span>
+            <span class="n">type_info_doc</span> <span class="o">=</span> <span class="n">parse_docstring</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_docstring</span><span class="p">,</span> <span class="n">validate_type</span><span class="o">=</span><span class="n">validate_type</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">_doc_parsed</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># If there any type annotations then ignore docstring types.</span>
+        <span class="c1"># Keep arg validators and return value formatters from docstring.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_annotations</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">type_info_doc</span><span class="p">:</span>
+                <span class="n">type_info_ann</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">formatter</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">type_info_doc</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;formatter&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+                <span class="k">for</span> <span class="n">param</span><span class="p">,</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">type_info_ann</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">type_info_doc</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                        <span class="n">info</span><span class="o">.</span><span class="n">validators</span> <span class="o">=</span> <span class="n">type_info_doc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">param</span><span class="p">]</span><span class="o">.</span><span class="n">validators</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_annotation_info</span><span class="p">(</span><span class="o">*</span><span class="n">type_info_ann</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">type_info_doc</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_annotation_info</span><span class="p">(</span><span class="o">*</span><span class="n">type_info_doc</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_type_info_mismatch</span><span class="p">(</span><span class="n">type_info_ann</span><span class="p">,</span> <span class="n">type_info_doc</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_check_type_info_mismatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">type_info_ann</span><span class="p">,</span> <span class="n">type_info_doc</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Check for type info mismatch in type annotations and docstring types.</span>
+<span class="sd">        If type annotations and docstring types are both specified then they should be the same.</span>
+<span class="sd">        If they are not then show a warning message.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">type_info_ann</span> <span class="ow">and</span> <span class="n">type_info_doc</span><span class="p">:</span>
+
+            <span class="c1"># if there any type info in docstring.</span>
+            <span class="n">doc_return_type</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">type_info_doc</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;type_name&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">val</span><span class="p">:</span> <span class="n">val</span><span class="o">.</span><span class="n">type_name</span><span class="p">,</span> <span class="n">type_info_doc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span> <span class="ow">or</span> <span class="n">doc_return_type</span><span class="p">:</span>
+
+                <span class="c1"># do not take docstring arg descriptions where type is not specified</span>
+                <span class="n">doc_arg_types</span> <span class="o">=</span> <span class="p">[(</span><span class="n">arg</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">type_name</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span><span class="p">,</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">type_info_doc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">type_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
+                <span class="n">ann_arg_types</span> <span class="o">=</span> <span class="p">[(</span><span class="n">arg</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">type_name</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span><span class="p">,</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">type_info_ann</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+
+                <span class="n">ann_types</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">ann_arg_types</span><span class="p">),</span> <span class="s1">&#39;return&#39;</span><span class="p">:</span> <span class="n">type_info_ann</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">type_name</span><span class="p">}</span>
+                <span class="n">doc_types</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">doc_arg_types</span><span class="p">),</span> <span class="s1">&#39;return&#39;</span><span class="p">:</span> <span class="n">type_info_doc</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">type_name</span><span class="p">}</span>
+
+                <span class="k">if</span> <span class="n">ann_types</span> <span class="o">!=</span> <span class="n">doc_types</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Type info mismatch between type annotations and docstring in &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_add_annotation_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">return_info</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add type information for params and return value of this function</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            params: ParameterInfo object</span>
+<span class="sd">            return_info: ReturnInfo object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">param_info</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="n">param_name</span><span class="p">,</span> <span class="n">param_info</span><span class="o">.</span><span class="n">type_class</span><span class="p">,</span> <span class="n">param_info</span><span class="o">.</span><span class="n">type_name</span><span class="p">,</span> <span class="n">param_info</span><span class="o">.</span><span class="n">validators</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">return_info</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span> <span class="o">=</span> <span class="n">return_info</span>
 
 <div class="viewcode-block" id="AnnotatedMetadata.spec_filled"><a class="viewcode-back" href="../../api/typedargs.metadata.html#typedargs.metadata.AnnotatedMetadata.spec_filled">[docs]</a>    <span class="k">def</span> <span class="nf">spec_filled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos_args</span><span class="p">,</span> <span class="n">kw_args</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Check if we have enough arguments to call this function.</span>
@@ -256,11 +298,12 @@
         <span class="n">req</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">req_names</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kw_args</span><span class="p">]</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">req</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pos_args</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="AnnotatedMetadata.add_param"><a class="viewcode-back" href="../../api/typedargs.metadata.html#typedargs.metadata.AnnotatedMetadata.add_param">[docs]</a>    <span class="k">def</span> <span class="nf">add_param</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">type_name</span><span class="p">,</span> <span class="n">validators</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="AnnotatedMetadata.add_param"><a class="viewcode-back" href="../../api/typedargs.metadata.html#typedargs.metadata.AnnotatedMetadata.add_param">[docs]</a>    <span class="k">def</span> <span class="nf">add_param</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">type_class</span><span class="p">,</span> <span class="n">type_name</span><span class="p">,</span> <span class="n">validators</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add type information for a parameter by name.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            name (str): The name of the parameter we wish to annotate</span>
+<span class="sd">            type_class (type): Parameter type class</span>
 <span class="sd">            type_name (str): The name of the parameter&#39;s type</span>
 <span class="sd">            validators (list): A list of either strings or n tuples that each</span>
 <span class="sd">                specify a validator defined for type_name.  If a string is passed,</span>
@@ -275,7 +318,7 @@
         <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">arg_names</span> <span class="ow">and</span> <span class="n">name</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">varargs</span> <span class="ow">and</span> <span class="n">name</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">TypeSystemError</span><span class="p">(</span><span class="s2">&quot;Annotation specified for unknown parameter&quot;</span><span class="p">,</span> <span class="n">param</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
 
-        <span class="n">info</span> <span class="o">=</span> <span class="n">ParameterInfo</span><span class="p">(</span><span class="n">type_name</span><span class="p">,</span> <span class="n">validators</span><span class="p">,</span> <span class="n">desc</span><span class="p">)</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="n">ParameterInfo</span><span class="p">(</span><span class="n">type_class</span><span class="p">,</span> <span class="n">type_name</span><span class="p">,</span> <span class="n">validators</span><span class="p">,</span> <span class="n">desc</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">annotated_params</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span></div>
 
 <div class="viewcode-block" id="AnnotatedMetadata.typed_returnvalue"><a class="viewcode-back" href="../../api/typedargs.metadata.html#typedargs.metadata.AnnotatedMetadata.typed_returnvalue">[docs]</a>    <span class="k">def</span> <span class="nf">typed_returnvalue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">type_name</span><span class="p">,</span> <span class="n">formatter</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -286,11 +329,11 @@
 <span class="sd">            formatter (str): An optional name of a formatting function specified</span>
 <span class="sd">                for the type given in type_name.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span> <span class="o">=</span> <span class="n">ReturnInfo</span><span class="p">(</span><span class="n">type_name</span><span class="p">,</span> <span class="n">formatter</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span> <span class="o">=</span> <span class="n">ReturnInfo</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">type_name</span><span class="p">,</span> <span class="n">formatter</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="AnnotatedMetadata.string_returnvalue"><a class="viewcode-back" href="../../api/typedargs.metadata.html#typedargs.metadata.AnnotatedMetadata.string_returnvalue">[docs]</a>    <span class="k">def</span> <span class="nf">string_returnvalue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Mark the return value as data that should be converted with str.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span> <span class="o">=</span> <span class="n">ReturnInfo</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span> <span class="o">=</span> <span class="n">ReturnInfo</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="AnnotatedMetadata.custom_returnvalue"><a class="viewcode-back" href="../../api/typedargs.metadata.html#typedargs.metadata.AnnotatedMetadata.custom_returnvalue">[docs]</a>    <span class="k">def</span> <span class="nf">custom_returnvalue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">printer</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Use a custom function to print the return value.</span>
@@ -300,7 +343,7 @@
 <span class="sd">                value and convert it to a string.</span>
 <span class="sd">            desc (str): An optional description of the return value.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span> <span class="o">=</span> <span class="n">ReturnInfo</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">printer</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span> <span class="o">=</span> <span class="n">ReturnInfo</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">printer</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="AnnotatedMetadata.has_varargs"><a class="viewcode-back" href="../../api/typedargs.metadata.html#typedargs.metadata.AnnotatedMetadata.has_varargs">[docs]</a>    <span class="k">def</span> <span class="nf">has_varargs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Check if this function supports variable arguments.&quot;&quot;&quot;</span>
@@ -489,7 +532,7 @@
         <span class="k">if</span> <span class="n">kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">varargs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_varargs</span><span class="p">()</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_kwargs</span><span class="p">():</span>
             <span class="k">raise</span> <span class="n">InternalError</span><span class="p">(</span><span class="s2">&quot;check_spec cannot be called on a function that takes *args or **kwargs&quot;</span><span class="p">)</span>
 
         <span class="n">missing</span> <span class="o">=</span> <span class="nb">object</span><span class="p">()</span>
@@ -566,6 +609,38 @@
             <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="n">exc</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">argument</span><span class="o">=</span><span class="n">arg_name</span><span class="p">,</span> <span class="n">arg_value</span><span class="o">=</span><span class="n">val</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">val</span></div></div>
+
+
+<span class="k">def</span> <span class="nf">_get_param_info</span><span class="p">(</span><span class="n">func_signature</span><span class="p">):</span>
+    <span class="n">varargs</span> <span class="o">=</span> <span class="p">[</span><span class="n">arg</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">func_signature</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="n">arg</span><span class="o">.</span><span class="n">VAR_POSITIONAL</span><span class="p">]</span>
+    <span class="n">varargs</span> <span class="o">=</span> <span class="n">varargs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">varargs</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="p">[</span><span class="n">arg</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">func_signature</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="n">arg</span><span class="o">.</span><span class="n">VAR_KEYWORD</span><span class="p">]</span>
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">kwargs</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="n">arg_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">arg</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">func_signature</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">kind</span> <span class="o">==</span> <span class="n">arg</span><span class="o">.</span><span class="n">POSITIONAL_OR_KEYWORD</span><span class="p">]</span>
+    <span class="n">arg_defaults</span> <span class="o">=</span> <span class="p">[</span><span class="n">arg</span><span class="o">.</span><span class="n">default</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">func_signature</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">default</span> <span class="o">!=</span> <span class="n">arg</span><span class="o">.</span><span class="n">empty</span><span class="p">]</span>
+
+    <span class="c1"># Skip self argument if this is a method function</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">arg_names</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">arg_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;self&#39;</span><span class="p">:</span>
+        <span class="n">arg_names</span> <span class="o">=</span> <span class="n">arg_names</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="n">has_self</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">has_self</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">return</span> <span class="n">varargs</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">arg_names</span><span class="p">,</span> <span class="n">arg_defaults</span><span class="p">,</span> <span class="n">has_self</span>
+
+
+<span class="k">def</span> <span class="nf">_get_type_annotations</span><span class="p">(</span><span class="n">func_signature</span><span class="p">):</span>
+    <span class="n">type_annotations</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">arg_name</span><span class="p">,</span> <span class="n">arg_info</span> <span class="ow">in</span> <span class="n">func_signature</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">arg_name</span> <span class="o">!=</span> <span class="s1">&#39;self&#39;</span> <span class="ow">and</span> <span class="n">arg_info</span><span class="o">.</span><span class="n">annotation</span> <span class="o">!=</span> <span class="n">arg_info</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="n">type_annotations</span><span class="p">[</span><span class="n">arg_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">arg_info</span><span class="o">.</span><span class="n">annotation</span>
+
+    <span class="k">if</span> <span class="n">func_signature</span><span class="o">.</span><span class="n">return_annotation</span> <span class="o">!=</span> <span class="n">func_signature</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+        <span class="n">type_annotations</span><span class="p">[</span><span class="s1">&#39;return&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">func_signature</span><span class="o">.</span><span class="n">return_annotation</span>
+
+    <span class="k">return</span> <span class="n">type_annotations</span>
 </pre></div>
 
            </div>

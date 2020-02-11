@@ -277,7 +277,7 @@
         <span class="n">func</span> <span class="o">=</span> <span class="n">annotated</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
 
         <span class="n">valids</span> <span class="o">=</span> <span class="n">_parse_validators</span><span class="p">(</span><span class="n">validators</span><span class="p">)</span>
-        <span class="n">func</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">type_name</span><span class="p">,</span> <span class="n">valids</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">func</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">add_param</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">type_name</span><span class="p">,</span> <span class="n">valids</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1"># Only decorate the function once even if we have multiple param decorators</span>
         <span class="k">if</span> <span class="n">func</span><span class="o">.</span><span class="n">decorated</span><span class="p">:</span>

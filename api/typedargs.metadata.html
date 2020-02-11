@@ -97,6 +97,7 @@
 <li class="toctree-l4 current"><a class="current reference internal" href="#">typedargs.metadata module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="typedargs.shell.html">typedargs.shell module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="typedargs.terminal.html">typedargs.terminal module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="typedargs.type_annotations_parser.html">typedargs.type_annotations_parser module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="typedargs.typeinfo.html">typedargs.typeinfo module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="typedargs.utils.html">typedargs.utils module</a></li>
 </ul>
@@ -241,7 +242,7 @@ of this function</li>
 
 <dl class="method">
 <dt id="typedargs.metadata.AnnotatedMetadata.add_param">
-<code class="descname">add_param</code><span class="sig-paren">(</span><em>name</em>, <em>type_name</em>, <em>validators</em>, <em>desc=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/metadata.html#AnnotatedMetadata.add_param"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.metadata.AnnotatedMetadata.add_param" title="Permalink to this definition">¶</a></dt>
+<code class="descname">add_param</code><span class="sig-paren">(</span><em>name</em>, <em>type_class</em>, <em>type_name</em>, <em>validators</em>, <em>desc=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/metadata.html#AnnotatedMetadata.add_param"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.metadata.AnnotatedMetadata.add_param" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add type information for a parameter by name.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -249,6 +250,7 @@ of this function</li>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The name of the parameter we wish to annotate</li>
+<li><strong>type_class</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.8)"><em>type</em></a>) – Parameter type class</li>
 <li><strong>type_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – The name of the parameter’s type</li>
 <li><strong>validators</strong> (<a class="reference internal" href="typedargs.types.list.html#typedargs.types.list.list" title="typedargs.types.list.list"><em>list</em></a>) – A list of either strings or n tuples that each
 specify a validator defined for type_name.  If a string is passed,
