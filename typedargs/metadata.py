@@ -43,26 +43,8 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
                 self.annotated_params = func.metadata.annotated_params
 
         signature = inspect.signature(func)
-
-        varargs = [arg.name for arg in signature.parameters.values() if arg.kind == arg.VAR_POSITIONAL]
-        kwargs = [arg.name for arg in signature.parameters.values() if arg.kind == arg.VAR_KEYWORD]
-        self.varargs = varargs[0] if varargs else None
-        self.kwargs = kwargs[0] if kwargs else None
-        self.arg_names = [arg.name for arg in signature.parameters.values() if arg.kind == arg.POSITIONAL_OR_KEYWORD]
-        self.arg_defaults = [arg.default for arg in signature.parameters.values() if arg.default != arg.empty]
-
-        # Skip self argument if this is a method function
-        if len(self.arg_names) > 0 and self.arg_names[0] == 'self':
-            self.arg_names = self.arg_names[1:]
-            self._has_self = True
-
-        self._type_annotations = {}
-        for arg_name, arg_info in signature.parameters.items():
-            if arg_name != 'self' and arg_info.annotation != arg_info.empty:
-                self._type_annotations[arg_name] = arg_info.annotation
-
-        if signature.return_annotation != signature.empty:
-            self._type_annotations['return'] = signature.return_annotation
+        self.varargs, self.kwargs, self.arg_names, self.arg_defaults, self._has_self = _get_param_info(signature)
+        self._type_annotations = _get_type_annotations(signature)
 
         self.return_info = ReturnInfo(None, None, None, False, None)
 
@@ -472,3 +454,35 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
             raise ValidationError(exc.args[0], argument=arg_name, arg_value=val)
 
         return val
+
+
+def _get_param_info(func_signature):
+    varargs = [arg.name for arg in func_signature.parameters.values() if arg.kind == arg.VAR_POSITIONAL]
+    varargs = varargs[0] if varargs else None
+
+    kwargs = [arg.name for arg in func_signature.parameters.values() if arg.kind == arg.VAR_KEYWORD]
+    kwargs = kwargs[0] if kwargs else None
+
+    arg_names = [arg.name for arg in func_signature.parameters.values() if arg.kind == arg.POSITIONAL_OR_KEYWORD]
+    arg_defaults = [arg.default for arg in func_signature.parameters.values() if arg.default != arg.empty]
+
+    # Skip self argument if this is a method function
+    if len(arg_names) > 0 and arg_names[0] == 'self':
+        arg_names = arg_names[1:]
+        has_self = True
+    else:
+        has_self = False
+
+    return varargs, kwargs, arg_names, arg_defaults, has_self
+
+
+def _get_type_annotations(func_signature):
+    type_annotations = {}
+    for arg_name, arg_info in func_signature.parameters.items():
+        if arg_name != 'self' and arg_info.annotation != arg_info.empty:
+            type_annotations[arg_name] = arg_info.annotation
+
+    if func_signature.return_annotation != func_signature.empty:
+        type_annotations['return'] = func_signature.return_annotation
+
+    return type_annotations
