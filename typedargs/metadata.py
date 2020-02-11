@@ -1,11 +1,12 @@
 """The basic class that is used to store metadata about a function."""
 
 import inspect
-import sys
+import logging
 from typedargs import typeinfo, utils
 from .exceptions import TypeSystemError, ArgumentError, ValidationError, InternalError
 from .basic_structures import ParameterInfo, ReturnInfo
 from .doc_annotate import parse_docstring
+from .type_annotations_parser import parse_annotations
 
 
 class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are required.
@@ -20,6 +21,8 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
     """
 
     def __init__(self, func, name=None):
+        self._logger = logging.getLogger(__name__)
+
         self.annotated_params = {}
         self._has_self = False
 
@@ -34,39 +37,16 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
 
             func = func.__init__
 
-            # If __init__ has anotated params, copy them to the class so
+            # If __init__ has annotated params, copy them to the class so
             # we print correct signatures
             if hasattr(func, 'metadata'):
                 self.annotated_params = func.metadata.annotated_params
 
-        # If we are called to annotate a context, we won't necessarily
-        # have any arguments
-        try:
-            if sys.version_info.major >= 3:
-                spec = inspect.getfullargspec(func)
-                args, varargs, kwargs, defaults = spec[:4]
-            else:
-                args, varargs, kwargs, defaults = inspect.getargspec(func)  # pylint: disable=deprecated-method
+        signature = inspect.signature(func)
+        self.varargs, self.kwargs, self.arg_names, self.arg_defaults, self._has_self = _get_param_info(signature)
+        self._type_annotations = _get_type_annotations(signature)
 
-            # Skip self argument if this is a method function
-            if len(args) > 0 and args[0] == 'self':
-                args = args[1:]
-                self._has_self = True
-
-            if defaults is None:
-                defaults = []
-
-            self.varargs = varargs
-            self.kwargs = kwargs
-            self.arg_names = args
-            self.arg_defaults = defaults
-        except TypeError:
-            self.varargs = None
-            self.kwargs = None
-            self.arg_names = []
-            self.arg_defaults = []
-
-        self.return_info = ReturnInfo(None, None, False, None)
+        self.return_info = ReturnInfo(None, None, None, False, None)
 
         if name is None:
             name = func.__name__
@@ -75,18 +55,80 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
 
         self.load_from_doc = False
         self._doc_parsed = False
+        self._annotations_parsed = False
         self._docstring = docstring
 
     def _ensure_loaded(self):
-        if self.load_from_doc and not self._doc_parsed:
-            params, ret_info = parse_docstring(self._docstring)
-            for param_name, param_info in params.items():
-                self.add_param(param_name, param_info.type_name, param_info.validators)
 
-            if ret_info is not None:
-                self.return_info = ret_info
+        if self._annotations_parsed and self.load_from_doc and self._doc_parsed:
+            return
+
+        type_info_ann = ()
+        type_info_doc = ()
+
+        # Parse type annotations
+        if self._type_annotations:
+            type_info_ann = parse_annotations(self._type_annotations)
+
+        self._annotations_parsed = True
+
+        # Parse docstring types info
+        if self.load_from_doc:
+            validate_type = not bool(self._type_annotations)
+            type_info_doc = parse_docstring(self._docstring, validate_type=validate_type)
 
             self._doc_parsed = True
+
+        # If there any type annotations then ignore docstring types.
+        # Keep arg validators and return value formatters from docstring.
+        if self._type_annotations:
+            if type_info_doc:
+                type_info_ann[1].formatter = getattr(type_info_doc[1], 'formatter', None)
+
+                for param, info in type_info_ann[0].items():
+                    if param in type_info_doc[0]:
+                        info.validators = type_info_doc[0][param].validators
+
+            self._add_annotation_info(*type_info_ann)
+
+        elif type_info_doc:
+            self._add_annotation_info(*type_info_doc)
+
+        self._check_type_info_mismatch(type_info_ann, type_info_doc)
+
+    def _check_type_info_mismatch(self, type_info_ann, type_info_doc):
+        """Check for type info mismatch in type annotations and docstring types.
+        If type annotations and docstring types are both specified then they should be the same.
+        If they are not then show a warning message.
+        """
+        if type_info_ann and type_info_doc:
+
+            # if there any type info in docstring.
+            doc_return_type = getattr(type_info_doc[1], 'type_name', None)
+            if list(filter(lambda val: val.type_name, type_info_doc[0].values())) or doc_return_type:
+
+                # do not take docstring arg descriptions where type is not specified
+                doc_arg_types = [(arg, info.type_name) for arg, info in type_info_doc[0].items() if info.type_name is not None]
+                ann_arg_types = [(arg, info.type_name) for arg, info in type_info_ann[0].items()]
+
+                ann_types = {'args': sorted(ann_arg_types), 'return': type_info_ann[1].type_name}
+                doc_types = {'args': sorted(doc_arg_types), 'return': type_info_doc[1].type_name}
+
+                if ann_types != doc_types:
+                    self._logger.warning('Type info mismatch between type annotations and docstring in "%s"', self.name)
+
+    def _add_annotation_info(self, params, return_info):
+        """Add type information for params and return value of this function
+
+        Args:
+            params: ParameterInfo object
+            return_info: ReturnInfo object
+        """
+        for param_name, param_info in params.items():
+            self.add_param(param_name, param_info.type_class, param_info.type_name, param_info.validators)
+
+        if return_info is not None:
+            self.return_info = return_info
 
     def spec_filled(self, pos_args, kw_args):
         """Check if we have enough arguments to call this function.
@@ -106,11 +148,12 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
         req = [x for x in req_names if x not in kw_args]
         return len(req) <= len(pos_args)
 
-    def add_param(self, name, type_name, validators, desc=None):
+    def add_param(self, name, type_class, type_name, validators, desc=None):
         """Add type information for a parameter by name.
 
         Args:
             name (str): The name of the parameter we wish to annotate
+            type_class (type): Parameter type class
             type_name (str): The name of the parameter's type
             validators (list): A list of either strings or n tuples that each
                 specify a validator defined for type_name.  If a string is passed,
@@ -125,7 +168,7 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
         if name not in self.arg_names and name != self.varargs and name != self.kwargs:
             raise TypeSystemError("Annotation specified for unknown parameter", param=name)
 
-        info = ParameterInfo(type_name, validators, desc)
+        info = ParameterInfo(type_class, type_name, validators, desc)
         self.annotated_params[name] = info
 
     def typed_returnvalue(self, type_name, formatter=None):
@@ -136,11 +179,11 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
             formatter (str): An optional name of a formatting function specified
                 for the type given in type_name.
         """
-        self.return_info = ReturnInfo(type_name, formatter, True, None)
+        self.return_info = ReturnInfo(None, type_name, formatter, True, None)
 
     def string_returnvalue(self):
         """Mark the return value as data that should be converted with str."""
-        self.return_info = ReturnInfo(None, str, True, None)
+        self.return_info = ReturnInfo(None, None, str, True, None)
 
     def custom_returnvalue(self, printer, desc=None):
         """Use a custom function to print the return value.
@@ -150,7 +193,7 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
                 value and convert it to a string.
             desc (str): An optional description of the return value.
         """
-        self.return_info = ReturnInfo(None, printer, True, desc)
+        self.return_info = ReturnInfo(None, None, printer, True, desc)
 
     def has_varargs(self):
         """Check if this function supports variable arguments."""
@@ -339,7 +382,7 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
         if kwargs is None:
             kwargs = {}
 
-        if self.varargs is not None or self.kwargs is not None:
+        if self.has_varargs() or self.has_kwargs():
             raise InternalError("check_spec cannot be called on a function that takes *args or **kwargs")
 
         missing = object()
@@ -416,3 +459,35 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
             raise ValidationError(exc.args[0], argument=arg_name, arg_value=val)
 
         return val
+
+
+def _get_param_info(func_signature):
+    varargs = [arg.name for arg in func_signature.parameters.values() if arg.kind == arg.VAR_POSITIONAL]
+    varargs = varargs[0] if varargs else None
+
+    kwargs = [arg.name for arg in func_signature.parameters.values() if arg.kind == arg.VAR_KEYWORD]
+    kwargs = kwargs[0] if kwargs else None
+
+    arg_names = [arg.name for arg in func_signature.parameters.values() if arg.kind == arg.POSITIONAL_OR_KEYWORD]
+    arg_defaults = [arg.default for arg in func_signature.parameters.values() if arg.default != arg.empty]
+
+    # Skip self argument if this is a method function
+    if len(arg_names) > 0 and arg_names[0] == 'self':
+        arg_names = arg_names[1:]
+        has_self = True
+    else:
+        has_self = False
+
+    return varargs, kwargs, arg_names, arg_defaults, has_self
+
+
+def _get_type_annotations(func_signature):
+    type_annotations = {}
+    for arg_name, arg_info in func_signature.parameters.items():
+        if arg_name != 'self' and arg_info.annotation != arg_info.empty:
+            type_annotations[arg_name] = arg_info.annotation
+
+    if func_signature.return_annotation != func_signature.empty:
+        type_annotations['return'] = func_signature.return_annotation
+
+    return type_annotations
