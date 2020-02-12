@@ -115,7 +115,11 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
                 doc_types = {'args': sorted(doc_arg_types), 'return': type_info_doc[1].type_name}
 
                 if ann_types != doc_types:
-                    self._logger.warning('Type info mismatch between type annotations and docstring in "%s"', self.name)
+                    if self._class_name:
+                        name = '{}.{}'.format(self._class_name, self.name)
+                    else:
+                        name = self.name
+                    self._logger.warning('Type info mismatch between docstring and type annotations in "%s"', name)
 
     def _add_annotation_info(self, params, return_info):
         """Add type information for params and return value of this function
