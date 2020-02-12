@@ -229,11 +229,12 @@ def takes_cmdline(func):
 
 
 def docannotate(func):
-    """Annotate a function using information from its docstring.
+    """Annotate a function using information from its docstring or from type annotations.
 
+    If function has a type annotations then docstring types would be ignored.
     The annotation actually happens at the time the function is first called
-    to improve startup time.  For this function to work, the docstring must be
-    formatted correctly.  You should use the typedargs pylint plugin to make
+    to improve startup time. For this function to work, the docstring must be
+    formatted correctly. You should use the typedargs pylint plugin to make
     sure there are no errors in the docstring.
     """
 
