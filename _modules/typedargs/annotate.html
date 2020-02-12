@@ -379,11 +379,12 @@
 
 
 <div class="viewcode-block" id="docannotate"><a class="viewcode-back" href="../../api/typedargs.annotate.html#typedargs.annotate.docannotate">[docs]</a><span class="k">def</span> <span class="nf">docannotate</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Annotate a function using information from its docstring.</span>
+    <span class="sd">&quot;&quot;&quot;Annotate a function using information from its docstring or from type annotations.</span>
 
+<span class="sd">    If function has a type annotations then docstring types would be ignored.</span>
 <span class="sd">    The annotation actually happens at the time the function is first called</span>
-<span class="sd">    to improve startup time.  For this function to work, the docstring must be</span>
-<span class="sd">    formatted correctly.  You should use the typedargs pylint plugin to make</span>
+<span class="sd">    to improve startup time. For this function to work, the docstring must be</span>
+<span class="sd">    formatted correctly. You should use the typedargs pylint plugin to make</span>
 <span class="sd">    sure there are no errors in the docstring.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 

@@ -198,7 +198,7 @@
 <td>Given a module, create a context from all of the top level annotated symbols in that module.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="#typedargs.annotate.docannotate" title="typedargs.annotate.docannotate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">docannotate</span></code></a></td>
-<td>Annotate a function using information from its docstring.</td>
+<td>Annotate a function using information from its docstring or from type annotations.</td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="#typedargs.annotate.finalizer" title="typedargs.annotate.finalizer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">finalizer</span></code></a></td>
 <td>Indicate that this function destroys the context in which it is invoked, such as a quit method on a subprocess or a delete method on an object.</td>
@@ -383,10 +383,11 @@ on a subprocess or a delete method on an object.</p>
 <dl class="function">
 <dt id="typedargs.annotate.docannotate">
 <code class="descclassname">typedargs.annotate.</code><code class="descname">docannotate</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/annotate.html#docannotate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.annotate.docannotate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Annotate a function using information from its docstring.</p>
-<p>The annotation actually happens at the time the function is first called
-to improve startup time.  For this function to work, the docstring must be
-formatted correctly.  You should use the typedargs pylint plugin to make
+<dd><p>Annotate a function using information from its docstring or from type annotations.</p>
+<p>If function has a type annotations then docstring types would be ignored.
+The annotation actually happens at the time the function is first called
+to improve startup time. For this function to work, the docstring must be
+formatted correctly. You should use the typedargs pylint plugin to make
 sure there are no errors in the docstring.</p>
 </dd></dl>
 
