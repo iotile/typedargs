@@ -247,7 +247,7 @@ def docannotate(func):
     if inspect.isclass(func):
         cls = func
         func = cls.__init__
-        func.class_docstring = cls.__doc__
+        func.class_docstring = cls.__doc__ if cls.__doc__ else ''
         func.class_name = cls.__name__
 
     func = annotated(func)
