@@ -322,6 +322,7 @@ def test_func_type_annotation(caplog):
 
 def test_class_docannotate_no_doc():
     """Make sure we can use @docannotate on class without docstring.
+
     Type annotations should be used to annotate __init__() method.
     """
 
@@ -339,9 +340,9 @@ def test_class_docannotate_no_doc():
 
 
 def test_class_docannotate_2_docstrings():
-    """Make sure we can decorate a class with @docannotate to annotate its __init__() method.
+    """Make __init__ method is annotated correctly when the class and its __init__ method has docstrings.
 
-    If both docstrings exist then class docstring should be used and the __init__ docstring should be ignored.
+    If both docstrings exist then class docstring should be used and __init__ docstring should be ignored.
     """
 
     @context("Demo")
