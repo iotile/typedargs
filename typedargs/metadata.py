@@ -26,8 +26,6 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
         self.annotated_params = {}
         self._has_self = False
 
-        docstring = func.__doc__ if func.__doc__ else ''
-
         if inspect.isclass(func):
             # If we're annotating a class, the name of the class should be
             # the class name so keep track of that before looking at its
@@ -56,7 +54,9 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
         self.load_from_doc = False
         self._doc_parsed = False
         self._annotations_parsed = False
-        self._docstring = docstring
+        self._docstring = func.__doc__ if func.__doc__ else ''
+        self._class_name = getattr(func, 'class_name', '')
+        self._class_docstring = getattr(func, 'class_docstring', '')
 
     def _ensure_loaded(self):
 
@@ -75,7 +75,11 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
         # Parse docstring types info
         if self.load_from_doc:
             validate_type = not bool(self._type_annotations)
-            type_info_doc = parse_docstring(self._docstring, validate_type=validate_type)
+
+            # if there is no param type info in self._class_docstring then use self._docstring
+            type_info_doc = parse_docstring(self._class_docstring, validate_type=validate_type)
+            if not type_info_doc[0]:
+                type_info_doc = parse_docstring(self._docstring, validate_type=validate_type)
 
             self._doc_parsed = True
 
@@ -112,7 +116,7 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
                 ann_arg_types = [(arg, info.type_name) for arg, info in type_info_ann[0].items()]
 
                 ann_types = {'args': sorted(ann_arg_types), 'return': type_info_ann[1].type_name}
-                doc_types = {'args': sorted(doc_arg_types), 'return': type_info_doc[1].type_name}
+                doc_types = {'args': sorted(doc_arg_types), 'return': doc_return_type}
 
                 if ann_types != doc_types:
                     if self._class_name:
