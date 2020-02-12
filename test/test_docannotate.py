@@ -393,7 +393,7 @@ def test_class_docstring_and_annotations(caplog):
     assert 'Type info mismatch' in warn_record.message and "Demo.__init__" in warn_record.message
 
 
-def test_docannotate_class_init():
+def test_docannotate_class_init(caplog):
     """Make sure we can use @docannotate on class __init__() method.
 
     In this case, the docstring should be ignored in favor of type annotations.
@@ -409,8 +409,19 @@ def test_docannotate_class_init():
                 arg (str): description
             """
 
+    @context("DemoAnn")
+    class DemoAnn:
+
+        @docannotate
+        def __init__(self, arg: str):
+            pass
+
     # trigger type info parsing
     Demo.__init__.metadata.returns_data()
+    DemoAnn.__init__.metadata.returns_data()
 
     assert 'arg' in Demo.__init__.metadata.annotated_params
+    assert 'arg' in DemoAnn.__init__.metadata.annotated_params
+
     assert Demo.__init__.metadata.annotated_params['arg'].type_name == 'str'
+    assert DemoAnn.__init__.metadata.annotated_params['arg'].type_class == str
