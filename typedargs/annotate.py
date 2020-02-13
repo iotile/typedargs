@@ -239,7 +239,9 @@ def docannotate(func):
 
     This decorator is also could be used on classes to annotate their __init__() method.
     If decorator applied on a class then the priority for source of type info would be:
+
         __init__() type annotations -> class docstring -> __init__() docstring
+        
     Class docstring would be taken if it contains any argument type information. __init__() docstring
     would be ignored in this case.
     """
