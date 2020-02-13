@@ -396,7 +396,7 @@ def test_class_docstring_and_annotations(caplog):
 def test_docannotate_class_init(caplog):
     """Make sure we can use @docannotate on class __init__() method.
 
-    In this case, the docstring should be ignored in favor of type annotations.
+    If method has a type annotations then docstring types should be ignored.
     """
 
     @context("Demo")
