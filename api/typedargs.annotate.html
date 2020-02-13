@@ -389,6 +389,12 @@ The annotation actually happens at the time the function is first called
 to improve startup time. For this function to work, the docstring must be
 formatted correctly. You should use the typedargs pylint plugin to make
 sure there are no errors in the docstring.</p>
+<p>This decorator is also could be used on classes to annotate their __init__() method.
+If decorator applied on a class then the priority for source of type info would be:</p>
+<blockquote>
+<div>__init__() type annotations -&gt; class docstring -&gt; __init__() docstring</div></blockquote>
+<p>Class docstring would be taken if it contains any argument type information. __init__() docstring
+would be ignored in this case.</p>
 </dd></dl>
 
 <dl class="function">

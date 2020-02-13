@@ -386,15 +386,38 @@
 <span class="sd">    to improve startup time. For this function to work, the docstring must be</span>
 <span class="sd">    formatted correctly. You should use the typedargs pylint plugin to make</span>
 <span class="sd">    sure there are no errors in the docstring.</span>
+
+<span class="sd">    This decorator is also could be used on classes to annotate their __init__() method.</span>
+<span class="sd">    If decorator applied on a class then the priority for source of type info would be:</span>
+
+<span class="sd">        __init__() type annotations -&gt; class docstring -&gt; __init__() docstring</span>
+
+<span class="sd">    Class docstring would be taken if it contains any argument type information. __init__() docstring</span>
+<span class="sd">    would be ignored in this case.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">cls</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+        <span class="bp">cls</span> <span class="o">=</span> <span class="n">func</span>
+        <span class="n">func</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span>
+        <span class="n">func</span><span class="o">.</span><span class="n">class_docstring</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__doc__</span> <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__doc__</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">func</span><span class="o">.</span><span class="n">class_name</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span>
 
     <span class="n">func</span> <span class="o">=</span> <span class="n">annotated</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
     <span class="n">func</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">load_from_doc</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">if</span> <span class="n">func</span><span class="o">.</span><span class="n">decorated</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">cls</span><span class="p">:</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;__init__&#39;</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span>
+
         <span class="k">return</span> <span class="n">func</span>
 
     <span class="n">func</span><span class="o">.</span><span class="n">decorated</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">if</span> <span class="bp">cls</span><span class="p">:</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;__init__&#39;</span><span class="p">,</span> <span class="n">decorate</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">_check_and_execute</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">cls</span>
+
     <span class="k">return</span> <span class="n">decorate</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">_check_and_execute</span><span class="p">)</span></div>
 
 

@@ -176,8 +176,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">annotated_params</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_has_self</span> <span class="o">=</span> <span class="kc">False</span>
 
-        <span class="n">docstring</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="vm">__doc__</span> <span class="k">if</span> <span class="n">func</span><span class="o">.</span><span class="vm">__doc__</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
-
         <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
             <span class="c1"># If we&#39;re annotating a class, the name of the class should be</span>
             <span class="c1"># the class name so keep track of that before looking at its</span>
@@ -206,7 +204,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">load_from_doc</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_doc_parsed</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_annotations_parsed</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_docstring</span> <span class="o">=</span> <span class="n">docstring</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_docstring</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="vm">__doc__</span> <span class="k">if</span> <span class="n">func</span><span class="o">.</span><span class="vm">__doc__</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_class_name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="s1">&#39;class_name&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_class_docstring</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="s1">&#39;class_docstring&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_ensure_loaded</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
@@ -225,7 +225,11 @@
         <span class="c1"># Parse docstring types info</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_from_doc</span><span class="p">:</span>
             <span class="n">validate_type</span> <span class="o">=</span> <span class="ow">not</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_type_annotations</span><span class="p">)</span>
-            <span class="n">type_info_doc</span> <span class="o">=</span> <span class="n">parse_docstring</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_docstring</span><span class="p">,</span> <span class="n">validate_type</span><span class="o">=</span><span class="n">validate_type</span><span class="p">)</span>
+
+            <span class="c1"># if there is no param type info in self._class_docstring then use self._docstring</span>
+            <span class="n">type_info_doc</span> <span class="o">=</span> <span class="n">parse_docstring</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_class_docstring</span><span class="p">,</span> <span class="n">validate_type</span><span class="o">=</span><span class="n">validate_type</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">type_info_doc</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">type_info_doc</span> <span class="o">=</span> <span class="n">parse_docstring</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_docstring</span><span class="p">,</span> <span class="n">validate_type</span><span class="o">=</span><span class="n">validate_type</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">_doc_parsed</span> <span class="o">=</span> <span class="kc">True</span>
 
@@ -265,7 +269,11 @@
                 <span class="n">doc_types</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">doc_arg_types</span><span class="p">),</span> <span class="s1">&#39;return&#39;</span><span class="p">:</span> <span class="n">doc_return_type</span><span class="p">}</span>
 
                 <span class="k">if</span> <span class="n">ann_types</span> <span class="o">!=</span> <span class="n">doc_types</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Type info mismatch between type annotations and docstring in &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_class_name</span><span class="p">:</span>
+                        <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">.</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_class_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Type info mismatch between docstring and type annotations in &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_add_annotation_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">return_info</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add type information for params and return value of this function</span>
