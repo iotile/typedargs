@@ -26,8 +26,6 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
         self.annotated_params = {}
         self._has_self = False
 
-        docstring = func.__doc__ if func.__doc__ else ''
-
         if inspect.isclass(func):
             # If we're annotating a class, the name of the class should be
             # the class name so keep track of that before looking at its
@@ -56,7 +54,9 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
         self.load_from_doc = False
         self._doc_parsed = False
         self._annotations_parsed = False
-        self._docstring = docstring
+        self._docstring = func.__doc__ if func.__doc__ else ''
+        self._class_name = getattr(func, 'class_name', '')
+        self._class_docstring = getattr(func, 'class_docstring', '')
 
     def _ensure_loaded(self):
 
@@ -75,7 +75,11 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
         # Parse docstring types info
         if self.load_from_doc:
             validate_type = not bool(self._type_annotations)
-            type_info_doc = parse_docstring(self._docstring, validate_type=validate_type)
+
+            # if there is no param type info in self._class_docstring then use self._docstring
+            type_info_doc = parse_docstring(self._class_docstring, validate_type=validate_type)
+            if not type_info_doc[0]:
+                type_info_doc = parse_docstring(self._docstring, validate_type=validate_type)
 
             self._doc_parsed = True
 
@@ -115,7 +119,11 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
                 doc_types = {'args': sorted(doc_arg_types), 'return': doc_return_type}
 
                 if ann_types != doc_types:
-                    self._logger.warning('Type info mismatch between type annotations and docstring in "%s"', self.name)
+                    if self._class_name:
+                        name = '{}.{}'.format(self._class_name, self.name)
+                    else:
+                        name = self.name
+                    self._logger.warning('Type info mismatch between docstring and type annotations in "%s"', name)
 
     def _add_annotation_info(self, params, return_info):
         """Add type information for params and return value of this function

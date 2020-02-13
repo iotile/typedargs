@@ -236,15 +236,36 @@ def docannotate(func):
     to improve startup time. For this function to work, the docstring must be
     formatted correctly. You should use the typedargs pylint plugin to make
     sure there are no errors in the docstring.
+
+    This decorator is also could be used on classes to annotate their __init__() method.
+    If decorator applied on a class then the priority for source of type info would be:
+        __init__() type annotations -> class docstring -> __init__() docstring
+    Class docstring would be taken if it contains any argument type information. __init__() docstring
+    would be ignored in this case.
     """
+    cls = None
+    if inspect.isclass(func):
+        cls = func
+        func = cls.__init__
+        func.class_docstring = cls.__doc__ if cls.__doc__ else ''
+        func.class_name = cls.__name__
 
     func = annotated(func)
     func.metadata.load_from_doc = True
 
     if func.decorated:
+        if cls:
+            setattr(cls, '__init__', func)
+            return cls
+
         return func
 
     func.decorated = True
+
+    if cls:
+        setattr(cls, '__init__', decorate(func, _check_and_execute))
+        return cls
+
     return decorate(func, _check_and_execute)
 
 

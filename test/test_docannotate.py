@@ -4,7 +4,7 @@
 
 import pytest
 from typedargs import type_system, docannotate, param, return_type
-from typedargs.annotate import get_help
+from typedargs.annotate import get_help, context
 from typedargs.exceptions import ValidationError, ArgumentError
 from typedargs.doc_annotate import parse_docstring
 from typedargs.doc_parser import ParsedDocstring
@@ -318,3 +318,110 @@ def test_func_type_annotation(caplog):
     # Type annotations for func_ann and func_mismatch are the same.
     # Check if parsed info is the same regardless of wrong param type in func_mismatch docstring
     assert func_ann_types == func_mismatch_types
+
+
+def test_class_docannotate_no_doc():
+    """Make sure we can use @docannotate on class without docstring.
+
+    Type annotations should be used to annotate __init__() method.
+    """
+
+    @context("Demo")
+    @docannotate
+    class Demo:
+        def __init__(self, arg: str):
+            pass
+
+    # trigger type info parsing
+    Demo.__init__.metadata.returns_data()
+
+    assert 'arg' in Demo.__init__.metadata.annotated_params
+    assert Demo.__init__.metadata.annotated_params['arg'].type_class == str
+
+
+def test_class_docannotate_2_docstrings():
+    """Make __init__ method is annotated correctly when the class and its __init__ method has docstrings.
+
+    If both docstrings exist then class docstring should be used and __init__ docstring should be ignored.
+    """
+
+    @context("Demo")
+    @docannotate
+    class Demo:
+        """A manager.
+
+        Args:
+            arg (str): description
+        """
+        def __init__(self, arg):
+            """
+            Args:
+                arg (int): description
+            """
+
+    # trigger type info parsing
+    Demo.__init__.metadata.returns_data()
+
+    assert 'arg' in Demo.__init__.metadata.annotated_params
+    assert Demo.__init__.metadata.annotated_params['arg'].type_name == 'str'
+
+
+def test_class_docstring_and_annotations(caplog):
+    """Make sure type annotations wins if we decorate a class with @docannotate.
+
+    In this case, the docstring should be ignored in favor of type annotations.
+    """
+    @context("Demo")
+    @docannotate
+    class Demo:
+        """
+        Args:
+            arg (int): description
+        """
+        def __init__(self, arg: str):
+            pass
+
+    # trigger type info parsing
+    Demo.__init__.metadata.returns_data()
+
+    assert Demo.__init__.metadata.annotated_params['arg'].type_class == str
+
+    # Check warning message about type info mismatch, it should be only one there for "Demo.__init__"
+    assert len(caplog.records) == 1
+    warn_record = caplog.records[0]
+    assert warn_record.levelname == 'WARNING'
+    assert 'Type info mismatch' in warn_record.message and "Demo.__init__" in warn_record.message
+
+
+def test_docannotate_class_init(caplog):
+    """Make sure we can use @docannotate on class __init__() method.
+
+    If method has a type annotations then docstring types should be ignored.
+    """
+
+    @context("Demo")
+    class Demo:
+
+        @docannotate
+        def __init__(self, arg):
+            """
+            Args:
+                arg (str): description
+            """
+
+    @context("DemoAnn")
+    class DemoAnn:
+
+        @docannotate
+        def __init__(self, arg: str):
+            pass
+
+    # trigger type info parsing
+    Demo.__init__.metadata.returns_data()
+    DemoAnn.__init__.metadata.returns_data()
+
+    assert 'arg' in Demo.__init__.metadata.annotated_params
+    assert 'arg' in DemoAnn.__init__.metadata.annotated_params
+
+    assert Demo.__init__.metadata.annotated_params['arg'].type_name == 'str'
+    assert DemoAnn.__init__.metadata.annotated_params['arg'].type_class == str
