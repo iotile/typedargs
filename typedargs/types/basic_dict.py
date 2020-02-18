@@ -48,14 +48,17 @@ def format_one_line(dict_obj, key_formatter=None, val_formatter=None):
         if formatter is None:
             return str
 
-        if not callable(formatter):
-            if isinstance(formatter, str):
-                f_name = 'format_{}'.format(formatter)
-                if not (hasattr(obj, f_name) and callable(getattr(obj, f_name))):
-                    raise validation_err
-                formatter = getattr(obj, f_name)
-            else:
+        if callable(formatter):
+            return formatter
+
+        if isinstance(formatter, str):
+            f_name = 'format_{}'.format(formatter)
+            if not (hasattr(obj, f_name) and callable(getattr(obj, f_name))):
                 raise validation_err
+            formatter = getattr(obj, f_name)
+        else:
+            raise validation_err
+
         return formatter
 
     key = list(dict_obj.keys())[0]
