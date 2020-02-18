@@ -480,7 +480,7 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
         type_class = self.param_type_class(arg_name)
         type_name = self.param_type(arg_name)
 
-        if type_class is not None and hasattr(type_class, 'FromString'):
+        if type_class is not None and callable(getattr(type_class, 'FromString', None)):
             val = type_class.FromString(arg_value)
         else:
             if type_name is None:
@@ -492,20 +492,24 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
         if len(validators) == 0:
             return val
 
-        if type_class:
-            type_obj = type_class
-        else:
-            type_obj = typeinfo.type_system.get_type(type_name)
+        type_obj = typeinfo.type_system.get_type(type_name) if type_name else None
 
         # Run all of the validators that were defined for this argument.
         # If the validation fails, they will raise an exception that we convert to
         # an instance of ValidationError
         try:
             for validator_name, extra_args in validators:
-                if not hasattr(type_obj, validator_name):
-                    raise ValidationError("Could not find validator specified for argument", argument=arg_name, validator_name=validator_name, type=str(type_obj), method=dir(type_obj))
+                obj_validator = getattr(type_obj, validator_name, None)
 
-                validator = getattr(type_obj, validator_name)
+                class_validator = getattr(type_class, validator_name, None)
+                if not callable(class_validator):
+                    class_validator = None
+
+                if not class_validator and not obj_validator:
+                    raise ValidationError("Could not find validator specified for argument",
+                                          argument=arg_name, validator_name=validator_name, type_class=type_class, type_obj=str(type_obj), method=dir(type_obj))
+
+                validator = class_validator if class_validator else obj_validator
                 validator(val, *extra_args)
         except (ValueError, TypeError) as exc:
             raise ValidationError(exc.args[0], argument=arg_name, arg_value=val)
