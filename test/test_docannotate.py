@@ -251,6 +251,7 @@ def test_return_value_formatter_string():
     assert func_string.metadata.format_returnvalue(ret_value) == 'foo\nbar'
 
 
+# todo: split the test
 def test_recursive_parsing_formatters():
     """Make sure we can parse recursive return value formatters"""
 
@@ -266,18 +267,29 @@ def test_recursive_parsing_formatters():
             self.value = value
 
         def __str__(self):
-            return self.value
+            return '<{}>'.format(str(self.value))
 
     @docannotate
-    def func():
+    def func1():
         """
         Returns:
             Dict[User, Option] show-as one_line[short_name, string]: value description
         """
-        return {User('john'): Option('opt_1'), User('bob'): Option('opt_2')}
+        return {User('john'): Option('1'), User('bob'): Option('2')}
 
-    ret_value = func()
-    assert func.metadata.format_returnvalue(ret_value) == 'john: 1; bob: 2;'
+    @docannotate
+    def func2():
+        """
+        Returns:
+            Dict[str, int] show-as one_line[repr, hex]: value description
+        """
+        return {User('john'): 15, User('bob'): 100}
+
+    ret_value1 = func1()
+    ret_value2 = func2()
+
+    assert func1.metadata.format_returnvalue(ret_value1) == 'john: <1>; bob: <2>;'
+    assert func2.metadata.format_returnvalue(ret_value2) == 'john: 0xF; bob: 0x64;'
 
 
 def test_func_type_annotation(caplog):
