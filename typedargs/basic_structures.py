@@ -27,7 +27,8 @@ class ParameterInfo:
         return str(tuple(self))
 
     def __repr__(self):
-        return '<{}.{} id={} {}>'.format(self.__module__, self.__class__.__name__, id(self), str(tuple(self)))
+        return '<{} type_class={}, type_name={}, validators={}, desc={}>' \
+               ''.format(self.__class__.__name__, self.type_class, self.type_name, self.validators, self.desc)
 
 
 class ReturnInfo:
@@ -58,4 +59,5 @@ class ReturnInfo:
         return str(tuple(self))
 
     def __repr__(self):
-        return '<{}.{} id={} {}>'.format(self.__module__, self.__class__.__name__, id(self), str(tuple(self)))
+        return '<{} type_class={}, type_name={}, formatter={}, is_data={}, desc={}>'.format(
+            self.__class__.__name__, self.type_class, self.type_name, self.formatter, self.is_data, self.desc)
