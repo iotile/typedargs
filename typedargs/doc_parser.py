@@ -321,7 +321,7 @@ class ParsedDocstring:
         return out.getvalue()
 
 
-def parse_param(param, include_desc=False):
+def parse_param(param, include_desc=False, validate_type=True):
     """Parse a single typed parameter statement."""
 
     param_def, _colon, desc = param.partition(':')
@@ -335,13 +335,16 @@ def parse_param(param, include_desc=False):
 
     param_name, _space, param_type = param_def.partition(' ')
     if len(param_type) < 2 or param_type[0] != '(' or param_type[-1] != ')':
-        raise ValidationError("Invalid parameter type string not enclosed in ( ) characters", param_string=param_def, type_string=param_type)
+        if validate_type:
+            raise ValidationError("Invalid parameter type string not enclosed in ( ) characters", param_string=param_def, type_string=param_type)
+
+        return param_name, ParameterInfo(None, None, [], desc)
 
     param_type = param_type[1:-1]
-    return param_name, ParameterInfo(param_type, [], desc)
+    return param_name, ParameterInfo(None, param_type, [], desc)
 
 
-def parse_return(return_line, include_desc=False):
+def parse_return(return_line, include_desc=False, validate_type=True):
     """Parse a single return statement declaration.
 
     The valid types of return declaration are a Returns: section heading
@@ -355,25 +358,29 @@ def parse_return(return_line, include_desc=False):
 
     ret_def, _colon, desc = return_line.partition(':')
     if _colon == "":
-        raise ValidationError("Invalid return declaration in docstring, missing colon", declaration=ret_def)
+        if validate_type:
+            raise ValidationError("Invalid return declaration in docstring, missing colon", declaration=ret_def)
+
+        desc = ret_def
+        ret_def = None
 
     if not include_desc:
         desc = None
 
-    if 'show-as' in ret_def:
+    if ret_def and 'show-as' in ret_def:
         ret_type, _showas, show_type = ret_def.partition('show-as')
         show_type = show_type.strip()
 
         if show_type == 'context':
-            return ReturnInfo(None, None, False, desc)
-        
-        return ReturnInfo(None, show_type, True, desc)
+            return ReturnInfo(None, None, None, False, desc)
 
-    if 'format-as' in ret_def:
+        return ReturnInfo(None, None, show_type, True, desc)
+
+    if ret_def and 'format-as' in ret_def:
         ret_type, _showas, formatter = ret_def.partition('format-as')
         ret_type = ret_type.strip()
         formatter = formatter.strip()
 
-        return ReturnInfo(ret_type, formatter, True, desc)
+        return ReturnInfo(None, ret_type, formatter, True, desc)
 
-    return ReturnInfo(ret_def, None, True, desc)
+    return ReturnInfo(None, ret_def, None, True, desc)
