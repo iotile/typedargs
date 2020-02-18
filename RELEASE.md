@@ -6,6 +6,8 @@
 - Extend docannotate `show-as` return annotation to support more options (Issue #60)
 - Add support of function type annotations in `@docannotate`
 - Support using `@docannotate` on classes to annotate their `__init__()` functons
+- Support type classes in type annotations for converting argument from string 
+  and formatting return value  
 
 ## 1.0.2
 
