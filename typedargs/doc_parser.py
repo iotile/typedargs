@@ -1,5 +1,5 @@
 """Experimental module for better google docstring parsing."""
-
+import ast
 import inspect
 from io import StringIO
 from collections import namedtuple
@@ -319,6 +319,70 @@ class ParsedDocstring:
             # TODO: Also include description information here
 
         return out.getvalue()
+
+
+def _parse_param_validators(param_desc):
+    """Get validators from parameter description.
+
+    Validators should be specified in braces. Arguments of validator should be in brackets.
+    Example of param_desc value:
+
+        {nonnegative, range(1, 5), list(['a', 'b'], istrue(True))} Parameter descriptiom
+
+    Validator arguments in parenthesis should be valid python code.
+    Allowed validator argument types are: str, int, bool, float, None, list
+
+    Args:
+        param_desc (str): parameter description
+
+    Returns:
+          List[Tuple[str, list]]: list of validators
+    """
+
+    param_desc = param_desc.strip()
+    if not param_desc.startswith('{'):
+        return []
+
+    validators_string, _br, _ = param_desc.partition('}')
+    if not _br:
+        raise ValidationError('Malformed validators notation. Closing brace missed.', param_desc=param_desc)
+
+    validators_string = validators_string.lstrip('{')
+
+    result_list = []
+    while validators_string:
+        item, _comma, validators_string = [val.strip() for val in validators_string.partition(',')]
+
+        if not item:
+            raise ValidationError('Malformed validators notation. Empty item found.', param_desc=param_desc)
+
+        if '(' not in item:
+            # it is a validator without arguments
+            v_name = "validate_{}".format(item)
+            result_list.append((v_name, []))
+        else:
+            # it is a validator with arguments
+            v_name, _br, v_arg = [val.strip() for val in item.partition('(')]
+
+            if not v_name or not v_arg:
+                raise ValidationError('Malformed validators notation.', param_desc=param_desc, bad_item=item)
+
+            validators_string = '{}{}{}'.format(v_arg, _comma, validators_string)
+            args, _br, validators_string = [val.strip() for val in validators_string.partition(')')]
+            validators_string = validators_string.lstrip(',')
+
+            try:
+                args = ast.literal_eval(args)
+            except (ValueError, SyntaxError):
+                raise ValidationError(
+                    'Malformed validators notation.', param_desc=param_desc, validator_name=v_name, validator_args=args)
+
+            args = list(args) if isinstance(args, tuple) else [args]
+            v_name = "validate_{}".format(v_name)
+
+            result_list.append((v_name, args))
+
+    return result_list
 
 
 def parse_param(param, include_desc=False, validate_type=True):
