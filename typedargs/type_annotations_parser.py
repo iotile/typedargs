@@ -11,6 +11,8 @@ def parse_annotations(annotations: dict) -> Tuple[Dict[str, ParameterInfo], Retu
     params = {}
     returns = ReturnInfo(None, None, None, False, None)
 
+    # todo: Remove ret_type_name after switching to type classes instead of type modules
+    # todo: But make sure that type mismatch warning is logged in occasion
     if 'return' in annotations:
         ret_type = annotations.pop('return')
         ret_type_name = TypeSystem.get_type_name(ret_type)
