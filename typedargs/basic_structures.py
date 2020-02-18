@@ -4,6 +4,13 @@
 class ParameterInfo:
 
     def __init__(self, type_class, type_name, validators, desc):
+        """
+        Args:
+            type_class (Optional[type]): class of parameter value type
+            type_name (Optional[str]): parameter type name
+            validators (Optional[list]): list of validators
+            desc (Optional[str]): parameter description
+        """
         self.type_class = type_class
         self.type_name = type_name
         self.validators = validators
@@ -19,10 +26,21 @@ class ParameterInfo:
     def __str__(self):
         return str(tuple(self))
 
+    def __repr__(self):
+        return '<{}.{} id={} {}>'.format(self.__module__, self.__class__.__name__, id(self), str(tuple(self)))
+
 
 class ReturnInfo:
 
     def __init__(self, type_class, type_name, formatter, is_data, desc):
+        """
+        Args:
+            type_class (Optional[type]): class of parameter value type
+            type_name (Optional[str]): parameter type name
+            formatter (Optional[str]): parameter string formatter name
+            is_data (Optional[bool]): True if annotated function returns any data
+            desc (Optional[str]): parameter description
+        """
         self.type_class = type_class
         self.type_name = type_name
         self.formatter = formatter
@@ -38,3 +56,6 @@ class ReturnInfo:
 
     def __str__(self):
         return str(tuple(self))
+
+    def __repr__(self):
+        return '<{}.{} id={} {}>'.format(self.__module__, self.__class__.__name__, id(self), str(tuple(self)))
