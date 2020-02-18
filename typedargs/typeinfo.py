@@ -139,8 +139,8 @@ class TypeSystem:
         typed_val = self.convert_to_type(value, type, **kwargs)
         typeobj = self.get_type(type)
 
-        #Allow types to specify default formatting functions as 'default_formatter'
-        #otherwise if not format is specified, just convert the value to a string
+        # Allow types to specify default formatting functions as 'default_formatter'
+        # otherwise if no format is specified, just convert the value to a string
         if format is None:
             if hasattr(typeobj, 'default_formatter'):
                 format_func = getattr(typeobj, 'default_formatter')
