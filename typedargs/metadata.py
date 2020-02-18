@@ -262,6 +262,23 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
 
         return self.annotated_params[name].type_name
 
+    def param_type_class(self, name):
+        """Get the parameter type information by name.
+
+        Args:
+            name (str): The full name of a parameter.
+
+        Returns:
+            type: The type class or None if no type information is given.
+        """
+
+        self._ensure_loaded()
+
+        if name not in self.annotated_params:
+            return None
+
+        return self.annotated_params[name].type_class
+
     def signature(self, name=None):
         """Return our function signature as a string.
 
@@ -441,17 +458,25 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
 
         self._ensure_loaded()
 
+        type_class = self.param_type_class(arg_name)
         type_name = self.param_type(arg_name)
-        if type_name is None:
-            return arg_value
 
-        val = typeinfo.type_system.convert_to_type(arg_value, type_name)
+        if type_class is not None and hasattr(type_class, 'FromString'):
+            val = type_class.FromString(arg_value)
+        else:
+            if type_name is None:
+                return arg_value
+
+            val = typeinfo.type_system.convert_to_type(arg_value, type_name)
 
         validators = self.annotated_params[arg_name].validators
         if len(validators) == 0:
             return val
 
-        type_obj = typeinfo.type_system.get_type(type_name)
+        if type_class:
+            type_obj = type_class
+        else:
+            type_obj = typeinfo.type_system.get_type(type_name)
 
         # Run all of the validators that were defined for this argument.
         # If the validation fails, they will raise an exception that we convert to
