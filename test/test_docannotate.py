@@ -425,3 +425,33 @@ def test_docannotate_class_init(caplog):
 
     assert Demo.__init__.metadata.annotated_params['arg'].type_name == 'str'
     assert DemoAnn.__init__.metadata.annotated_params['arg'].type_class == str
+
+
+def test_custom_type_class():
+
+    class DemoInteger:
+        @classmethod
+        def FromString(cls, arg):
+            return int(arg)
+
+        @classmethod
+        def format_hex(cls, arg):
+            return "0x%X" % arg
+
+    @docannotate
+    def func(arg: DemoInteger) -> DemoInteger:
+        """Basic function.
+
+        Args:
+            arg: The input that will be converted to DemoInteger
+
+        Returns:
+            DemoInteger show-as hex: Some description
+        """
+        return arg
+
+    # trigger type info parsing
+    func.metadata.returns_data()
+
+    assert func('1') == 1
+    assert func.metadata.format_returnvalue(1) == '0x1'
