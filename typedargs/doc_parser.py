@@ -389,10 +389,15 @@ def parse_param(param, include_desc=False, validate_type=True):
     """Parse a single typed parameter statement."""
 
     param_def, _colon, desc = param.partition(':')
+
+    validators = _parse_param_validators(desc)
+
     if not include_desc:
         desc = None
     else:
-        desc = desc.lstrip()
+        if validators:
+            desc = desc.split('}', 1)[1]
+        desc = desc.strip()
 
     if _colon == "":
         raise ValidationError("Invalid parameter declaration in docstring, missing colon", declaration=param)
@@ -402,10 +407,10 @@ def parse_param(param, include_desc=False, validate_type=True):
         if validate_type:
             raise ValidationError("Invalid parameter type string not enclosed in ( ) characters", param_string=param_def, type_string=param_type)
 
-        return param_name, ParameterInfo(None, None, [], desc)
+        return param_name, ParameterInfo(None, None, validators, desc)
 
     param_type = param_type[1:-1]
-    return param_name, ParameterInfo(None, param_type, [], desc)
+    return param_name, ParameterInfo(None, param_type, validators, desc)
 
 
 def parse_return(return_line, include_desc=False, validate_type=True):
