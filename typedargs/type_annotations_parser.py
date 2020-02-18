@@ -2,7 +2,7 @@
 
 from typing import Tuple, Dict
 from typedargs.typeinfo import TypeSystem
-from .basic_structures import ParameterInfo, ReturnInfo
+from typedargs.basic_structures import ParameterInfo, ReturnInfo
 
 
 def parse_annotations(annotations: dict) -> Tuple[Dict[str, ParameterInfo], ReturnInfo]:
