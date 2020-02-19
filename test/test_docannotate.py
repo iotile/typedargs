@@ -428,7 +428,7 @@ def test_docannotate_class_init(caplog):
     assert DemoAnn.__init__.metadata.annotated_params['arg'].type_class == str
 
 
-def test_docstring_validators():
+def test_docstring_validators_parsing():
     """Make sure we can parse validators from docstring"""
 
     @docannotate
@@ -436,7 +436,7 @@ def test_docstring_validators():
         """
         Args:
             arg1: {positive, range(1, 5)} description
-            arg2: {list('a', 'b')} description
+            arg2: {list(['a', 'b'])} description
             arg3: {valid(None, True, 0.5)}
             arg4: descriptiom
         """
@@ -450,6 +450,6 @@ def test_docstring_validators():
     arg4_validators = func.metadata.annotated_params['arg4'].validators
 
     assert arg1_validators == [('validate_positive', []), ('validate_range', [1, 5])]
-    assert arg2_validators == [('validate_list', ['a', 'b'])]
+    assert arg2_validators == [('validate_list', [['a', 'b']])]
     assert arg3_validators == [('validate_valid', [None, True, 0.5])]
     assert arg4_validators == []
