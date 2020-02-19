@@ -3,10 +3,12 @@ import ast
 import inspect
 from io import StringIO
 from collections import namedtuple
+from typing import List, Tuple
 from textwrap import fill, dedent
 from .basic_structures import ParameterInfo, ReturnInfo
 from .exceptions import ValidationError
 from .terminal import get_terminal_size
+
 
 
 BlankLine = namedtuple("BlankLine", ['contents'])
@@ -321,7 +323,7 @@ class ParsedDocstring:
         return out.getvalue()
 
 
-def _parse_param_validators(param_desc):
+def _parse_param_validators(param_desc: str) -> List[Tuple[str, list]]:
     """Get validators from parameter description.
 
     Validators should be specified in braces. Arguments of validator should be in brackets.
@@ -333,10 +335,10 @@ def _parse_param_validators(param_desc):
     Allowed validator argument types are: str, int, bool, float, None, list
 
     Args:
-        param_desc (str): parameter description
+        param_desc: parameter description
 
     Returns:
-          List[Tuple[str, list]]: list of validators
+          list of validators
     """
 
     param_desc = param_desc.strip()
