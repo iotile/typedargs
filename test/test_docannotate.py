@@ -453,3 +453,30 @@ def test_docstring_validators_parsing():
     assert arg2_validators == [('validate_list', [['a', 'b']])]
     assert arg3_validators == [('validate_valid', [None, True, 0.5])]
     assert arg4_validators == []
+
+
+def test_docstring_validators_validation():
+    """Make sure we can parse validators from docstring"""
+
+    @docannotate
+    def func(arg1: int) -> int:
+        """
+        Args:
+            arg1: {positive, range(1, 5)} description
+        """
+        return arg1
+
+    # trigger type info parsing
+    _ = func.metadata.returns_data()
+
+    assert func('1') == 1
+
+    # check "positive" validator
+    with pytest.raises(ValidationError):
+        func('-1')
+
+    # check "range" validator
+    with pytest.raises(ValidationError):
+        func('10')
+
+
