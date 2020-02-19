@@ -338,7 +338,7 @@ def _parse_param_validators(param_desc: str) -> List[Tuple[str, list]]:
         param_desc: parameter description
 
     Returns:
-          list of validators
+          A list of validators
     """
 
     param_desc = param_desc.strip()
