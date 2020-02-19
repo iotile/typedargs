@@ -428,6 +428,11 @@ def test_docannotate_class_init(caplog):
 
 
 def test_custom_type_class():
+    """Make sure we can annotate a function with type class.
+
+    @docannotate should use methods of this class to convert arguments from string,
+    to validate arguments and to format return value.
+    """
 
     class DemoInteger:
         @classmethod
