@@ -149,14 +149,16 @@
             
   <h1>Source code for typedargs.doc_parser</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Experimental module for better google docstring parsing.&quot;&quot;&quot;</span>
-
+<span class="kn">import</span> <span class="nn">ast</span>
 <span class="kn">import</span> <span class="nn">inspect</span>
 <span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">StringIO</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Iterator</span>
 <span class="kn">from</span> <span class="nn">textwrap</span> <span class="kn">import</span> <span class="n">fill</span><span class="p">,</span> <span class="n">dedent</span>
 <span class="kn">from</span> <span class="nn">.basic_structures</span> <span class="kn">import</span> <span class="n">ParameterInfo</span><span class="p">,</span> <span class="n">ReturnInfo</span>
 <span class="kn">from</span> <span class="nn">.exceptions</span> <span class="kn">import</span> <span class="n">ValidationError</span>
 <span class="kn">from</span> <span class="nn">.terminal</span> <span class="kn">import</span> <span class="n">get_terminal_size</span>
+
 
 
 <span class="n">BlankLine</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;BlankLine&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;contents&#39;</span><span class="p">])</span>
@@ -471,14 +473,97 @@
         <span class="k">return</span> <span class="n">out</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span></div></div>
 
 
+<span class="k">def</span> <span class="nf">_iter_validators</span><span class="p">(</span><span class="n">validators_string</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Iterate over each complete validator.&quot;&quot;&quot;</span>
+
+    <span class="k">while</span> <span class="n">validators_string</span><span class="p">:</span>
+        <span class="n">item</span><span class="p">,</span> <span class="n">_comma</span><span class="p">,</span> <span class="n">validators_string</span> <span class="o">=</span> <span class="p">[</span><span class="n">val</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">validators_string</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">item</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="s1">&#39;Malformed validators notation. Empty item found.&#39;</span><span class="p">,</span> <span class="n">validators_string</span><span class="o">=</span><span class="n">validators_string</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s1">&#39;(&#39;</span> <span class="ow">in</span> <span class="n">item</span><span class="p">:</span>
+            <span class="c1"># validator with args</span>
+            <span class="n">validators_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}{}{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">_comma</span><span class="p">,</span> <span class="n">validators_string</span><span class="p">)</span>
+            <span class="n">item</span><span class="p">,</span> <span class="n">_br</span><span class="p">,</span> <span class="n">validators_string</span> <span class="o">=</span> <span class="p">[</span><span class="n">val</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">validators_string</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">)]</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">_br</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="s1">&#39;Malformed validators notation. Closing parenthesis missed.&#39;</span><span class="p">,</span> <span class="n">validators_string</span><span class="o">=</span><span class="n">validators_string</span><span class="p">)</span>
+
+            <span class="n">item</span> <span class="o">+=</span> <span class="n">_br</span>
+            <span class="n">validators_string</span> <span class="o">=</span> <span class="n">validators_string</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+
+        <span class="k">yield</span> <span class="n">item</span>
+
+
+<span class="k">def</span> <span class="nf">_parse_param_validators</span><span class="p">(</span><span class="n">param_desc</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]]:</span>
+    <span class="sd">&quot;&quot;&quot;Get validators from parameter description.</span>
+
+<span class="sd">    Validators should be specified in braces. Arguments of validator should be in brackets.</span>
+<span class="sd">    Example of param_desc value:</span>
+
+<span class="sd">        {nonnegative, range(1, 5), list([&#39;a&#39;, &#39;b&#39;], istrue(True))} Parameter descriptiom</span>
+
+<span class="sd">    Validator arguments in parenthesis should be valid python code.</span>
+<span class="sd">    Allowed validator argument types are: None, str, int, bool, float, list</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        param_desc: parameter description</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">          A list of validators</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">param_desc</span> <span class="o">=</span> <span class="n">param_desc</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">param_desc</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;{&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[]</span>
+
+    <span class="n">validators_string</span><span class="p">,</span> <span class="n">_br</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">param_desc</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">&#39;}&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_br</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="s1">&#39;Malformed validators notation. Closing brace missed.&#39;</span><span class="p">,</span> <span class="n">param_desc</span><span class="o">=</span><span class="n">param_desc</span><span class="p">)</span>
+
+    <span class="n">validators_string</span> <span class="o">=</span> <span class="n">validators_string</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s1">&#39;{&#39;</span><span class="p">)</span>
+
+    <span class="n">result_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">validator</span> <span class="ow">in</span> <span class="n">_iter_validators</span><span class="p">(</span><span class="n">validators_string</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s1">&#39;(&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">validator</span><span class="p">:</span>
+            <span class="c1"># it is a validator without arguments</span>
+            <span class="n">v_name</span> <span class="o">=</span> <span class="s2">&quot;validate_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">validator</span><span class="p">)</span>
+            <span class="n">result_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">v_name</span><span class="p">,</span> <span class="p">[]))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># it is a validator with arguments</span>
+            <span class="n">v_name</span><span class="p">,</span> <span class="n">_br</span><span class="p">,</span> <span class="n">v_args</span> <span class="o">=</span> <span class="p">[</span><span class="n">val</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">validator</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">)]</span>
+            <span class="n">v_args</span> <span class="o">=</span> <span class="n">v_args</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">v_name</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">v_args</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="s1">&#39;Malformed validators notation.&#39;</span><span class="p">,</span> <span class="n">param_desc</span><span class="o">=</span><span class="n">param_desc</span><span class="p">,</span> <span class="n">validator</span><span class="o">=</span><span class="n">validator</span><span class="p">)</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">v_args</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">literal_eval</span><span class="p">(</span><span class="n">v_args</span><span class="p">)</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">SyntaxError</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="s1">&#39;Malformed validators notation. Cannot evaluate validator arguments&#39;</span><span class="p">,</span> <span class="n">param_desc</span><span class="o">=</span><span class="n">param_desc</span><span class="p">,</span> <span class="n">validator</span><span class="o">=</span><span class="n">validator</span><span class="p">)</span>
+
+            <span class="n">v_args</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">v_args</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v_args</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="k">else</span> <span class="p">[</span><span class="n">v_args</span><span class="p">]</span>
+            <span class="n">v_name</span> <span class="o">=</span> <span class="s2">&quot;validate_</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">v_name</span><span class="p">)</span>
+
+            <span class="n">result_list</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">v_name</span><span class="p">,</span> <span class="n">v_args</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">result_list</span>
+
+
 <div class="viewcode-block" id="parse_param"><a class="viewcode-back" href="../../api/typedargs.doc_parser.html#typedargs.doc_parser.parse_param">[docs]</a><span class="k">def</span> <span class="nf">parse_param</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">include_desc</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">validate_type</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Parse a single typed parameter statement.&quot;&quot;&quot;</span>
 
     <span class="n">param_def</span><span class="p">,</span> <span class="n">_colon</span><span class="p">,</span> <span class="n">desc</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
+
+    <span class="n">validators</span> <span class="o">=</span> <span class="n">_parse_param_validators</span><span class="p">(</span><span class="n">desc</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="ow">not</span> <span class="n">include_desc</span><span class="p">:</span>
         <span class="n">desc</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">desc</span> <span class="o">=</span> <span class="n">desc</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">validators</span><span class="p">:</span>
+            <span class="n">desc</span> <span class="o">=</span> <span class="n">desc</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;}&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">desc</span> <span class="o">=</span> <span class="n">desc</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">_colon</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="s2">&quot;Invalid parameter declaration in docstring, missing colon&quot;</span><span class="p">,</span> <span class="n">declaration</span><span class="o">=</span><span class="n">param</span><span class="p">)</span>
@@ -488,10 +573,10 @@
         <span class="k">if</span> <span class="n">validate_type</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="s2">&quot;Invalid parameter type string not enclosed in ( ) characters&quot;</span><span class="p">,</span> <span class="n">param_string</span><span class="o">=</span><span class="n">param_def</span><span class="p">,</span> <span class="n">type_string</span><span class="o">=</span><span class="n">param_type</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">ParameterInfo</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">[],</span> <span class="n">desc</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">ParameterInfo</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">validators</span><span class="p">,</span> <span class="n">desc</span><span class="p">)</span>
 
     <span class="n">param_type</span> <span class="o">=</span> <span class="n">param_type</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">ParameterInfo</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">param_type</span><span class="p">,</span> <span class="p">[],</span> <span class="n">desc</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">ParameterInfo</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">param_type</span><span class="p">,</span> <span class="n">validators</span><span class="p">,</span> <span class="n">desc</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="parse_return"><a class="viewcode-back" href="../../api/typedargs.doc_parser.html#typedargs.doc_parser.parse_return">[docs]</a><span class="k">def</span> <span class="nf">parse_return</span><span class="p">(</span><span class="n">return_line</span><span class="p">,</span> <span class="n">include_desc</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">validate_type</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>

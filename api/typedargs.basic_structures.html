@@ -189,10 +189,28 @@
 </colgroup>
 <tbody valign="top">
 <tr class="row-odd"><td><a class="reference internal" href="#typedargs.basic_structures.ParameterInfo" title="typedargs.basic_structures.ParameterInfo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ParameterInfo</span></code></a></td>
-<td></td>
+<td><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">param type_class:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">class of parameter value type</td>
+</tr>
+</tbody>
+</table>
+</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="#typedargs.basic_structures.ReturnInfo" title="typedargs.basic_structures.ReturnInfo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ReturnInfo</span></code></a></td>
-<td></td>
+<td><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">param type_class:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">class of parameter value type</td>
+</tr>
+</tbody>
+</table>
+</td>
 </tr>
 </tbody>
 </table>
@@ -201,14 +219,43 @@
 <h2>Reference<a class="headerlink" href="#reference" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="typedargs.basic_structures.ParameterInfo">
-<em class="property">class </em><code class="descclassname">typedargs.basic_structures.</code><code class="descname">ParameterInfo</code><span class="sig-paren">(</span><em>type_class</em>, <em>type_name</em>, <em>validators</em>, <em>desc</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/basic_structures.html#ParameterInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.basic_structures.ParameterInfo" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">typedargs.basic_structures.</code><code class="descname">ParameterInfo</code><span class="sig-paren">(</span><em>type_class: Optional[type], type_name: Optional[str], validators: Optional[list], desc: Optional[str]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/basic_structures.html#ParameterInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.basic_structures.ParameterInfo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>type_class</strong> – class of parameter value type</li>
+<li><strong>type_name</strong> – parameter type name</li>
+<li><strong>validators</strong> – list of validators</li>
+<li><strong>desc</strong> – parameter description</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="class">
 <dt id="typedargs.basic_structures.ReturnInfo">
-<em class="property">class </em><code class="descclassname">typedargs.basic_structures.</code><code class="descname">ReturnInfo</code><span class="sig-paren">(</span><em>type_class</em>, <em>type_name</em>, <em>formatter</em>, <em>is_data</em>, <em>desc</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/basic_structures.html#ReturnInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.basic_structures.ReturnInfo" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">typedargs.basic_structures.</code><code class="descname">ReturnInfo</code><span class="sig-paren">(</span><em>type_class: Optional[type], type_name: Optional[str], formatter: Optional[str], is_data: Optional[bool], desc: Optional[str]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/basic_structures.html#ReturnInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.basic_structures.ReturnInfo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>type_class</strong> – class of parameter value type</li>
+<li><strong>type_name</strong> – parameter type name</li>
+<li><strong>formatter</strong> – parameter string formatter name</li>
+<li><strong>is_data</strong> – True if annotated function returns any data</li>
+<li><strong>desc</strong> – parameter description</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
