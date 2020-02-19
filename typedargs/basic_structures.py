@@ -1,16 +1,17 @@
 """Basic structures used to describe parameters and return values."""
+from typing import Optional
 
 
 class ParameterInfo:
+    """
+    Args:
+        type_class: class of parameter value type
+        type_name: parameter type name
+        validators: list of validators
+        desc: parameter description
+    """
+    def __init__(self, type_class: Optional[type], type_name: Optional[str], validators: Optional[list], desc: Optional[str]):
 
-    def __init__(self, type_class, type_name, validators, desc):
-        """
-        Args:
-            type_class (Optional[type]): class of parameter value type
-            type_name (Optional[str]): parameter type name
-            validators (Optional[list]): list of validators
-            desc (Optional[str]): parameter description
-        """
         self.type_class = type_class
         self.type_name = type_name
         self.validators = validators
@@ -32,16 +33,16 @@ class ParameterInfo:
 
 
 class ReturnInfo:
+    """
+    Args:
+        type_class: class of parameter value type
+        type_name: parameter type name
+        formatter: parameter string formatter name
+        is_data: True if annotated function returns any data
+        desc: parameter description
+    """
+    def __init__(self, type_class: Optional[type], type_name: Optional[str], formatter: Optional[str], is_data: Optional[bool], desc: Optional[str]):
 
-    def __init__(self, type_class, type_name, formatter, is_data, desc):
-        """
-        Args:
-            type_class (Optional[type]): class of parameter value type
-            type_name (Optional[str]): parameter type name
-            formatter (Optional[str]): parameter string formatter name
-            is_data (Optional[bool]): True if annotated function returns any data
-            desc (Optional[str]): parameter description
-        """
         self.type_class = type_class
         self.type_name = type_name
         self.formatter = formatter
