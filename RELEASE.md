@@ -6,6 +6,7 @@
 - Extend docannotate `show-as` return annotation to support more options (Issue #60)
 - Add support of function type annotations in `@docannotate`
 - Support using `@docannotate` on classes to annotate their `__init__()` functons
+- Support specifying validators in docstrings (Issue #65)
 
 ## 1.0.2
 

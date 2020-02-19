@@ -1,12 +1,14 @@
 """Experimental module for better google docstring parsing."""
-
+import ast
 import inspect
 from io import StringIO
 from collections import namedtuple
+from typing import List, Tuple, Iterator
 from textwrap import fill, dedent
 from .basic_structures import ParameterInfo, ReturnInfo
 from .exceptions import ValidationError
 from .terminal import get_terminal_size
+
 
 
 BlankLine = namedtuple("BlankLine", ['contents'])
@@ -321,14 +323,97 @@ class ParsedDocstring:
         return out.getvalue()
 
 
+def _iter_validators(validators_string: str) -> Iterator[str]:
+    """Iterate over each complete validator."""
+
+    while validators_string:
+        item, _comma, validators_string = [val.strip() for val in validators_string.partition(',')]
+
+        if not item:
+            raise ValidationError('Malformed validators notation. Empty item found.', validators_string=validators_string)
+
+        if '(' in item:
+            # validator with args
+            validators_string = '{}{}{}'.format(item, _comma, validators_string)
+            item, _br, validators_string = [val.strip() for val in validators_string.partition(')')]
+
+            if not _br:
+                raise ValidationError('Malformed validators notation. Closing parenthesis missed.', validators_string=validators_string)
+
+            item += _br
+            validators_string = validators_string.strip().lstrip(',')
+
+        yield item
+
+
+def _parse_param_validators(param_desc: str) -> List[Tuple[str, list]]:
+    """Get validators from parameter description.
+
+    Validators should be specified in braces. Arguments of validator should be in brackets.
+    Example of param_desc value:
+
+        {nonnegative, range(1, 5), list(['a', 'b'], istrue(True))} Parameter descriptiom
+
+    Validator arguments in parenthesis should be valid python code.
+    Allowed validator argument types are: None, str, int, bool, float, list
+
+    Args:
+        param_desc: parameter description
+
+    Returns:
+          A list of validators
+    """
+
+    param_desc = param_desc.strip()
+    if not param_desc.startswith('{'):
+        return []
+
+    validators_string, _br, _ = param_desc.partition('}')
+    if not _br:
+        raise ValidationError('Malformed validators notation. Closing brace missed.', param_desc=param_desc)
+
+    validators_string = validators_string.lstrip('{')
+
+    result_list = []
+    for validator in _iter_validators(validators_string):
+        if '(' not in validator:
+            # it is a validator without arguments
+            v_name = "validate_{}".format(validator)
+            result_list.append((v_name, []))
+        else:
+            # it is a validator with arguments
+            v_name, _br, v_args = [val.strip() for val in validator.partition('(')]
+            v_args = v_args.rstrip(')').strip()
+
+            if not v_name or not v_args:
+                raise ValidationError('Malformed validators notation.', param_desc=param_desc, validator=validator)
+
+            try:
+                v_args = ast.literal_eval(v_args)
+            except (ValueError, SyntaxError):
+                raise ValidationError('Malformed validators notation. Cannot evaluate validator arguments', param_desc=param_desc, validator=validator)
+
+            v_args = list(v_args) if isinstance(v_args, tuple) else [v_args]
+            v_name = "validate_{}".format(v_name)
+
+            result_list.append((v_name, v_args))
+
+    return result_list
+
+
 def parse_param(param, include_desc=False, validate_type=True):
     """Parse a single typed parameter statement."""
 
     param_def, _colon, desc = param.partition(':')
+
+    validators = _parse_param_validators(desc)
+
     if not include_desc:
         desc = None
     else:
-        desc = desc.lstrip()
+        if validators:
+            desc = desc.split('}', 1)[1]
+        desc = desc.strip()
 
     if _colon == "":
         raise ValidationError("Invalid parameter declaration in docstring, missing colon", declaration=param)
@@ -338,10 +423,10 @@ def parse_param(param, include_desc=False, validate_type=True):
         if validate_type:
             raise ValidationError("Invalid parameter type string not enclosed in ( ) characters", param_string=param_def, type_string=param_type)
 
-        return param_name, ParameterInfo(None, None, [], desc)
+        return param_name, ParameterInfo(None, None, validators, desc)
 
     param_type = param_type[1:-1]
-    return param_name, ParameterInfo(None, param_type, [], desc)
+    return param_name, ParameterInfo(None, param_type, validators, desc)
 
 
 def parse_return(return_line, include_desc=False, validate_type=True):

@@ -9,6 +9,7 @@ from typedargs.exceptions import ValidationError, ArgumentError
 from typedargs.doc_annotate import parse_docstring
 from typedargs.doc_parser import ParsedDocstring
 from typedargs.basic_structures import ParameterInfo
+from typing import Any
 
 
 DOCSTRING1 = """Do something.
@@ -425,3 +426,57 @@ def test_docannotate_class_init(caplog):
 
     assert Demo.__init__.metadata.annotated_params['arg'].type_name == 'str'
     assert DemoAnn.__init__.metadata.annotated_params['arg'].type_class == str
+
+
+def test_docstring_validators_parsing():
+    """Make sure we can parse validators from docstring"""
+
+    @docannotate
+    def func(arg1: int, arg2: str, arg3: Any, arg4: bool):
+        """
+        Args:
+            arg1: {positive, range(1, 5)} description
+            arg2: {list(['a', 'b'])} description
+            arg3: {valid(None, True, 0.5)}
+            arg4: descriptiom
+        """
+
+    # trigger type info parsing
+    _ = func.metadata.returns_data()
+
+    arg1_validators = func.metadata.annotated_params['arg1'].validators
+    arg2_validators = func.metadata.annotated_params['arg2'].validators
+    arg3_validators = func.metadata.annotated_params['arg3'].validators
+    arg4_validators = func.metadata.annotated_params['arg4'].validators
+
+    assert arg1_validators == [('validate_positive', []), ('validate_range', [1, 5])]
+    assert arg2_validators == [('validate_list', [['a', 'b']])]
+    assert arg3_validators == [('validate_valid', [None, True, 0.5])]
+    assert arg4_validators == []
+
+
+def test_docstring_validators_validation():
+    """Make sure we can parse validators from docstring"""
+
+    @docannotate
+    def func(arg1: int) -> int:
+        """
+        Args:
+            arg1: {positive, range(1, 5)} description
+        """
+        return arg1
+
+    # trigger type info parsing
+    _ = func.metadata.returns_data()
+
+    assert func('1') == 1
+
+    # check "positive" validator
+    with pytest.raises(ValidationError):
+        func('-1')
+
+    # check "range" validator
+    with pytest.raises(ValidationError):
+        func('10')
+
+
