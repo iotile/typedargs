@@ -237,26 +237,6 @@ class TypeSystem:
 
         return False
 
-    @classmethod
-    def get_type_name(cls, type_class: type) -> Optional[str]:
-
-        type_name = None
-
-        supported_typing_types = ('Dict', 'Tuple', 'List')
-
-        if inspect.getmodule(type_class) == typing:
-
-            # get 'Type' from "typing.Type[sub, sub] or from typing.Type"
-            type_name = str(type_class).split('.', 1)[-1].split('[')[0]
-
-            if type_name in supported_typing_types:
-                type_name = type_name.lower()
-
-        elif hasattr(type_class, '__name__'):
-            type_name = type_class.__name__
-
-        return type_name
-
     def get_type(self, type_name):
         """Return the type object corresponding to a type name.
 
