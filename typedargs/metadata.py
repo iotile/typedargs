@@ -312,20 +312,6 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
 
         return "{}({})".format(name, ", ".join(args))
 
-    def _format_returnvalue_type_class(self, value):
-        if self.return_info.formatter in ('str', 'string', 'default', None):
-            default_formatter = getattr(self.return_info.type_class, 'format_default', None)
-            if callable(default_formatter):
-                return default_formatter(value)
-
-        elif self.return_info.formatter and isinstance(self.return_info.formatter, str):
-            formatter_name = 'format_{}'.format(self.return_info.formatter)
-            formatter = getattr(self.return_info.type_class, formatter_name, None)
-            if callable(formatter):
-                return formatter(value)
-
-        return None
-
     def format_returnvalue(self, value):
         """Format the return value of this function as a string.
 
@@ -342,18 +328,18 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
         if not self.return_info.is_data:
             return None
 
-        # If the return value is typed, use the type class or type_system to format it
-        if self.return_info.type_class:
-            result_str = self._format_returnvalue_type_class(value)
-            if result_str is not None:
-                return result_str
+        validation_err = ValidationError('Cannot convert return value to string', value=value)
 
-        if not self.return_info.type_class and self.return_info.type_name:
-            return typeinfo.type_system.format_value(value, self.return_info.type_name, self.return_info.formatter)
+        # If the return value is typed, use the type_system to format it
+        if self.return_info.type_class:
+            value_type = self.return_info.type_class
+        else:
+            value_type = self.return_info.type_name
+
+        if value_type is not None:
+            return typeinfo.type_system.format_value(value, value_type, self.return_info.formatter)
 
         # Otherwise convert this value to a string with formatter function
-        validation_err = ValidationError('Cannot convert return value to string')
-
         if self.return_info.formatter in (None, 'default', 'str', 'string'):
             formatter = str
         elif callable(self.return_info.formatter):
