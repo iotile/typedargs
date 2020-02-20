@@ -141,21 +141,24 @@ class TypeSystem:
 
         return 0
 
-    def format_value(self, value, type, format=None, **kwargs):
+    def format_value(self, value, type_or_name, format=None, **kwargs):
         """
-        Convert value to type and format it as a string
+        Convert value to type specified by type_or_name and format it as a string.
 
-        type must be a known type in the type system and format,
-        if given, must specify a valid formatting option for the
-        specified type.
+        type_or_name must be a known type in the type system or a type class.
+        And format, if given, must specify a valid formatting option for the specified type.
         """
 
-        typed_val = self.convert_to_type(value, type, **kwargs)
-        typeobj = self.get_type(type)
+        typed_val = self.convert_to_type(value, type_or_name, **kwargs)
+
+        if isinstance(type_or_name, str) or self.is_known_type(type_or_name):
+            typeobj = self.get_type(type_or_name)
+        else:
+            typeobj = type_or_name
 
         # Allow types to specify default formatting functions as 'default_formatter'
         # otherwise if no format is specified, just convert the value to a string
-        if format is None:
+        if format in (None, 'default', 'str', 'string'):
             if hasattr(typeobj, 'default_formatter'):
                 format_func = getattr(typeobj, 'default_formatter')
                 return format_func(typed_val, **kwargs)
@@ -163,10 +166,11 @@ class TypeSystem:
             return str(typed_val)
 
         formatter = "format_%s" % str(format)
-        if not hasattr(typeobj, formatter):
-            raise ArgumentError("Unknown format for type", type=type, format=format, formatter_function=formatter)
+        format_func = getattr(typeobj, formatter, None)
 
-        format_func = getattr(typeobj, formatter)
+        if not callable(format_func):
+            raise ArgumentError("Unknown format for type", type=type_or_name, format=format, formatter_function=formatter)
+
         return format_func(typed_val, **kwargs)
 
     @classmethod
