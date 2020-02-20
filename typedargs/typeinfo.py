@@ -76,24 +76,37 @@ class TypeSystem:
 
         self._lazy_type_sources.append((source, name))
 
-    def convert_to_type(self, value, typename, **kwargs):
+    def convert_to_type(self, value, type_or_name, **kwargs):
         """
-        Convert value to type 'typename'
+        Convert value to type 'type_or_name'
 
         If the conversion routine takes various kwargs to
         modify the conversion process, \\**kwargs is passed
         through to the underlying conversion function
         """
-        try:
-            if isinstance(value, bytearray):
-                return self.convert_from_binary(value, typename, **kwargs)
 
-            typeobj = self.get_type(typename)
+        if isinstance(type_or_name, str) or self.is_known_type(type_or_name):
+            try:
+                if isinstance(value, bytearray):
+                    return self.convert_from_binary(value, type_or_name, **kwargs)
 
-            conv = typeobj.convert(value, **kwargs)
-            return conv
-        except (ValueError, TypeError) as exc:
-            raise ValidationError("Could not convert value", type=typename, value=value, error_message=str(exc))
+                typeobj = self.get_type(type_or_name)
+
+                conv = typeobj.convert(value, **kwargs)
+                return conv
+
+            except (ValueError, TypeError) as exc:
+                raise ValidationError("Could not convert value", type=type_or_name, value=value, error_message=str(exc))
+        else:
+            if isinstance(value, type_or_name):
+                return value
+
+            if isinstance(value, str):
+                if not callable(getattr(type_or_name, 'FromString', None)):
+                    raise ValidationError("Converting from string to the given type is not supported.", type=type_or_name, value=value)
+
+                conv = type_or_name.FromString(value)
+                return conv
 
     def convert_from_binary(self, binvalue, type, **kwargs):
         """
