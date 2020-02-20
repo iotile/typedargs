@@ -2,6 +2,7 @@
 
 import inspect
 import logging
+from typing import Union
 from typedargs import typeinfo, utils
 from .exceptions import TypeSystemError, ArgumentError, ValidationError, InternalError
 from .basic_structures import ParameterInfo, ReturnInfo
@@ -245,7 +246,7 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
 
         return possible[0]
 
-    def param_type(self, name):
+    def param_type(self, name: str) -> Union[type, str, None]:
         """Get the parameter type information by name.
 
         Args:
@@ -260,24 +261,10 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
         if name not in self.annotated_params:
             return None
 
+        if self.annotated_params[name].type_class:
+            return self.annotated_params[name].type_class
+
         return self.annotated_params[name].type_name
-
-    def param_type_class(self, name):
-        """Get the parameter type information by name.
-
-        Args:
-            name (str): The full name of a parameter.
-
-        Returns:
-            type: The type class or None if no type information is given.
-        """
-
-        self._ensure_loaded()
-
-        if name not in self.annotated_params:
-            return None
-
-        return self.annotated_params[name].type_class
 
     def signature(self, name=None):
         """Return our function signature as a string.
