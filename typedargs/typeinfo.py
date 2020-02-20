@@ -236,15 +236,17 @@ class TypeSystem:
 
         return False
 
-    def get_type(self, type_name):
+    def get_type(self, type_or_name):
         """Return the type object corresponding to a type name.
 
         If type_name is not found, this triggers the loading of
         external types until a matching type is found or until there
         are no more external type sources.
         """
+        if type_or_name in self.mapped_builtin_types:
+            return self.mapped_builtin_types[type_or_name]
 
-        type_name = self._canonicalize_type(type_name)
+        type_name = self._canonicalize_type(type_or_name)
 
         # Add basic transformations on common abbreviations
         if str(type_name) == 'int':
