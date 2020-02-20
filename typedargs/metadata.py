@@ -109,8 +109,8 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
 
             # if there any type info in docstring.
             doc_return_type = getattr(type_info_doc[1], 'type_name', None)
-            if list(filter(lambda val: val.type_name, type_info_doc[0].values())) or doc_return_type:
-
+            doc_arg_types = list(filter(lambda val: val.type_name, type_info_doc[0].values()))
+            if doc_arg_types or doc_return_type:
                 # do not take docstring arg descriptions where type is not specified
                 doc_arg_types = [(arg, info.type_name) for arg, info in type_info_doc[0].items() if info.type_name is not None]
                 ann_arg_types = [(arg, info.type_name) for arg, info in type_info_ann[0].items()]
