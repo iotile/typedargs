@@ -39,6 +39,7 @@ class TypeSystem:
         self.interactive = False
         self.known_types = {}
         self.type_factories = {}
+        self.mapped_builtin_types = {}
         self.logger = logging.getLogger(__name__)
 
         for arg in args:
@@ -331,6 +332,9 @@ class TypeSystem:
         else:
             self._validate_type(typeobj)
             self.known_types[name] = typeobj
+
+            if hasattr(typeobj, 'MAPPED_BUILTIN_TYPE'):
+                self.mapped_builtin_types[typeobj.MAPPED_BUILTIN_TYPE] = typeobj
 
         if not hasattr(typeobj, "default_formatter"):
             raise ArgumentError("type is invalid, does not have default_formatter function", type=typeobj, methods=dir(typeobj))
