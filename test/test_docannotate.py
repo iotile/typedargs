@@ -436,20 +436,28 @@ def test_custom_type_class():
     """
 
     class DemoInteger:
+        def __init__(self, value: int):
+            self.value = value
+
         @classmethod
         def FromString(cls, arg):
-            return int(arg)
+            return cls(int(arg))
+
+        @classmethod
+        def validate_positive(cls, arg):
+            if arg.value <= 0:
+                raise ValueError('Object value is not positive.')
 
         @classmethod
         def format_hex(cls, arg):
-            return "0x%X" % arg
+            return "0x%X" % arg.value
 
     @docannotate
     def func(arg: DemoInteger) -> DemoInteger:
         """Basic function.
 
         Args:
-            arg: The input that will be converted to DemoInteger
+            arg: {positive} The input that will be converted to DemoInteger
 
         Returns:
             DemoInteger show-as hex: Some description
@@ -459,8 +467,20 @@ def test_custom_type_class():
     # trigger type info parsing
     func.metadata.returns_data()
 
-    assert func('1') == 1
-    assert func.metadata.format_returnvalue(1) == '0x1'
+    ret_value = func('1')
+
+    # check converting from string
+    assert isinstance(ret_value, DemoInteger)
+    assert ret_value.value == 1
+
+    # check argument validation
+    with pytest.raises(ValidationError) as exc:
+        func('-1')
+
+    assert 'Object value is not positive.' in str(exc)
+
+    # check formatting return value
+    assert func.metadata.format_returnvalue(ret_value) == '0x1'
 
 
 def test_docstring_validators_parsing():
@@ -513,4 +533,3 @@ def test_docstring_validators_validation():
     # check "range" validator
     with pytest.raises(ValidationError):
         func('10')
-
