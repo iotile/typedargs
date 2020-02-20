@@ -367,7 +367,7 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
         # Otherwise convert this value to a string with formatter function
         validation_err = ValidationError('Cannot convert return value to string')
 
-        if self.return_info.formatter is None or self.return_info.formatter == 'string':
+        if self.return_info.formatter in (None, 'default', 'str', 'string'):
             formatter = str
         elif callable(self.return_info.formatter):
             formatter = self.return_info.formatter
