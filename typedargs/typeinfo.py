@@ -174,15 +174,13 @@ class TypeSystem:
         if not hasattr(typeobj, "default_formatter"):
             raise ArgumentError("type is invalid, does not have default_formatter function", type=typeobj, methods=dir(typeobj))
 
-    def is_known_type(self, type_name):
+    def is_known_type(self, type_or_name):
         """Check if type is known to the type system.
 
         Returns:
             bool: True if the type is a known instantiated simple type, False otherwise
         """
-
-        type_name = str(type_name)
-        if type_name in self.known_types:
+        if type_or_name in self.known_types or type_or_name in self.mapped_builtin_types:
             return True
 
         return False
