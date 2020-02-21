@@ -439,6 +439,9 @@ def test_custom_type_class():
         def __init__(self, value: int):
             self.value = value
 
+        def __eq__(self, other):
+            return self.__class__ == other.__class__ and self.value == other.value
+
         @classmethod
         def FromString(cls, arg):
             return cls(int(arg))
@@ -469,9 +472,11 @@ def test_custom_type_class():
 
     ret_value = func('1')
 
+    # Support of argument conversion from string should not break original function behaviour
+    assert func(DemoInteger(1)) == DemoInteger(1)
+
     # check converting from string
-    assert isinstance(ret_value, DemoInteger)
-    assert ret_value.value == 1
+    assert ret_value == DemoInteger(1)
 
     # check argument validation
     with pytest.raises(ValidationError) as exc:
