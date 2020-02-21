@@ -11,6 +11,9 @@
 # integer type
 
 
+MAPPED_BUILTIN_TYPE = int
+
+
 def convert(arg):
     if arg is None:
         return None

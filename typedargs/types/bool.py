@@ -12,6 +12,9 @@
 # Simple boolean type
 
 
+MAPPED_BUILTIN_TYPE = bool
+
+
 def convert(arg, **kwargs):
     if arg is None:
         return arg

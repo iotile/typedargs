@@ -9,6 +9,9 @@
 # pylint: disable=unused-argument,missing-docstring
 
 
+MAPPED_BUILTIN_TYPE = str
+
+
 def convert(arg):
     if arg is None:
         return None

@@ -428,6 +428,74 @@ def test_docannotate_class_init(caplog):
     assert DemoAnn.__init__.metadata.annotated_params['arg'].type_class == str
 
 
+def test_custom_type_class():
+    """Make sure we can annotate a function with type class.
+
+    @docannotate should use methods of this class to convert arguments from string,
+    to validate arguments and to format return value.
+    """
+
+    class DemoInteger:
+        def __init__(self, value: int):
+            self.value = value
+
+        def __eq__(self, other):
+            return self.__class__ == other.__class__ and self.value == other.value
+
+        @classmethod
+        def FromString(cls, arg):
+            return cls(int(arg))
+
+        @classmethod
+        def validate_positive(cls, arg):
+            if arg.value <= 0:
+                raise ValueError('Object value is not positive.')
+
+        @classmethod
+        def format_hex(cls, arg):
+            return "0x%X" % arg.value
+
+    @docannotate
+    def func(arg: DemoInteger) -> DemoInteger:
+        """Basic function.
+
+        Args:
+            arg: {positive} The input that will be converted to DemoInteger
+
+        Returns:
+            DemoInteger show-as hex: Some description
+        """
+        return arg
+
+    # trigger type info parsing
+    func.metadata.returns_data()
+
+    ret_value = func('1')
+
+    # Support of argument conversion from string should not break original function behaviour
+    assert func(DemoInteger(1)) == DemoInteger(1)
+
+    # check converting from string
+    assert ret_value == DemoInteger(1)
+
+    # check argument validation
+    with pytest.raises(ValidationError) as exc:
+        func('-1')
+
+    assert 'Object value is not positive.' in str(exc)
+
+    # check formatting return value
+    assert func.metadata.format_returnvalue(ret_value) == '0x1'
+
+    # trying to format return value having wrong type should cause raising a ValidationError
+    with pytest.raises(ValidationError):
+        func.metadata.format_returnvalue(1)
+
+    # passing an argument having wrong type (and not string) should cause raising a ValidationError
+    with pytest.raises(ValidationError):
+        func(1)
+
+
 def test_docstring_validators_parsing():
     """Make sure we can parse validators from docstring"""
 
@@ -478,5 +546,3 @@ def test_docstring_validators_validation():
     # check "range" validator
     with pytest.raises(ValidationError):
         func('10')
-
-

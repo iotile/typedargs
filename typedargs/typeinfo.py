@@ -39,6 +39,7 @@ class TypeSystem:
         self.interactive = False
         self.known_types = {}
         self.type_factories = {}
+        self.mapped_builtin_types = {}
         self.logger = logging.getLogger(__name__)
 
         for arg in args:
@@ -75,24 +76,39 @@ class TypeSystem:
 
         self._lazy_type_sources.append((source, name))
 
-    def convert_to_type(self, value, typename, **kwargs):
+    def convert_to_type(self, value, type_or_name, **kwargs):
         """
-        Convert value to type 'typename'
+        Convert value to type 'type_or_name'
 
         If the conversion routine takes various kwargs to
         modify the conversion process, \\**kwargs is passed
         through to the underlying conversion function
         """
-        try:
-            if isinstance(value, bytearray):
-                return self.convert_from_binary(value, typename, **kwargs)
 
-            typeobj = self.get_type(typename)
+        if isinstance(type_or_name, str) or self.is_known_type(type_or_name):
+            try:
+                if isinstance(value, bytearray):
+                    return self.convert_from_binary(value, type_or_name, **kwargs)
 
-            conv = typeobj.convert(value, **kwargs)
-            return conv
-        except (ValueError, TypeError) as exc:
-            raise ValidationError("Could not convert value", type=typename, value=value, error_message=str(exc))
+                typeobj = self.get_type(type_or_name)
+
+                conv = typeobj.convert(value, **kwargs)
+                return conv
+
+            except (ValueError, TypeError) as exc:
+                raise ValidationError("Could not convert value", type=type_or_name, value=value, error_message=str(exc))
+        else:
+            if isinstance(value, type_or_name):
+                return value
+
+            if isinstance(value, str):
+                if not callable(getattr(type_or_name, 'FromString', None)):
+                    raise ValidationError("Converting from string to the given type is not supported.", type=type_or_name, value=value)
+
+                conv = type_or_name.FromString(value)
+                return conv
+
+            raise ValidationError("Could not convert a value. Wrong value type.", type=type_or_name, value=value)
 
     def convert_from_binary(self, binvalue, type, **kwargs):
         """
@@ -127,21 +143,24 @@ class TypeSystem:
 
         return 0
 
-    def format_value(self, value, type, format=None, **kwargs):
+    def format_value(self, value, type_or_name, format=None, **kwargs):
         """
-        Convert value to type and format it as a string
+        Convert value to type specified by type_or_name and format it as a string.
 
-        type must be a known type in the type system and format,
-        if given, must specify a valid formatting option for the
-        specified type.
+        type_or_name must be a known type in the type system or a type class.
+        And format, if given, must specify a valid formatting option for the specified type.
         """
 
-        typed_val = self.convert_to_type(value, type, **kwargs)
-        typeobj = self.get_type(type)
+        typed_val = self.convert_to_type(value, type_or_name, **kwargs)
 
-        #Allow types to specify default formatting functions as 'default_formatter'
-        #otherwise if not format is specified, just convert the value to a string
-        if format is None:
+        if isinstance(type_or_name, str) or self.is_known_type(type_or_name):
+            typeobj = self.get_type(type_or_name)
+        else:
+            typeobj = type_or_name
+
+        # Allow types to specify default formatting functions as 'default_formatter'
+        # otherwise if no format is specified, just convert the value to a string
+        if format in (None, 'default', 'str', 'string'):
             if hasattr(typeobj, 'default_formatter'):
                 format_func = getattr(typeobj, 'default_formatter')
                 return format_func(typed_val, **kwargs)
@@ -149,10 +168,11 @@ class TypeSystem:
             return str(typed_val)
 
         formatter = "format_%s" % str(format)
-        if not hasattr(typeobj, formatter):
-            raise ArgumentError("Unknown format for type", type=type, format=format, formatter_function=formatter)
+        format_func = getattr(typeobj, formatter, None)
 
-        format_func = getattr(typeobj, formatter)
+        if not callable(format_func):
+            raise ArgumentError("Unknown format for type", type=type_or_name, format=format, formatter_function=formatter)
+
         return format_func(typed_val, **kwargs)
 
     @classmethod
@@ -173,15 +193,13 @@ class TypeSystem:
         if not hasattr(typeobj, "default_formatter"):
             raise ArgumentError("type is invalid, does not have default_formatter function", type=typeobj, methods=dir(typeobj))
 
-    def is_known_type(self, type_name):
+    def is_known_type(self, type_or_name):
         """Check if type is known to the type system.
 
         Returns:
             bool: True if the type is a known instantiated simple type, False otherwise
         """
-
-        type_name = str(type_name)
-        if type_name in self.known_types:
+        if type_or_name in self.known_types or type_or_name in self.mapped_builtin_types:
             return True
 
         return False
@@ -237,35 +255,17 @@ class TypeSystem:
 
         return False
 
-    @classmethod
-    def get_type_name(cls, type_class: type) -> Optional[str]:
-
-        type_name = None
-
-        supported_typing_types = ('Dict', 'Tuple', 'List')
-
-        if inspect.getmodule(type_class) == typing:
-
-            # get 'Type' from "typing.Type[sub, sub] or from typing.Type"
-            type_name = str(type_class).split('.', 1)[-1].split('[')[0]
-
-            if type_name in supported_typing_types:
-                type_name = type_name.lower()
-
-        elif hasattr(type_class, '__name__'):
-            type_name = type_class.__name__
-
-        return type_name
-
-    def get_type(self, type_name):
+    def get_type(self, type_or_name):
         """Return the type object corresponding to a type name.
 
         If type_name is not found, this triggers the loading of
         external types until a matching type is found or until there
         are no more external type sources.
         """
+        if type_or_name in self.mapped_builtin_types:
+            return self.mapped_builtin_types[type_or_name]
 
-        type_name = self._canonicalize_type(type_name)
+        type_name = self._canonicalize_type(type_or_name)
 
         # Add basic transformations on common abbreviations
         if str(type_name) == 'int':
@@ -351,6 +351,9 @@ class TypeSystem:
         else:
             self._validate_type(typeobj)
             self.known_types[name] = typeobj
+
+            if hasattr(typeobj, 'MAPPED_BUILTIN_TYPE'):
+                self.mapped_builtin_types[typeobj.MAPPED_BUILTIN_TYPE] = typeobj
 
         if not hasattr(typeobj, "default_formatter"):
             raise ArgumentError("type is invalid, does not have default_formatter function", type=typeobj, methods=dir(typeobj))

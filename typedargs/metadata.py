@@ -2,6 +2,7 @@
 
 import inspect
 import logging
+from typing import Union
 from typedargs import typeinfo, utils
 from .exceptions import TypeSystemError, ArgumentError, ValidationError, InternalError
 from .basic_structures import ParameterInfo, ReturnInfo
@@ -109,8 +110,8 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
 
             # if there any type info in docstring.
             doc_return_type = getattr(type_info_doc[1], 'type_name', None)
-            if list(filter(lambda val: val.type_name, type_info_doc[0].values())) or doc_return_type:
-
+            doc_arg_types = list(filter(lambda val: val.type_name, type_info_doc[0].values()))
+            if doc_arg_types or doc_return_type:
                 # do not take docstring arg descriptions where type is not specified
                 doc_arg_types = [(arg, info.type_name) for arg, info in type_info_doc[0].items() if info.type_name is not None]
                 ann_arg_types = [(arg, info.type_name) for arg, info in type_info_ann[0].items()]
@@ -245,7 +246,7 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
 
         return possible[0]
 
-    def param_type(self, name):
+    def param_type(self, name: str) -> Union[type, str, None]:
         """Get the parameter type information by name.
 
         Args:
@@ -259,6 +260,9 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
 
         if name not in self.annotated_params:
             return None
+
+        if self.annotated_params[name].type_class:
+            return self.annotated_params[name].type_class
 
         return self.annotated_params[name].type_name
 
@@ -324,14 +328,19 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
         if not self.return_info.is_data:
             return None
 
+        validation_err = ValidationError('Cannot convert return value to string', value=value)
+
         # If the return value is typed, use the type_system to format it
-        if self.return_info.type_name is not None:
-            return typeinfo.type_system.format_value(value, self.return_info.type_name, self.return_info.formatter)
+        if self.return_info.type_class:
+            value_type = self.return_info.type_class
+        else:
+            value_type = self.return_info.type_name
+
+        if value_type is not None:
+            return typeinfo.type_system.format_value(value, value_type, self.return_info.formatter)
 
         # Otherwise convert this value to a string with formatter function
-        validation_err = ValidationError('Cannot convert return value to string')
-
-        if self.return_info.formatter is None or self.return_info.formatter == 'string':
+        if self.return_info.formatter in (None, 'default', 'str', 'string'):
             formatter = str
         elif callable(self.return_info.formatter):
             formatter = self.return_info.formatter
@@ -441,30 +450,34 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
 
         self._ensure_loaded()
 
-        type_name = self.param_type(arg_name)
-        if type_name is None:
+        arg_type = self.param_type(arg_name)
+
+        if arg_type is None:
             return arg_value
 
-        val = typeinfo.type_system.convert_to_type(arg_value, type_name)
+        val = typeinfo.type_system.convert_to_type(arg_value, arg_type)
 
         validators = self.annotated_params[arg_name].validators
         if len(validators) == 0:
             return val
 
-        type_obj = typeinfo.type_system.get_type(type_name)
+        if isinstance(arg_type, str) or typeinfo.type_system.is_known_type(arg_type):
+            arg_type = typeinfo.type_system.get_type(arg_type)
 
         # Run all of the validators that were defined for this argument.
         # If the validation fails, they will raise an exception that we convert to
         # an instance of ValidationError
         try:
             for validator_name, extra_args in validators:
-                if not hasattr(type_obj, validator_name):
-                    raise ValidationError("Could not find validator specified for argument", argument=arg_name, validator_name=validator_name, type=str(type_obj), method=dir(type_obj))
+                validator = getattr(arg_type, validator_name, None)
 
-                validator = getattr(type_obj, validator_name)
+                if not callable(validator):
+                    raise ValidationError("Could not find validator specified for argument",
+                                          argument=arg_name, validator_name=validator_name, arg_type=arg_type, method=dir(arg_type))
+
                 validator(val, *extra_args)
         except (ValueError, TypeError) as exc:
-            raise ValidationError(exc.args[0], argument=arg_name, arg_value=val)
+            raise ValidationError(exc.args[0], argument=arg_name, arg_value=val, arg_type=arg_type)
 
         return val
 
