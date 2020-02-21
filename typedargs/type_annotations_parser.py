@@ -22,11 +22,14 @@ def parse_annotations(annotations: dict) -> Tuple[Dict[str, ParameterInfo], Retu
     returns = ReturnInfo(None, None, None, False, None)
 
     if 'return' in annotations:
-        ret_type = annotations.pop('return')
+        ret_type = annotations['return']
         type_name = _get_type_name(ret_type)
         returns = ReturnInfo(ret_type, type_name, None, True, None)
 
     for param_name, param_type in annotations.items():
+        if param_name == 'return':
+            continue
+
         type_name = _get_type_name(param_type)
         params[param_name] = ParameterInfo(param_type, type_name, [], None)
 
