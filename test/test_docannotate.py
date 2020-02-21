@@ -487,6 +487,14 @@ def test_custom_type_class():
     # check formatting return value
     assert func.metadata.format_returnvalue(ret_value) == '0x1'
 
+    # trying to format return value having wrong type should cause raising a ValidationError
+    with pytest.raises(ValidationError):
+        func.metadata.format_returnvalue(1)
+
+    # passing an argument having wrong type (and not string) should cause raising a ValidationError
+    with pytest.raises(ValidationError):
+        func(1)
+
 
 def test_docstring_validators_parsing():
     """Make sure we can parse validators from docstring"""

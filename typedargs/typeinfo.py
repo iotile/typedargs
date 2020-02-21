@@ -108,6 +108,8 @@ class TypeSystem:
                 conv = type_or_name.FromString(value)
                 return conv
 
+            raise ValidationError("Could not convert a value. Wrong value type.", type=type_or_name, value=value)
+
     def convert_from_binary(self, binvalue, type, **kwargs):
         """
         Convert binary data to type 'type'.
