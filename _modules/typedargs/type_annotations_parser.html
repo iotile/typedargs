@@ -150,9 +150,19 @@
   <h1>Source code for typedargs.type_annotations_parser</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Routines for extracting parameter and return information from type annotations.&quot;&quot;&quot;</span>
 
+<span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">import</span> <span class="nn">typing</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span>
-<span class="kn">from</span> <span class="nn">typedargs.typeinfo</span> <span class="kn">import</span> <span class="n">TypeSystem</span>
-<span class="kn">from</span> <span class="nn">.basic_structures</span> <span class="kn">import</span> <span class="n">ParameterInfo</span><span class="p">,</span> <span class="n">ReturnInfo</span>
+<span class="kn">from</span> <span class="nn">typedargs.basic_structures</span> <span class="kn">import</span> <span class="n">ParameterInfo</span><span class="p">,</span> <span class="n">ReturnInfo</span>
+
+
+<span class="k">def</span> <span class="nf">_get_type_name</span><span class="p">(</span><span class="n">type_class</span><span class="p">):</span>
+    <span class="n">type_name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">type_class</span><span class="p">,</span> <span class="s1">&#39;__name__&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getmodule</span><span class="p">(</span><span class="n">type_class</span><span class="p">)</span> <span class="o">==</span> <span class="n">typing</span> <span class="ow">and</span> <span class="n">type_name</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;Dict&#39;</span><span class="p">,</span> <span class="s1">&#39;List&#39;</span><span class="p">,</span> <span class="s1">&#39;Tuple&#39;</span><span class="p">):</span>
+        <span class="n">type_name</span> <span class="o">=</span> <span class="n">type_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">type_name</span>
 
 
 <div class="viewcode-block" id="parse_annotations"><a class="viewcode-back" href="../../api/typedargs.type_annotations_parser.html#typedargs.type_annotations_parser.parse_annotations">[docs]</a><span class="k">def</span> <span class="nf">parse_annotations</span><span class="p">(</span><span class="n">annotations</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ParameterInfo</span><span class="p">],</span> <span class="n">ReturnInfo</span><span class="p">]:</span>
@@ -162,13 +172,16 @@
     <span class="n">returns</span> <span class="o">=</span> <span class="n">ReturnInfo</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="s1">&#39;return&#39;</span> <span class="ow">in</span> <span class="n">annotations</span><span class="p">:</span>
-        <span class="n">ret_type</span> <span class="o">=</span> <span class="n">annotations</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;return&#39;</span><span class="p">)</span>
-        <span class="n">ret_type_name</span> <span class="o">=</span> <span class="n">TypeSystem</span><span class="o">.</span><span class="n">get_type_name</span><span class="p">(</span><span class="n">ret_type</span><span class="p">)</span>
-        <span class="n">returns</span> <span class="o">=</span> <span class="n">ReturnInfo</span><span class="p">(</span><span class="n">ret_type</span><span class="p">,</span> <span class="n">ret_type_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">ret_type</span> <span class="o">=</span> <span class="n">annotations</span><span class="p">[</span><span class="s1">&#39;return&#39;</span><span class="p">]</span>
+        <span class="n">type_name</span> <span class="o">=</span> <span class="n">_get_type_name</span><span class="p">(</span><span class="n">ret_type</span><span class="p">)</span>
+        <span class="n">returns</span> <span class="o">=</span> <span class="n">ReturnInfo</span><span class="p">(</span><span class="n">ret_type</span><span class="p">,</span> <span class="n">type_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">param_type</span> <span class="ow">in</span> <span class="n">annotations</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="n">param_type_name</span> <span class="o">=</span> <span class="n">TypeSystem</span><span class="o">.</span><span class="n">get_type_name</span><span class="p">(</span><span class="n">param_type</span><span class="p">)</span>
-        <span class="n">params</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">ParameterInfo</span><span class="p">(</span><span class="n">param_type</span><span class="p">,</span> <span class="n">param_type_name</span><span class="p">,</span> <span class="p">[],</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s1">&#39;return&#39;</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="n">type_name</span> <span class="o">=</span> <span class="n">_get_type_name</span><span class="p">(</span><span class="n">param_type</span><span class="p">)</span>
+        <span class="n">params</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">ParameterInfo</span><span class="p">(</span><span class="n">param_type</span><span class="p">,</span> <span class="n">type_name</span><span class="p">,</span> <span class="p">[],</span> <span class="kc">None</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">params</span><span class="p">,</span> <span class="n">returns</span></div>
 </pre></div>

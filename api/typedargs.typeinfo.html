@@ -261,8 +261,8 @@ when source is a callable.</li>
 
 <dl class="method">
 <dt id="typedargs.typeinfo.TypeSystem.convert_to_type">
-<code class="descname">convert_to_type</code><span class="sig-paren">(</span><em>value</em>, <em>typename</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/typeinfo.html#TypeSystem.convert_to_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.typeinfo.TypeSystem.convert_to_type" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert value to type ‘typename’</p>
+<code class="descname">convert_to_type</code><span class="sig-paren">(</span><em>value</em>, <em>type_or_name</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/typeinfo.html#TypeSystem.convert_to_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.typeinfo.TypeSystem.convert_to_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert value to type ‘type_or_name’</p>
 <p>If the conversion routine takes various kwargs to
 modify the conversion process, **kwargs is passed
 through to the underlying conversion function</p>
@@ -286,16 +286,15 @@ type. Return 0 if the size is not known.</p>
 
 <dl class="method">
 <dt id="typedargs.typeinfo.TypeSystem.format_value">
-<code class="descname">format_value</code><span class="sig-paren">(</span><em>value</em>, <em>type</em>, <em>format=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/typeinfo.html#TypeSystem.format_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.typeinfo.TypeSystem.format_value" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert value to type and format it as a string</p>
-<p>type must be a known type in the type system and format,
-if given, must specify a valid formatting option for the
-specified type.</p>
+<code class="descname">format_value</code><span class="sig-paren">(</span><em>value</em>, <em>type_or_name</em>, <em>format=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/typeinfo.html#TypeSystem.format_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.typeinfo.TypeSystem.format_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert value to type specified by type_or_name and format it as a string.</p>
+<p>type_or_name must be a known type in the type system or a type class.
+And format, if given, must specify a valid formatting option for the specified type.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="typedargs.typeinfo.TypeSystem.is_known_type">
-<code class="descname">is_known_type</code><span class="sig-paren">(</span><em>type_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/typeinfo.html#TypeSystem.is_known_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.typeinfo.TypeSystem.is_known_type" title="Permalink to this definition">¶</a></dt>
+<code class="descname">is_known_type</code><span class="sig-paren">(</span><em>type_or_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/typeinfo.html#TypeSystem.is_known_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.typeinfo.TypeSystem.is_known_type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check if type is known to the type system.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -321,14 +320,9 @@ specified type.</p>
 <dd><p>Instantiate a complex type.</p>
 </dd></dl>
 
-<dl class="classmethod">
-<dt id="typedargs.typeinfo.TypeSystem.get_type_name">
-<em class="property">classmethod </em><code class="descname">get_type_name</code><span class="sig-paren">(</span><em>type_class: type</em><span class="sig-paren">)</span> &#x2192; Optional[str]<a class="reference internal" href="../_modules/typedargs/typeinfo.html#TypeSystem.get_type_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.typeinfo.TypeSystem.get_type_name" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 <dl class="method">
 <dt id="typedargs.typeinfo.TypeSystem.get_type">
-<code class="descname">get_type</code><span class="sig-paren">(</span><em>type_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/typeinfo.html#TypeSystem.get_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.typeinfo.TypeSystem.get_type" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_type</code><span class="sig-paren">(</span><em>type_or_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/typeinfo.html#TypeSystem.get_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.typeinfo.TypeSystem.get_type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the type object corresponding to a type name.</p>
 <p>If type_name is not found, this triggers the loading of
 external types until a matching type is found or until there

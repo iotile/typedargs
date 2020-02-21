@@ -152,6 +152,7 @@
 
 <span class="kn">import</span> <span class="nn">inspect</span>
 <span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
 <span class="kn">from</span> <span class="nn">typedargs</span> <span class="kn">import</span> <span class="n">typeinfo</span><span class="p">,</span> <span class="n">utils</span>
 <span class="kn">from</span> <span class="nn">.exceptions</span> <span class="kn">import</span> <span class="n">TypeSystemError</span><span class="p">,</span> <span class="n">ArgumentError</span><span class="p">,</span> <span class="n">ValidationError</span><span class="p">,</span> <span class="n">InternalError</span>
 <span class="kn">from</span> <span class="nn">.basic_structures</span> <span class="kn">import</span> <span class="n">ParameterInfo</span><span class="p">,</span> <span class="n">ReturnInfo</span>
@@ -259,8 +260,8 @@
 
             <span class="c1"># if there any type info in docstring.</span>
             <span class="n">doc_return_type</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">type_info_doc</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;type_name&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">val</span><span class="p">:</span> <span class="n">val</span><span class="o">.</span><span class="n">type_name</span><span class="p">,</span> <span class="n">type_info_doc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span> <span class="ow">or</span> <span class="n">doc_return_type</span><span class="p">:</span>
-
+            <span class="n">doc_arg_types</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">val</span><span class="p">:</span> <span class="n">val</span><span class="o">.</span><span class="n">type_name</span><span class="p">,</span> <span class="n">type_info_doc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+            <span class="k">if</span> <span class="n">doc_arg_types</span> <span class="ow">or</span> <span class="n">doc_return_type</span><span class="p">:</span>
                 <span class="c1"># do not take docstring arg descriptions where type is not specified</span>
                 <span class="n">doc_arg_types</span> <span class="o">=</span> <span class="p">[(</span><span class="n">arg</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">type_name</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span><span class="p">,</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">type_info_doc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">type_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
                 <span class="n">ann_arg_types</span> <span class="o">=</span> <span class="p">[(</span><span class="n">arg</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">type_name</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span><span class="p">,</span> <span class="n">info</span> <span class="ow">in</span> <span class="n">type_info_ann</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
@@ -395,7 +396,7 @@
 
         <span class="k">return</span> <span class="n">possible</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="AnnotatedMetadata.param_type"><a class="viewcode-back" href="../../api/typedargs.metadata.html#typedargs.metadata.AnnotatedMetadata.param_type">[docs]</a>    <span class="k">def</span> <span class="nf">param_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<div class="viewcode-block" id="AnnotatedMetadata.param_type"><a class="viewcode-back" href="../../api/typedargs.metadata.html#typedargs.metadata.AnnotatedMetadata.param_type">[docs]</a>    <span class="k">def</span> <span class="nf">param_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">type</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Get the parameter type information by name.</span>
 
 <span class="sd">        Args:</span>
@@ -409,6 +410,9 @@
 
         <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">annotated_params</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">annotated_params</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">type_class</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">annotated_params</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">type_class</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">annotated_params</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">type_name</span></div>
 
@@ -474,14 +478,19 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">is_data</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
 
+        <span class="n">validation_err</span> <span class="o">=</span> <span class="n">ValidationError</span><span class="p">(</span><span class="s1">&#39;Cannot convert return value to string&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+
         <span class="c1"># If the return value is typed, use the type_system to format it</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">type_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">typeinfo</span><span class="o">.</span><span class="n">type_system</span><span class="o">.</span><span class="n">format_value</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">type_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">formatter</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">type_class</span><span class="p">:</span>
+            <span class="n">value_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">type_class</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">value_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">type_name</span>
+
+        <span class="k">if</span> <span class="n">value_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">typeinfo</span><span class="o">.</span><span class="n">type_system</span><span class="o">.</span><span class="n">format_value</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">value_type</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">formatter</span><span class="p">)</span>
 
         <span class="c1"># Otherwise convert this value to a string with formatter function</span>
-        <span class="n">validation_err</span> <span class="o">=</span> <span class="n">ValidationError</span><span class="p">(</span><span class="s1">&#39;Cannot convert return value to string&#39;</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">formatter</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">formatter</span> <span class="o">==</span> <span class="s1">&#39;string&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">formatter</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;default&#39;</span><span class="p">,</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="s1">&#39;string&#39;</span><span class="p">):</span>
             <span class="n">formatter</span> <span class="o">=</span> <span class="nb">str</span>
         <span class="k">elif</span> <span class="n">callable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">formatter</span><span class="p">):</span>
             <span class="n">formatter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">formatter</span>
@@ -591,30 +600,34 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_loaded</span><span class="p">()</span>
 
-        <span class="n">type_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">param_type</span><span class="p">(</span><span class="n">arg_name</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">type_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">arg_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">param_type</span><span class="p">(</span><span class="n">arg_name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">arg_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">arg_value</span>
 
-        <span class="n">val</span> <span class="o">=</span> <span class="n">typeinfo</span><span class="o">.</span><span class="n">type_system</span><span class="o">.</span><span class="n">convert_to_type</span><span class="p">(</span><span class="n">arg_value</span><span class="p">,</span> <span class="n">type_name</span><span class="p">)</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="n">typeinfo</span><span class="o">.</span><span class="n">type_system</span><span class="o">.</span><span class="n">convert_to_type</span><span class="p">(</span><span class="n">arg_value</span><span class="p">,</span> <span class="n">arg_type</span><span class="p">)</span>
 
         <span class="n">validators</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">annotated_params</span><span class="p">[</span><span class="n">arg_name</span><span class="p">]</span><span class="o">.</span><span class="n">validators</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">validators</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">val</span>
 
-        <span class="n">type_obj</span> <span class="o">=</span> <span class="n">typeinfo</span><span class="o">.</span><span class="n">type_system</span><span class="o">.</span><span class="n">get_type</span><span class="p">(</span><span class="n">type_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg_type</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="n">typeinfo</span><span class="o">.</span><span class="n">type_system</span><span class="o">.</span><span class="n">is_known_type</span><span class="p">(</span><span class="n">arg_type</span><span class="p">):</span>
+            <span class="n">arg_type</span> <span class="o">=</span> <span class="n">typeinfo</span><span class="o">.</span><span class="n">type_system</span><span class="o">.</span><span class="n">get_type</span><span class="p">(</span><span class="n">arg_type</span><span class="p">)</span>
 
         <span class="c1"># Run all of the validators that were defined for this argument.</span>
         <span class="c1"># If the validation fails, they will raise an exception that we convert to</span>
         <span class="c1"># an instance of ValidationError</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">validator_name</span><span class="p">,</span> <span class="n">extra_args</span> <span class="ow">in</span> <span class="n">validators</span><span class="p">:</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">type_obj</span><span class="p">,</span> <span class="n">validator_name</span><span class="p">):</span>
-                    <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="s2">&quot;Could not find validator specified for argument&quot;</span><span class="p">,</span> <span class="n">argument</span><span class="o">=</span><span class="n">arg_name</span><span class="p">,</span> <span class="n">validator_name</span><span class="o">=</span><span class="n">validator_name</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">type_obj</span><span class="p">),</span> <span class="n">method</span><span class="o">=</span><span class="nb">dir</span><span class="p">(</span><span class="n">type_obj</span><span class="p">))</span>
+                <span class="n">validator</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">arg_type</span><span class="p">,</span> <span class="n">validator_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
-                <span class="n">validator</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">type_obj</span><span class="p">,</span> <span class="n">validator_name</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">validator</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="s2">&quot;Could not find validator specified for argument&quot;</span><span class="p">,</span>
+                                          <span class="n">argument</span><span class="o">=</span><span class="n">arg_name</span><span class="p">,</span> <span class="n">validator_name</span><span class="o">=</span><span class="n">validator_name</span><span class="p">,</span> <span class="n">arg_type</span><span class="o">=</span><span class="n">arg_type</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="nb">dir</span><span class="p">(</span><span class="n">arg_type</span><span class="p">))</span>
+
                 <span class="n">validator</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="o">*</span><span class="n">extra_args</span><span class="p">)</span>
         <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="n">exc</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">argument</span><span class="o">=</span><span class="n">arg_name</span><span class="p">,</span> <span class="n">arg_value</span><span class="o">=</span><span class="n">val</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="n">exc</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">argument</span><span class="o">=</span><span class="n">arg_name</span><span class="p">,</span> <span class="n">arg_value</span><span class="o">=</span><span class="n">val</span><span class="p">,</span> <span class="n">arg_type</span><span class="o">=</span><span class="n">arg_type</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">val</span></div></div>
 
