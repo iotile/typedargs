@@ -5,7 +5,11 @@
 - Fix docstrings parsing (Issues #47, #34) 
 - Extend docannotate `show-as` return annotation to support more options (Issue #60)
 - Add support of function type annotations in `@docannotate`
-- Support using `@docannotate` on classes to annotate their `__init__()` functons
+- Support using `@docannotate` on classes to annotate their `__init__()` functions
+- Support type classes in type annotations for converting argument from string 
+  and formatting return value  
+- Support specifying validators in docstrings (Issue #65)
+
 
 ## 1.0.2
 

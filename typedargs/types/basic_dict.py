@@ -5,6 +5,9 @@ import json
 from typedargs.exceptions import ValidationError
 
 
+MAPPED_BUILTIN_TYPE = dict
+
+
 def convert(arg, **kwargs):
     if arg is None:
         return None
