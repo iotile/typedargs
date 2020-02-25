@@ -13,6 +13,7 @@ from .base import BaseType
 
 class BytesType(BaseType):
     MAPPED_BUILTIN_TYPE = bytes
+    MAPPED_TYPE_NAMES = ('bytes', )
 
     @classmethod
     def FromString(cls, arg: str) -> Union[bytearray, bytes]:

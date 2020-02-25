@@ -7,6 +7,7 @@ from .base import BaseType
 
 class DictType(BaseType):
     MAPPED_BUILTIN_TYPE = dict
+    MAPPED_TYPE_NAMES = ('dict', )
 
     @classmethod
     def FromString(cls, arg: str) -> Optional[dict]:

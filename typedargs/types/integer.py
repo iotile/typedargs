@@ -15,6 +15,7 @@ from .base import BaseType
 
 class IntegerType(BaseType):
     MAPPED_BUILTIN_TYPE = int
+    MAPPED_TYPE_NAMES = ('integer', 'int')
 
     @classmethod
     def FromString(cls, arg: str) -> Optional[int]:

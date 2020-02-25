@@ -16,6 +16,7 @@ from .base import BaseType
 
 class BoolType(BaseType):
     MAPPED_BUILTIN_TYPE = bool
+    MAPPED_TYPE_NAMES = ('bool', )
 
     @classmethod
     def FromString(cls, arg: str) -> Optional[bool]:

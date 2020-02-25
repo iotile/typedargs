@@ -13,6 +13,7 @@ from .base import BaseType
 
 class FloatType(BaseType):
     MAPPED_BUILTIN_TYPE = float
+    MAPPED_TYPE_NAMES = ('float', )
 
     @classmethod
     def FromString(cls, arg: str) -> Optional[float]:

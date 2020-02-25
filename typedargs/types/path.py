@@ -15,7 +15,7 @@ from typing import Optional
 
 class PathType(BaseType):
 
-    MAPPED_TYPE_NAME = 'path'
+    MAPPED_TYPE_NAMES = ('path', )
 
     @classmethod
     def FromString(cls, arg: str) -> Optional[str]:

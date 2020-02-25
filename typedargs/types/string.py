@@ -13,6 +13,7 @@ from .base import BaseType
 
 class StringType(BaseType):
     MAPPED_BUILTIN_TYPE = str
+    MAPPED_TYPE_NAMES = ('string', 'str')
 
     @classmethod
     def FromString(cls, arg: str) -> Optional[str]:
