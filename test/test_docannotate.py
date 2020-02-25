@@ -11,6 +11,8 @@ from typedargs.doc_parser import ParsedDocstring
 from typedargs.basic_structures import ParameterInfo
 from typing import Any
 
+from typedargs.types.base import BaseInternalType
+
 
 DOCSTRING1 = """Do something.
 
@@ -37,6 +39,7 @@ Args:
 Returns:
     map(string, int): A generic struct
 """
+
 
 def test_docannotate_basic():
     """Make sure we can docannotate a function."""
@@ -546,3 +549,23 @@ def test_docstring_validators_validation():
     # check "range" validator
     with pytest.raises(ValidationError):
         func('10')
+
+
+def test_type_annotations_type_mapping():
+    """Make sure we map simple builtin types to our internal type classes.
+
+    If we have a builtin type in a function type annotations then
+    we should use mapped internal type class.
+    It should work for builtin types: str, int, float, bytes, bool, dict
+    """
+
+    @docannotate
+    def func(arg1: str, arg2: int, arg3: float, arg4: bytes, arg5: bool, arg6: dict):
+        pass
+
+    # trigger type info parsing
+    _ = func.metadata.returns_data()
+
+    for arg_info in func.metadata.annotated_params.values():
+        internal_type_class = type_system.get_type(arg_info.type_class)
+        assert issubclass(internal_type_class, BaseInternalType)
