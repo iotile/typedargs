@@ -22,6 +22,7 @@ from typing import Optional
 import sys
 from typedargs.exceptions import ValidationError, ArgumentError, KeyValueException
 from typedargs import types
+from typedargs.types.base import BaseType
 
 
 class TypeSystem:
@@ -91,8 +92,11 @@ class TypeSystem:
                     return self.convert_from_binary(value, type_or_name, **kwargs)
 
                 typeobj = self.get_type(type_or_name)
+                if isinstance(typeobj, type) and hasattr(typeobj, 'FromString'):
+                    conv = typeobj.FromString(value)
+                else:
+                    conv = typeobj.convert(value, **kwargs)
 
-                conv = typeobj.convert(value, **kwargs)
                 return conv
 
             except (ValueError, TypeError) as exc:
@@ -267,14 +271,6 @@ class TypeSystem:
 
         type_name = self._canonicalize_type(type_or_name)
 
-        # Add basic transformations on common abbreviations
-        if str(type_name) == 'int':
-            type_name = 'integer'
-        elif str(type_name) == 'str':
-            type_name = 'string'
-        elif str(type_name) == 'dict':
-            type_name = 'basic_dict'
-
         if self.is_known_type(type_name):
             return self.known_types[type_name]
 
@@ -348,12 +344,16 @@ class TypeSystem:
             if name in self.type_factories:
                 raise ArgumentError("attempted to inject a complex type factory that is already defined", type=name)
             self.type_factories[name] = typeobj
+        elif isinstance(typeobj, type) and issubclass(typeobj, BaseType):
+            if hasattr(typeobj, 'MAPPED_BUILTIN_TYPE'):
+                self.mapped_builtin_types[typeobj.MAPPED_BUILTIN_TYPE] = typeobj
+
+            for name in getattr(typeobj, 'MAPPED_TYPE_NAMES', []):
+                self.known_types[name] = typeobj
+
         else:
             self._validate_type(typeobj)
             self.known_types[name] = typeobj
-
-            if hasattr(typeobj, 'MAPPED_BUILTIN_TYPE'):
-                self.mapped_builtin_types[typeobj.MAPPED_BUILTIN_TYPE] = typeobj
 
         if not hasattr(typeobj, "default_formatter"):
             raise ArgumentError("type is invalid, does not have default_formatter function", type=typeobj, methods=dir(typeobj))
