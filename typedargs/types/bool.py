@@ -11,10 +11,10 @@
 # bool.py
 # Simple boolean type
 from typing import Optional
-from .base import BaseType
+from .base import BaseInternalType
 
 
-class BoolType(BaseType):
+class InternalBool(BaseInternalType):
     MAPPED_BUILTIN_TYPE = bool
     MAPPED_TYPE_NAMES = ('bool', )
 

@@ -19,7 +19,7 @@ import logging
 import sys
 from typedargs.exceptions import ValidationError, ArgumentError, KeyValueException
 from typedargs import types
-from typedargs.types.base import BaseType
+from typedargs.types.base import BaseInternalType
 
 
 class TypeSystem:
@@ -341,7 +341,7 @@ class TypeSystem:
             if name in self.type_factories:
                 raise ArgumentError("attempted to inject a complex type factory that is already defined", type=name)
             self.type_factories[name] = typeobj
-        elif isinstance(typeobj, type) and issubclass(typeobj, BaseType):
+        elif isinstance(typeobj, type) and issubclass(typeobj, BaseInternalType):
             if hasattr(typeobj, 'MAPPED_BUILTIN_TYPE'):
                 self.mapped_builtin_types[typeobj.MAPPED_BUILTIN_TYPE] = typeobj
 

@@ -8,10 +8,10 @@
 
 from typing import Union
 from binascii import unhexlify, hexlify
-from .base import BaseType
+from .base import BaseInternalType
 
 
-class BytesType(BaseType):
+class InternalBytes(BaseInternalType):
     MAPPED_BUILTIN_TYPE = bytes
     MAPPED_TYPE_NAMES = ('bytes', )
 

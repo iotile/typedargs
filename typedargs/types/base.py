@@ -1,6 +1,6 @@
 
 
-class BaseType:
+class BaseInternalType:
 
     @classmethod
     def FromString(cls, arg):

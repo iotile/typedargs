@@ -9,11 +9,11 @@
 # pylint: disable=unused-argument,missing-docstring
 
 import os.path
-from .base import BaseType
+from .base import BaseInternalType
 from typing import Optional
 
 
-class PathType(BaseType):
+class InternalPath(BaseInternalType):
 
     MAPPED_TYPE_NAMES = ('path', )
 

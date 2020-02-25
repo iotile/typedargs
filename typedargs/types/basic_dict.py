@@ -2,10 +2,10 @@
 
 import json
 from typing import Optional, Union
-from .base import BaseType
+from .base import BaseInternalType
 
 
-class DictType(BaseType):
+class InternalDict(BaseInternalType):
     MAPPED_BUILTIN_TYPE = dict
     MAPPED_TYPE_NAMES = ('dict', )
 

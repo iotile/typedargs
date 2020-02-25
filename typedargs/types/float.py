@@ -8,10 +8,10 @@
 
 # pylint: disable=unused-argument,missing-docstring
 from typing import Optional, Union
-from .base import BaseType
+from .base import BaseInternalType
 
 
-class FloatType(BaseType):
+class InternalFloat(BaseInternalType):
     MAPPED_BUILTIN_TYPE = float
     MAPPED_TYPE_NAMES = ('float', )
 

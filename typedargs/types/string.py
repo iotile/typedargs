@@ -8,10 +8,10 @@
 
 # pylint: disable=unused-argument,missing-docstring
 from typing import Optional, Iterable
-from .base import BaseType
+from .base import BaseInternalType
 
 
-class StringType(BaseType):
+class InternalString(BaseInternalType):
     MAPPED_BUILTIN_TYPE = str
     MAPPED_TYPE_NAMES = ('string', 'str')
 

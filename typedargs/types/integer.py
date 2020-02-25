@@ -10,10 +10,10 @@
 
 # integer type
 from typing import Optional
-from .base import BaseType
+from .base import BaseInternalType
 
 
-class IntegerType(BaseType):
+class InternalInteger(BaseInternalType):
     MAPPED_BUILTIN_TYPE = int
     MAPPED_TYPE_NAMES = ('integer', 'int')
 
