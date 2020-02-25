@@ -10,31 +10,25 @@
 
 # bool.py
 # Simple boolean type
-from typing import Optional
-from .base import BaseInternalType
+
+MAPPED_BUILTIN_TYPE = bool
+
+def convert(arg, **kwargs):
+    if arg is None:
+        return arg
+
+    if isinstance(arg, str):
+        comp = str(arg.lower())
+
+        if comp == u'true':
+            return True
+        if comp == u'false':
+            return False
+
+        raise ValueError("Unknown boolean value (should be true or false): %s" % arg)
+
+    return bool(arg)
 
 
-class InternalBool(BaseInternalType):
-    MAPPED_BUILTIN_TYPE = bool
-    MAPPED_TYPE_NAMES = ('bool', )
-
-    @classmethod
-    def FromString(cls, arg: str) -> Optional[bool]:
-        if arg is None:
-            return arg
-
-        if isinstance(arg, str):
-            comp = str(arg.lower())
-
-            if comp == u'true':
-                return True
-            if comp == u'false':
-                return False
-
-            raise ValueError("Unknown boolean value (should be true or false): %s" % arg)
-
-        return bool(arg)
-
-    @classmethod
-    def default_formatter(cls, arg: bool) -> str:
-        return str(arg)
+def default_formatter(arg, **kwargs):
+    return str(arg)

@@ -11,8 +11,6 @@ from typedargs.doc_parser import ParsedDocstring
 from typedargs.basic_structures import ParameterInfo
 from typing import Any
 
-from typedargs.types.base import BaseInternalType
-
 
 DOCSTRING1 = """Do something.
 
@@ -482,10 +480,10 @@ def test_custom_type_class():
     assert ret_value == DemoInteger(1)
 
     # check argument validation
-    with pytest.raises(ValidationError) as exc:
+    with pytest.raises(ValidationError) as exc_info:
         func('-1')
 
-    assert 'Object value is not positive.' in str(exc)
+    assert 'Object value is not positive.' in exc_info.value.msg
 
     # check formatting return value
     assert func.metadata.format_returnvalue(ret_value) == '0x1'
@@ -567,5 +565,5 @@ def test_type_annotations_type_mapping():
     _ = func.metadata.returns_data()
 
     for arg_info in func.metadata.annotated_params.values():
-        internal_type_class = type_system.get_type(arg_info.type_class)
-        assert issubclass(internal_type_class, BaseInternalType)
+        internal_type_class = type_system.get_proxy_for_type(arg_info.type_class)
+        assert internal_type_class is not None

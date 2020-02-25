@@ -9,52 +9,46 @@
 # pylint: disable=unused-argument,missing-docstring
 
 import os.path
-from .base import BaseInternalType
-from typing import Optional
 
 
-class InternalPath(BaseInternalType):
+def convert(arg):
+    if arg is None:
+        return None
 
-    MAPPED_TYPE_NAMES = ('path', )
+    return str(arg)
 
-    @classmethod
-    def FromString(cls, arg: str) -> Optional[str]:
-        if arg is None:
-            return None
 
-        return str(arg)
+def validate_readable(arg):
+    if arg is None:
+        raise ValueError("Path must be readable")
 
-    @classmethod
-    def validate_readable(cls, arg: str):
-        if arg is None:
-            raise ValueError("Path must be readable")
+    if not os.path.isfile(arg):
+        raise ValueError("Path is not a file")
 
-        if not os.path.isfile(arg):
-            raise ValueError("Path is not a file")
+    try:
+        file = open(arg, "r")
+        file.close()
+    except:
+        raise ValueError("Path could not be opened for reading")
 
-        try:
-            file = open(arg, "r")
-            file.close()
-        except:
-            raise ValueError("Path could not be opened for reading")
 
-    @classmethod
-    def validate_exists(cls, arg: str):
-        if arg is None:
-            raise ValueError("Path must exist")
+def validate_exists(arg):
+    if arg is None:
+        raise ValueError("Path must exist")
 
-        if not os.path.exists(arg):
-            raise ValueError("Path must exist")
+    if not os.path.exists(arg):
+        raise ValueError("Path must exist")
 
-    @classmethod
-    def validate_writeable(cls, arg: str):
-        if arg is None:
-            raise ValueError("Path must be writable")
 
-        parent = os.path.dirname(arg)
-        if not os.path.isdir(parent):
-            raise ValueError("Parent directory does not exist and path must be writeable")
+def validate_writeable(arg):
+    if arg is None:
+        raise ValueError("Path must be writable")
 
-    @classmethod
-    def default_formatter(cls, arg: str) -> str:
-        return str(arg)
+    parent = os.path.dirname(arg)
+    if not os.path.isdir(parent):
+        raise ValueError("Parent directory does not exist and path must be writeable")
+
+
+# Formatting functions
+def default_formatter(arg, **kwargs):
+    return str(arg)

@@ -9,13 +9,13 @@
 # are copyright Arch Systems Inc.
 
 #Known Types
-from .bool import InternalBool
-from .string import InternalString
-from .basic_dict import InternalDict
-from .float import InternalFloat
-from .bytes import InternalBytes
-from .path import InternalPath
-from .integer import InternalInteger
+from . import integer
+from . import string
+from . import path
+from . import bool
+from . import float
+from . import bytes
+from . import basic_dict
 
 from .map import map
 from .list import list

@@ -461,19 +461,21 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
         if len(validators) == 0:
             return val
 
-        if isinstance(arg_type, str) or typeinfo.type_system.is_known_type(arg_type):
-            arg_type = typeinfo.type_system.get_type(arg_type)
-
         # Run all of the validators that were defined for this argument.
         # If the validation fails, they will raise an exception that we convert to
         # an instance of ValidationError
         try:
+            checker_type = typeinfo.type_system.get_proxy_for_type(arg_type)
+            if checker_type is None:
+                checker_type = arg_type
+
             for validator_name, extra_args in validators:
-                validator = getattr(arg_type, validator_name, None)
+                validator = getattr(checker_type, validator_name, None)
 
                 if not callable(validator):
                     raise ValidationError("Could not find validator specified for argument",
-                                          argument=arg_name, validator_name=validator_name, arg_type=arg_type, method=dir(arg_type))
+                                          argument=arg_name, validator_name=validator_name, arg_type=arg_type,
+                                          method=dir(check_spec), augmented_Type=checker_type)
 
                 validator(val, *extra_args)
         except (ValueError, TypeError) as exc:
