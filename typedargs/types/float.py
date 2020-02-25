@@ -7,46 +7,47 @@
 # are copyright Arch Systems Inc.
 
 # pylint: disable=unused-argument,missing-docstring
+from typing import Optional, Union
+from .base import BaseType
 
 
-MAPPED_BUILTIN_TYPE = float
+class FloatType(BaseType):
+    MAPPED_BUILTIN_TYPE = float
 
+    @classmethod
+    def FromString(cls, arg: str) -> Optional[float]:
+        if arg is None:
+            return None
 
-def convert(arg):
-    if arg is None:
-        return None
+        if isinstance(arg, (str, int, float)):
+            return float(arg)
 
-    if isinstance(arg, (str, int, float)):
-        return float(arg)
+        raise TypeError("Unknown argument type")
 
-    raise TypeError("Unknown argument type")
+    @classmethod
+    def validate_positive(cls, arg: float):
+        if arg is None:
+            return
 
+        if arg <= 0:
+            raise ValueError("value is not positive")
 
-# Validation Functions
-def validate_positive(arg):
-    if arg is None:
-        return
+    @classmethod
+    def validate_nonnegative(cls, arg: float):
+        if arg is None:
+            return
 
-    if arg <= 0:
-        raise ValueError("value is not positive")
+        if arg < 0:
+            raise ValueError("value is negative")
 
+    @classmethod
+    def validate_range(cls, arg: float, lower: Union[int, float], upper: Union[int, float]):
+        if arg is None:
+            return
 
-def validate_nonnegative(arg):
-    if arg is None:
-        return
+        if arg < lower or arg > upper:
+            raise ValueError("not in required range [%f, %f]" % (float(lower), float(upper)))
 
-    if arg < 0:
-        raise ValueError("value is negative")
-
-
-def validate_range(arg, lower, upper):
-    if arg is None:
-        return
-
-    if arg < lower or arg > upper:
-        raise ValueError("not in required range [%f, %f]" %(float(lower), float(upper)))
-
-
-# Formatting functions
-def default_formatter(arg, **kwarg):
-    return str(arg)
+    @classmethod
+    def default_formatter(cls, arg: float) -> str:
+        return str(arg)

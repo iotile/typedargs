@@ -9,46 +9,52 @@
 # pylint: disable=unused-argument,missing-docstring
 
 import os.path
+from .base import BaseType
+from typing import Optional
 
 
-def convert(arg):
-    if arg is None:
-        return None
+class PathType(BaseType):
 
-    return str(arg)
+    MAPPED_TYPE_NAME = 'path'
 
+    @classmethod
+    def FromString(cls, arg: str) -> Optional[str]:
+        if arg is None:
+            return None
 
-def validate_readable(arg):
-    if arg is None:
-        raise ValueError("Path must be readable")
+        return str(arg)
 
-    if not os.path.isfile(arg):
-        raise ValueError("Path is not a file")
+    @classmethod
+    def validate_readable(cls, arg: str):
+        if arg is None:
+            raise ValueError("Path must be readable")
 
-    try:
-        file = open(arg, "r")
-        file.close()
-    except:
-        raise ValueError("Path could not be opened for reading")
+        if not os.path.isfile(arg):
+            raise ValueError("Path is not a file")
 
+        try:
+            file = open(arg, "r")
+            file.close()
+        except:
+            raise ValueError("Path could not be opened for reading")
 
-def validate_exists(arg):
-    if arg is None:
-        raise ValueError("Path must exist")
+    @classmethod
+    def validate_exists(cls, arg: str):
+        if arg is None:
+            raise ValueError("Path must exist")
 
-    if not os.path.exists(arg):
-        raise ValueError("Path must exist")
+        if not os.path.exists(arg):
+            raise ValueError("Path must exist")
 
+    @classmethod
+    def validate_writeable(cls, arg: str):
+        if arg is None:
+            raise ValueError("Path must be writable")
 
-def validate_writeable(arg):
-    if arg is None:
-        raise ValueError("Path must be writable")
+        parent = os.path.dirname(arg)
+        if not os.path.isdir(parent):
+            raise ValueError("Parent directory does not exist and path must be writeable")
 
-    parent = os.path.dirname(arg)
-    if not os.path.isdir(parent):
-        raise ValueError("Parent directory does not exist and path must be writeable")
-
-
-# Formatting functions
-def default_formatter(arg, **kwargs):
-    return str(arg)
+    @classmethod
+    def default_formatter(cls, arg: str) -> str:
+        return str(arg)

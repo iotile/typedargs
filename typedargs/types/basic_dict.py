@@ -1,29 +1,32 @@
 # pylint: disable=unused-argument,missing-docstring
 
 import json
+from typing import Optional, Union
+from .base import BaseType
 
 
-MAPPED_BUILTIN_TYPE = dict
+class DictType(BaseType):
+    MAPPED_BUILTIN_TYPE = dict
 
+    @classmethod
+    def FromString(cls, arg: str) -> Optional[dict]:
+        if arg is None:
+            return None
 
-def convert(arg, **kwargs):
-    if arg is None:
-        return None
+        if isinstance(arg, str):
+            return json.loads(arg)
+        if isinstance(arg, dict):
+            return arg
 
-    if isinstance(arg, str):
-        return json.loads(arg)
-    if isinstance(arg, dict):
-        return arg
+        raise TypeError("Unknown argument type")
 
-    raise TypeError("Unknown argument type")
+    @classmethod
+    def _json_formatter(cls, arg: Union[dict, bytearray]):
+        if isinstance(arg, bytearray):
+            return repr(arg)
 
+        return str(arg)
 
-def _json_formatter(arg):
-    if isinstance(arg, bytearray):
-        return repr(arg)
-
-    return str(arg)
-
-
-def default_formatter(arg, **kwargs):
-    return json.dumps(arg, sort_keys=True, indent=4, separators=(',', ': '), default=_json_formatter)
+    @classmethod
+    def default_formatter(cls, arg: Union[dict, bytearray],):
+        return json.dumps(arg, sort_keys=True, indent=4, separators=(',', ': '), default=cls._json_formatter)

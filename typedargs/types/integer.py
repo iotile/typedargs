@@ -9,56 +9,57 @@
 # pylint: disable=unused-argument,missing-docstring
 
 # integer type
+from typing import Optional
+from .base import BaseType
 
 
-MAPPED_BUILTIN_TYPE = int
+class IntegerType(BaseType):
+    MAPPED_BUILTIN_TYPE = int
 
+    @classmethod
+    def FromString(cls, arg: str) -> Optional[int]:
+        if arg is None:
+            return None
 
-def convert(arg):
-    if arg is None:
-        return None
+        if isinstance(arg, str):
+            return int(arg, 0)
+        if isinstance(arg, int):
+            return arg
 
-    if isinstance(arg, str):
-        return int(arg, 0)
-    if isinstance(arg, int):
-        return arg
+        raise TypeError("Unknown argument type")
 
-    raise TypeError("Unknown argument type")
+    @classmethod
+    def validate_positive(cls, arg: int):
+        if arg is None:
+            return
 
+        if arg <= 0:
+            raise ValueError("value is not positive")
 
-# Validation Functions
-def validate_positive(arg):
-    if arg is None:
-        return
+    @classmethod
+    def validate_range(cls, arg: int, lower: int, upper: int):
+        if arg is None:
+            return
 
-    if arg <= 0:
-        raise ValueError("value is not positive")
+        if arg < lower or arg > upper:
+            raise ValueError("not in required range [%d, %d]" % (int(lower), int(upper)))
 
+    @classmethod
+    def validate_nonnegative(cls, arg: int):
+        if arg is None:
+            return
 
-def validate_range(arg, lower, upper):
-    if arg is None:
-        return
+        if arg < 0:
+            raise ValueError("value is negative")
 
-    if arg < lower or arg > upper:
-        raise ValueError("not in required range [%d, %d]" %(int(lower), int(upper)))
+    @classmethod
+    def default_formatter(cls, arg: int) -> str:
+        return str(arg)
 
+    @classmethod
+    def format_unsigned(cls, arg: int) -> str:
+        return format(arg, 'd')
 
-def validate_nonnegative(arg):
-    if arg is None:
-        return
-
-    if arg < 0:
-        raise ValueError("value is negative")
-
-
-# Formatting functions
-def default_formatter(arg, **kwarg):
-    return str(arg)
-
-
-def format_unsigned(arg, **kwarg):
-    return format(arg, 'd')
-
-
-def format_hex(arg, **kwarg):
-    return "0x%X" % arg
+    @classmethod
+    def format_hex(cls, arg: int) -> str:
+        return "0x%X" % arg

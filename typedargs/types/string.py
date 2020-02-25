@@ -7,39 +7,42 @@
 # are copyright Arch Systems Inc.
 
 # pylint: disable=unused-argument,missing-docstring
+from typing import Optional, Iterable
+from .base import BaseType
 
 
-MAPPED_BUILTIN_TYPE = str
+class StringType(BaseType):
+    MAPPED_BUILTIN_TYPE = str
 
+    @classmethod
+    def FromString(cls, arg: str) -> Optional[str]:
+        if arg is None:
+            return None
 
-def convert(arg):
-    if arg is None:
-        return None
+        return str(arg)
 
-    return str(arg)
+    @classmethod
+    def default_formatter(cls, arg: str) -> str:
+        return arg
 
+    @classmethod
+    def validate_list(cls, arg: str, choices: Iterable):
+        """
+        Make sure the argument is in the list of choices passed to the function
+        """
 
-def validate_list(arg, choices):
-    """
-    Make sure the argument is in the list of choices passed to the function
-    """
+        if arg not in choices:
+            raise ValueError('Value not in list: %s' % str(choices))
 
-    if arg not in choices:
-        raise ValueError('Value not in list: %s' % str(choices))
+    @classmethod
+    def validate_not_empty(cls, arg: str):
+        """
+        Make sure the string is not empty
+        """
 
+        if len(arg) == 0:
+            raise ValueError("String cannot be empty")
 
-def validate_not_empty(arg):
-    """
-    Make sure the string is not empty
-    """
-
-    if len(arg) == 0:
-        raise ValueError("String cannot be empty")
-
-
-def default_formatter(arg, **kwargs):
-    return arg
-
-
-def format_repr(arg, **kwargs):
-    return repr(arg)
+    @classmethod
+    def format_repr(cls, arg: str) -> str:
+        return repr(arg)
