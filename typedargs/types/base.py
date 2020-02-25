@@ -1,3 +1,4 @@
+"""A base class for internal type classes."""
 
 
 class BaseInternalType:
