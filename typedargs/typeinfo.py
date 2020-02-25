@@ -12,6 +12,7 @@
 # Basic routines for converting information from string or other binary
 # formats to python types and for displaying those types in supported
 # formats
+import inspect
 import os.path
 import importlib
 import logging
@@ -89,7 +90,7 @@ class TypeSystem:
                     return self.convert_from_binary(value, type_or_name, **kwargs)
 
                 typeobj = self.get_type(type_or_name)
-                if isinstance(typeobj, type) and hasattr(typeobj, 'FromString'):
+                if inspect.isclass(typeobj) and issubclass(typeobj, BaseInternalType):
                     conv = typeobj.FromString(value)
                 else:
                     conv = typeobj.convert(value, **kwargs)
@@ -341,7 +342,7 @@ class TypeSystem:
             if name in self.type_factories:
                 raise ArgumentError("attempted to inject a complex type factory that is already defined", type=name)
             self.type_factories[name] = typeobj
-        elif isinstance(typeobj, type) and issubclass(typeobj, BaseInternalType):
+        elif inspect.isclass(typeobj) and issubclass(typeobj, BaseInternalType):
             if hasattr(typeobj, 'MAPPED_BUILTIN_TYPE'):
                 self.mapped_builtin_types[typeobj.MAPPED_BUILTIN_TYPE] = typeobj
 
