@@ -12,12 +12,9 @@
 # Basic routines for converting information from string or other binary
 # formats to python types and for displaying those types in supported
 # formats
-import inspect
 import os.path
 import importlib
 import logging
-import typing
-from typing import Optional
 
 import sys
 from typedargs.exceptions import ValidationError, ArgumentError, KeyValueException
