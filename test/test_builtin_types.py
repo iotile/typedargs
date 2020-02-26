@@ -98,25 +98,6 @@ def test_format_bool():
     assert val == 'False'
 
 
-def test_unicode_conversion():
-    """Make sure that converting to builtin types from unicode works."""
-
-    # Test bool
-    val = type_system.convert_to_type(u'True', 'bool')
-    assert val is True
-
-    val = type_system.convert_to_type(u'False', 'bool')
-    assert val is False
-
-    # Test int
-    val = type_system.convert_to_type(u'42', 'integer')
-    assert val == 42
-
-    # Test float
-    val = type_system.convert_to_type(u'42.5', 'float')
-    assert val == 42.5
-
-
 def test_bytes_from_hex():
     """Make sure we can convert a hex string to bytes."""
 
