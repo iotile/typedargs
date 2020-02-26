@@ -27,7 +27,7 @@ def test_splitting():
 
 def test_map_type():
     """Make sure the map type works."""
-    type_system.get_type('map(string, string)')
+    type_system.get_proxy_for_type('map(string, string)')
 
 
 def test_map_formatting():
@@ -40,7 +40,7 @@ def test_map_formatting():
 
 def test_list_type():
     """Make sure the list type works."""
-    type_system.get_type('list(integer)')
+    type_system.get_proxy_for_type('list(integer)')
 
 
 def test_list_formatting():

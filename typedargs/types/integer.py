@@ -10,9 +10,8 @@
 
 # integer type
 
-
 MAPPED_BUILTIN_TYPE = int
-
+MAPPED_TYPE_NAMES = ('int', )
 
 def convert(arg):
     if arg is None:

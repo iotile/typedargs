@@ -2,9 +2,8 @@
 
 import json
 
-
 MAPPED_BUILTIN_TYPE = dict
-
+MAPPED_TYPE_NAMES = ('dict', )
 
 def convert(arg, **kwargs):
     if arg is None:
