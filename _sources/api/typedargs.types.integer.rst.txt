@@ -7,7 +7,7 @@ typedargs.types.integer module
 .. currentmodule:: typedargs.types.integer
 
 .. automodule:: typedargs.types.integer
-    :members: convert, default_formatter, format_hex, format_unsigned, validate_nonnegative, validate_positive, validate_range
+    :members: MAPPED_TYPE_NAMES, convert, default_formatter, format_hex, format_unsigned, validate_nonnegative, validate_positive, validate_range
     :undoc-members:
     :show-inheritance:
     :member-order: bysource
@@ -27,6 +27,13 @@ typedargs.types.integer module
         validate_nonnegative
         validate_positive
         validate_range
+
+    Data:
+
+    .. autosummary::
+        :nosignatures:
+
+        MAPPED_TYPE_NAMES
 
 
 

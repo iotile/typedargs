@@ -7,7 +7,7 @@ typedargs.types.string module
 .. currentmodule:: typedargs.types.string
 
 .. automodule:: typedargs.types.string
-    :members: convert, default_formatter, format_repr, validate_list, validate_not_empty
+    :members: MAPPED_TYPE_NAMES, convert, default_formatter, format_repr, validate_list, validate_not_empty
     :undoc-members:
     :show-inheritance:
     :member-order: bysource
@@ -25,6 +25,13 @@ typedargs.types.string module
         format_repr
         validate_list
         validate_not_empty
+
+    Data:
+
+    .. autosummary::
+        :nosignatures:
+
+        MAPPED_TYPE_NAMES
 
 
 
