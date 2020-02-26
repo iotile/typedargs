@@ -18,7 +18,7 @@ from typedargs.exceptions import ValidationError, ArgumentError
 
 def test_builtins_exist():
     """Make sure basic builtins are found."""
-    builtin = ['integer', 'path', 'string', 'dict', 'bool', 'bytes', 'float']
+    builtin = ['integer', 'int', 'path', 'string', 'str', 'basic_dict', 'dict', 'bool', 'bytes', 'float']
 
     for type_name in builtin:
         type_system.get_type(type_name)
