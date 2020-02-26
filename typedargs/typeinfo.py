@@ -20,7 +20,6 @@ import logging
 import sys
 from typedargs.exceptions import ValidationError, ArgumentError, KeyValueException
 from typedargs import types
-from typedargs.types.base import BaseInternalType
 
 
 class TypeSystem:
@@ -84,33 +83,52 @@ class TypeSystem:
         through to the underlying conversion function
         """
 
-        if isinstance(type_or_name, str) or self.is_known_type(type_or_name):
-            try:
-                if isinstance(value, bytearray):
-                    return self.convert_from_binary(value, type_or_name, **kwargs)
+        # TODO: this can all be refactored into a routine `self.get_type_and_proxy(type_or_name)`
+        if isinstance(type_or_name, str):
+            type_obj = None
+            proxy_obj = self.get_proxy_for_type(type_or_name)
+        elif inspect.isclass(type_or_name):
+            type_obj = type_or_name
 
-                typeobj = self.get_type(type_or_name)
-                if inspect.isclass(typeobj) and issubclass(typeobj, BaseInternalType):
-                    conv = typeobj.FromString(value)
-                else:
-                    conv = typeobj.convert(value, **kwargs)
+            # Normally, we expect that the type objects contain a certain set of methods
+            # to support validation, conversion and formatting.  However, for certain
+            # internal types like int, dict, etc, we provide a separate augmentation
+            # class that contains the converters.
 
-                return conv
-
-            except (ValueError, TypeError) as exc:
-                raise ValidationError("Could not convert value", type=type_or_name, value=value, error_message=str(exc))
+            proxy_obj = self.mapped_builtin_types.get(type_obj)
         else:
-            if isinstance(value, type_or_name):
+            raise ValidationError("Unknown object passed to convert_to_type", type_or_name=type_or_name)
+
+        # Legacy types supported conversion from binary
+        # so make sure that remains functional.  This behavior is deprecated so
+        # it is only used if the type name is passed in via a string.
+        if isinstance(type_or_name, str) and isinstance(value, bytearray):
+            return self.convert_from_binary(value, type_or_name, **kwargs)
+
+        if type_obj is not None:
+            # When we have a proper modern type class that supports isinstance()
+            # checks, we can just verify if we actually need to do anything
+            if value is None or isinstance(value, type_obj):
                 return value
 
-            if isinstance(value, str):
-                if not callable(getattr(type_or_name, 'FromString', None)):
-                    raise ValidationError("Converting from string to the given type is not supported.", type=type_or_name, value=value)
+            # If the value is not already the right type, we only support converting
+            # from string.
+            if not isinstance(value, str):
+                raise ValidationError("Value was not the right type and was not a string",
+                                      expected_type=type_obj, value=value)
 
-                conv = type_or_name.FromString(value)
-                return conv
+            return _try_convert_from_string(value, type_obj, proxy_obj)
 
-            raise ValidationError("Could not convert a value. Wrong value type.", type=type_or_name, value=value)
+        # This is the legacy case, we have no type object, so we rely on the
+        # legacy behavior that the proxy object has a `convert` function that
+        # implicitly checks if the value is already converted and just returns
+        # it.
+
+        try:
+            return proxy_obj.convert(value, **kwargs)
+        except (ValueError, TypeError) as exc:
+            raise ValidationError("Could not convert value", type=type_or_name, value=value,
+                                  error_message=str(exc))
 
     def convert_from_binary(self, binvalue, type, **kwargs):
         """
@@ -125,7 +143,7 @@ class TypeSystem:
         if size > 0 and len(binvalue) != size:
             raise ArgumentError("Could not convert type from binary since the data was not the correct size", required_size=size, actual_size=len(binvalue), type=type)
 
-        typeobj = self.get_type(type)
+        typeobj = self.get_proxy_for_type(type)
 
         if not hasattr(typeobj, 'convert_binary'):
             raise ArgumentError("Type does not support conversion from binary", type=type)
@@ -138,7 +156,7 @@ class TypeSystem:
         type. Return 0 if the size is not known.
         """
 
-        typeobj = self.get_type(type)
+        typeobj = self.get_proxy_for_type(type)
 
         if hasattr(typeobj, 'size'):
             return typeobj.size()
@@ -156,7 +174,7 @@ class TypeSystem:
         typed_val = self.convert_to_type(value, type_or_name, **kwargs)
 
         if isinstance(type_or_name, str) or self.is_known_type(type_or_name):
-            typeobj = self.get_type(type_or_name)
+            typeobj = self.get_proxy_for_type(type_or_name)
         else:
             typeobj = type_or_name
 
@@ -235,7 +253,7 @@ class TypeSystem:
         #Make sure all of the subtypes are valid
         for sub_type in subtypes:
             try:
-                self.get_type(sub_type)
+                self.get_proxy_for_type(sub_type)
             except KeyValueException as exc:
                 raise ArgumentError("could not instantiate subtype for complex type", passed_type=typename, sub_type=sub_type, error=exc)
 
@@ -257,7 +275,7 @@ class TypeSystem:
 
         return False
 
-    def get_type(self, type_or_name):
+    def get_proxy_for_type(self, type_or_name):
         """Return the type object corresponding to a type name.
 
         If type_name is not found, this triggers the loading of
@@ -266,6 +284,9 @@ class TypeSystem:
         """
         if type_or_name in self.mapped_builtin_types:
             return self.mapped_builtin_types[type_or_name]
+
+        if not isinstance(type_or_name, str):
+            return type_or_name
 
         type_name = self._canonicalize_type(type_or_name)
 
@@ -309,7 +330,7 @@ class TypeSystem:
         if not (self.is_known_type(type_name) or (is_complex and base_type in self.type_factories)):
             raise ArgumentError("get_type called on unknown type", type=type_name, failed_external_sources=[x[0] for x in self.failed_sources])
 
-        return self.get_type(type_name)
+        return self.get_proxy_for_type(type_name)
 
     def is_known_format(self, type, format):
         """
@@ -318,7 +339,7 @@ class TypeSystem:
         Returns boolean indicating if format is valid for the specified type.
         """
 
-        typeobj = self.get_type(type)
+        typeobj = self.get_proxy_for_type(type)
 
         formatter = "format_%s" % str(format)
         if not hasattr(typeobj, formatter):
@@ -342,15 +363,18 @@ class TypeSystem:
             if name in self.type_factories:
                 raise ArgumentError("attempted to inject a complex type factory that is already defined", type=name)
             self.type_factories[name] = typeobj
-        elif inspect.isclass(typeobj) and issubclass(typeobj, BaseInternalType):
-            if hasattr(typeobj, 'MAPPED_BUILTIN_TYPE'):
-                self.mapped_builtin_types[typeobj.MAPPED_BUILTIN_TYPE] = typeobj
-
-            for name in getattr(typeobj, 'MAPPED_TYPE_NAMES', []):
-                self.known_types[name] = typeobj
-
+        elif inspect.isclass(typeobj):
+            self.known_types[name] = typeobj
         else:
             self._validate_type(typeobj)
+
+            actual_type = getattr(typeobj, 'MAPPED_BUILTIN_TYPE', None)
+            if actual_type is not None:
+                self.mapped_builtin_types[actual_type] = typeobj
+
+            for alias in getattr(typeobj, 'MAPPED_TYPE_NAMES', []):
+                self.known_types[alias] = typeobj
+
             self.known_types[name] = typeobj
 
         if not hasattr(typeobj, "default_formatter"):
@@ -402,3 +426,38 @@ def iprint(stringable):
 #information
 
 type_system = TypeSystem(types)  # pylint: disable=invalid-name
+
+
+def _try_convert_from_string(value: str, type_obj, proxy_obj):
+    """Attempt to convert a string value to a given type.
+
+    Returns:
+        instance of type_obj
+    """
+
+    # If there is a proxy object that should be used instead of the actual type
+    # then use that.  Otherwise, we expect the type itself to have a FromString
+    # method.
+    converting_obj = proxy_obj
+    if converting_obj is None:
+        converting_obj = type_obj
+
+    if inspect.isclass(converting_obj):
+        return converting_obj.FromString(value)
+
+    if not hasattr(converting_obj, 'convert'):
+        raise ValidationError("Type did not have a convert function for string conversion",
+                              type_obj=type_obj, augmented_type=proxy_obj)
+
+    try:
+        converted_value = converting_obj.convert(value)
+    except (ValueError, TypeError) as err:
+        raise ValidationError("Error converting value from string", message=str(err),
+                              value=value)
+
+    if type_obj is not None and not isinstance(converted_value, type_obj):
+        raise ValidationError("Conversion from string did not produce the expected type",
+                              string_value=value, converted_value=repr(converted_value),
+                              expected_type=repr(type_obj))
+
+    return converted_value
