@@ -21,7 +21,7 @@ def test_builtins_exist():
     builtin = ['integer', 'int', 'path', 'string', 'str', 'basic_dict', 'dict', 'bool', 'bytes', 'float']
 
     for type_name in builtin:
-        type_system.get_type(type_name)
+        type_system.get_proxy_for_type(type_name)
 
 
 def test_builtin_conversions():
@@ -81,12 +81,6 @@ def test_bool_valid():
 
     val = type_system.convert_to_type(None, 'bool')
     assert val is None
-
-    val = type_system.convert_to_type(0, 'bool')
-    assert val is False
-
-    val = type_system.convert_to_type(1, 'bool')
-    assert val is True
 
 
 def test_format_bool():

@@ -39,11 +39,11 @@ def test_type_injection(clean_typesystem):
 def test_external_module_injection(clean_typesystem):
     """Test type injection from an external python module."""
 
-    path = os.path.join(os.path.dirname(__file__), 'extra_types')
+    path = os.path.join(os.path.dirname(__file__), 'extra_type_package')
 
-    assert not typeinfo.type_system.is_known_type('new_type')
+    assert not typeinfo.type_system.is_known_type('new_pkg_type')
     typeinfo.type_system.load_external_types(path)
-    assert typeinfo.type_system.is_known_type('new_type')
+    assert typeinfo.type_system.is_known_type('new_pkg_type')
 
 
 def test_external_package_injection(clean_typesystem):
@@ -74,7 +74,7 @@ def test_lazy_type_loading(clean_typesystem):
     with pytest.raises(ArgumentError):
         inner_function('1')
 
-    path = os.path.join(os.path.dirname(__file__), 'extra_types')
+    path = os.path.join(os.path.dirname(__file__), 'extra_type_package')
     typeinfo.type_system.load_external_types(path)
 
     inner_function('1')
