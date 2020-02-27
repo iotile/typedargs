@@ -39,6 +39,7 @@ class TypeSystem:
         self.type_factories = {}
         self.mapped_builtin_types = {}
         self.mapped_complex_types = {}
+        self._complex_type_proxies = {}
         self.logger = logging.getLogger(__name__)
 
         for arg in args:
@@ -348,13 +349,21 @@ class TypeSystem:
 
         return True
 
-    def inject_type(self, name, typeobj):
+    def inject_type(self, type_or_name, typeobj):
         """
         Given a module-like object that defines a type, add it to our type system so that
         it can be used with the iotile tool and with other annotated API functions.
-        """
 
-        name = self._canonicalize_type(name)
+        type_or_name could be a string name or a type from typing module
+        """
+        # if type_or_name is a type from typing module
+        if not isinstance(type_or_name, str):
+            if type_or_name in self._complex_type_proxies:
+                raise ArgumentError("attempting to inject a type that is already defined", type=type_or_name)
+            self._complex_type_proxies[type_or_name] = typeobj
+            return
+
+        name = self._canonicalize_type(type_or_name)
         _, is_complex, _ = self.split_type(name)
 
         if self.is_known_type(name):
