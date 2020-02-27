@@ -119,7 +119,7 @@ class TypeSystem:
                 raise ValidationError("Value was not the right type and was not a string",
                                       expected_type=type_obj, value=value)
 
-            return _try_convert_from_string(value, type_obj, proxy_obj)
+            return self._try_convert_from_string(value, type_obj, proxy_obj)
 
         # This is the legacy case, we have no type object, so we rely on the
         # legacy behavior that the proxy object has a `convert` function that
@@ -426,6 +426,40 @@ class TypeSystem:
 
         self.load_type_module(mod)
 
+    def _try_convert_from_string(self, value: str, type_obj, proxy_obj):
+        """Attempt to convert a string value to a given type.
+
+        Returns:
+            instance of type_obj
+        """
+
+        # If there is a proxy object that should be used instead of the actual type
+        # then use that.  Otherwise, we expect the type itself to have a FromString
+        # method.
+        converting_obj = proxy_obj
+        if converting_obj is None:
+            converting_obj = type_obj
+
+        if inspect.isclass(converting_obj) and type_obj not in self._complex_type_proxies:
+            return converting_obj.FromString(value)
+
+        if not hasattr(converting_obj, 'convert'):
+            raise ValidationError("Type did not have a convert function for string conversion",
+                                  type_obj=type_obj, augmented_type=proxy_obj)
+
+        try:
+            converted_value = converting_obj.convert(value)
+        except (ValueError, TypeError) as err:
+            raise ValidationError("Error converting value from string", message=str(err),
+                                  value=value)
+
+        if type_obj is not None and not isinstance(converted_value, type_obj):
+            raise ValidationError("Conversion from string did not produce the expected type",
+                                  string_value=value, converted_value=repr(converted_value),
+                                  expected_type=repr(type_obj))
+
+        return converted_value
+
 
 def iprint(stringable):
     """
@@ -443,36 +477,3 @@ def iprint(stringable):
 type_system = TypeSystem(types)  # pylint: disable=invalid-name
 
 
-def _try_convert_from_string(value: str, type_obj, proxy_obj):
-    """Attempt to convert a string value to a given type.
-
-    Returns:
-        instance of type_obj
-    """
-
-    # If there is a proxy object that should be used instead of the actual type
-    # then use that.  Otherwise, we expect the type itself to have a FromString
-    # method.
-    converting_obj = proxy_obj
-    if converting_obj is None:
-        converting_obj = type_obj
-
-    if inspect.isclass(converting_obj):
-        return converting_obj.FromString(value)
-
-    if not hasattr(converting_obj, 'convert'):
-        raise ValidationError("Type did not have a convert function for string conversion",
-                              type_obj=type_obj, augmented_type=proxy_obj)
-
-    try:
-        converted_value = converting_obj.convert(value)
-    except (ValueError, TypeError) as err:
-        raise ValidationError("Error converting value from string", message=str(err),
-                              value=value)
-
-    if type_obj is not None and not isinstance(converted_value, type_obj):
-        raise ValidationError("Conversion from string did not produce the expected type",
-                              string_value=value, converted_value=repr(converted_value),
-                              expected_type=repr(type_obj))
-
-    return converted_value
