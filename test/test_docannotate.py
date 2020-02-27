@@ -583,7 +583,7 @@ def test_annotations_complex_types():
     _ = func_list.metadata.returns_data()
     _ = func_dict.metadata.returns_data()
 
-    # check if original function behaviour is not broken, we can pass argument of expected type
+    # check if original function behaviour is not broken, we can pass an argument of expected type
     assert [1, 2, 3] == func_list([1, 2, 3])
     assert {"foo": 1} == func_dict({"foo": 1})
 
