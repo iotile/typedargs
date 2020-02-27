@@ -77,6 +77,31 @@ class TypeSystem:
 
         self._lazy_type_sources.append((source, name))
 
+    def _get_type_and_proxy(self, type_or_name):
+        """
+        Normally, we expect that the type objects contain a certain set of methods
+        to support validation, conversion and formatting.  However, for certain
+        internal types like int, dict, etc, typing.List[t], typing.Dict[t, t] we provide a separate augmentation
+        class that contains the converters.
+        """
+        if isinstance(type_or_name, str):
+            type_obj = None
+            proxy_obj = self.get_proxy_for_type(type_or_name)
+        elif utils.is_class_from_typing(type_or_name):
+            type_obj = type_or_name
+            proxy_obj = self.get_proxy_for_type(type_obj)
+        elif inspect.isclass(type_or_name):
+            type_obj = type_or_name
+
+            if self.is_known_type(type_or_name):
+                proxy_obj = self.get_proxy_for_type(type_or_name)
+            else:
+                proxy_obj = None
+        else:
+            raise ValidationError("Unknown object passed to convert_to_type", type_or_name=type_or_name)
+
+        return type_obj, proxy_obj
+
     def convert_to_type(self, value, type_or_name, **kwargs):
         """
         Convert value to type 'type_or_name'
@@ -85,22 +110,7 @@ class TypeSystem:
         modify the conversion process, \\**kwargs is passed
         through to the underlying conversion function
         """
-
-        # TODO: this can all be refactored into a routine `self.get_type_and_proxy(type_or_name)`
-        if isinstance(type_or_name, str):
-            type_obj = None
-            proxy_obj = self.get_proxy_for_type(type_or_name)
-        elif inspect.isclass(type_or_name):
-            type_obj = type_or_name
-
-            # Normally, we expect that the type objects contain a certain set of methods
-            # to support validation, conversion and formatting.  However, for certain
-            # internal types like int, dict, etc, we provide a separate augmentation
-            # class that contains the converters.
-
-            proxy_obj = self.mapped_builtin_types.get(type_obj)
-        else:
-            raise ValidationError("Unknown object passed to convert_to_type", type_or_name=type_or_name)
+        type_obj, proxy_obj = self.get_type_and_proxy(type_or_name)
 
         # Legacy types supported conversion from binary
         # so make sure that remains functional.  This behavior is deprecated so
