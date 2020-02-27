@@ -265,23 +265,26 @@ class TypeSystem:
         else:
             raise ArgumentError('Cannot split the given type.', type_or_name=type_or_name)
 
-    def instantiate_type(self, typename, base, subtypes):
+    def instantiate_type(self, type_or_name, base, subtypes):
         """Instantiate a complex type."""
 
-        if base not in self.type_factories:
-            raise ArgumentError("unknown complex base type specified", passed_type=typename, base_type=base)
+        if isinstance(type_or_name, str):
+            type_or_name = self._canonicalize_type(type_or_name)
 
-        base_type = self.type_factories[base]
+        if not self._is_known_type_factory(base):
+            raise ArgumentError("unknown complex base type specified", passed_type=type_or_name, base_type=base)
 
-        #Make sure all of the subtypes are valid
+        base_type = self._get_known_type_factory(base)
+
+        # Make sure all of the subtypes are valid
         for sub_type in subtypes:
             try:
                 self.get_proxy_for_type(sub_type)
             except KeyValueException as exc:
-                raise ArgumentError("could not instantiate subtype for complex type", passed_type=typename, sub_type=sub_type, error=exc)
+                raise ArgumentError("could not instantiate subtype for complex type", passed_type=type_or_name, sub_type=sub_type, error=exc)
 
         typeobj = base_type.Build(*subtypes, type_system=self)
-        self.inject_type(typename, typeobj)
+        self.inject_type(type_or_name, typeobj)
 
     @classmethod
     def _canonicalize_type(cls, typename):
