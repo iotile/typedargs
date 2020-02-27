@@ -110,7 +110,7 @@ class TypeSystem:
         modify the conversion process, \\**kwargs is passed
         through to the underlying conversion function
         """
-        type_obj, proxy_obj = self.get_type_and_proxy(type_or_name)
+        type_obj, proxy_obj = self._get_type_and_proxy(type_or_name)
 
         # Legacy types supported conversion from binary
         # so make sure that remains functional.  This behavior is deprecated so
