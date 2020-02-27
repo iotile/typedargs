@@ -12,9 +12,12 @@
 
 import ast
 import collections
+from typing import List
 
 
 class list:  # pylint: disable=C0103
+    MAPPED_COMPLEX_TYPE = List
+
     def __init__(self, valuetype, **kwargs):
 
         self.valuetype = valuetype
