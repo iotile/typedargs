@@ -38,8 +38,8 @@ class TypeSystem:
         self.interactive = False
         self.known_types = {}
         self.type_factories = {}
-        self.mapped_builtin_types = {}
-        self.mapped_complex_types = {}
+        self._mapped_builtin_types = {}
+        self._mapped_complex_types = {}
         self._complex_type_proxies = {}
         self.logger = logging.getLogger(__name__)
 
@@ -227,7 +227,7 @@ class TypeSystem:
             raise ArgumentError("type is invalid, does not have default_formatter function", type=typeobj, methods=dir(typeobj))
 
     def _is_known_type_factory(self, class_or_name):
-        if class_or_name in self.type_factories or class_or_name in self.mapped_complex_types:
+        if class_or_name in self.type_factories or class_or_name in self._mapped_complex_types:
             return True
         return False
 
@@ -237,7 +237,7 @@ class TypeSystem:
         Returns:
             bool: True if the type is a known instantiated simple type, False otherwise
         """
-        if type_or_name in self.known_types or type_or_name in self.mapped_builtin_types or type_or_name in self._complex_type_proxies:
+        if type_or_name in self.known_types or type_or_name in self._mapped_builtin_types or type_or_name in self._complex_type_proxies:
             return True
         return False
 
@@ -304,8 +304,8 @@ class TypeSystem:
     def _get_known_type_factory(self, type_or_name):
         if type_or_name in self.type_factories:
             return self.type_factories[type_or_name]
-        if type_or_name in self.mapped_complex_types:
-            return self.mapped_complex_types[type_or_name]
+        if type_or_name in self._mapped_complex_types:
+            return self._mapped_complex_types[type_or_name]
         raise ArgumentError('Type factory not found.', type_or_name=type_or_name)
 
     def _get_proxy_for_known_type(self, type_or_name):
@@ -315,8 +315,8 @@ class TypeSystem:
         """
         if type_or_name in self.known_types:
             return self.known_types[type_or_name]
-        if type_or_name in self.mapped_builtin_types:
-            return self.mapped_builtin_types[type_or_name]
+        if type_or_name in self._mapped_builtin_types:
+            return self._mapped_builtin_types[type_or_name]
         if type_or_name in self._complex_type_proxies:
             return self._complex_type_proxies[type_or_name]
         raise ArgumentError('Proxy object not found.', type_or_name=type_or_name)
@@ -438,7 +438,7 @@ class TypeSystem:
 
             mapped_complex_type = getattr(typeobj, 'MAPPED_COMPLEX_TYPE', None)
             if mapped_complex_type:
-                self.mapped_complex_types[mapped_complex_type] = typeobj
+                self._mapped_complex_types[mapped_complex_type] = typeobj
 
         elif inspect.isclass(typeobj):
             self.known_types[name] = typeobj
@@ -447,7 +447,7 @@ class TypeSystem:
 
             actual_type = getattr(typeobj, 'MAPPED_BUILTIN_TYPE', None)
             if actual_type is not None:
-                self.mapped_builtin_types[actual_type] = typeobj
+                self._mapped_builtin_types[actual_type] = typeobj
 
             for alias in getattr(typeobj, 'MAPPED_TYPE_NAMES', []):
                 self.known_types[alias] = typeobj
