@@ -322,27 +322,42 @@ class TypeSystem:
         raise ArgumentError('Proxy object not found.', type_or_name=type_or_name)
 
     def get_proxy_for_type(self, type_or_name):
-        """Return the type object corresponding to a type name.
+        """Return the type object corresponding to a given type_or_name.
 
-        If type_name is not found, this triggers the loading of
+        type_or_name could be:
+        - a simple builtin type like str, int, etc
+        - a string name of a known type
+        - a string name of an unknown complex type where base type is a known type factory
+        - a complex type class from typing module: Dict[T, T] or List[T]
+        - a string name of an unknown type (maybe a complex where base type is unknown type factory)
+
+        If type_or_name is a string type name and it is not found in known types, this triggers the loading of
         external types until a matching type is found or until there
         are no more external type sources.
         """
-        if type_or_name in self.mapped_builtin_types:
-            return self.mapped_builtin_types[type_or_name]
+        if isinstance(type_or_name, str):
+            type_or_name = self._canonicalize_type(type_or_name)
 
-        if not isinstance(type_or_name, str):
-            return type_or_name
+        # If type_or_name is a:
+        # - a simple builtin type like str, int, etc
+        # - a string name of a known type
+        if self.is_known_type(type_or_name):
+            return self._get_proxy_for_known_type(type_or_name)
 
-        type_name = self._canonicalize_type(type_or_name)
+        # here type_or_name could be a string name or a complex type class from typing module
+        base_type, is_complex, subtypes = self.split_type(type_or_name)
 
-        if self.is_known_type(type_name):
-            return self.known_types[type_name]
+        # If type_or_name is a:
+        # - a string name of an unknown complex type where base type is a known type factory
+        # - a complex type class from typing module: Dict[T, T] or List[T]
+        if is_complex and self._is_known_type_factory(base_type):
+            self.instantiate_type(type_or_name, base_type, subtypes)
+            return self.get_proxy_for_type(type_or_name)
+
+        # If type_or_name is a:
+        # - a string name of an unknown type (maybe a complex where base type is unknown type factory)
 
         base_type, is_complex, subtypes = self.split_type(type_name)
-        if is_complex and base_type in self.type_factories:
-            self.instantiate_type(type_name, base_type, subtypes)
-            return self.known_types[type_name]
 
         # If we're here, this is a type that we don't know anything about, so go find it.
         i = 0
