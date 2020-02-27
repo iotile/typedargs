@@ -357,9 +357,18 @@ class TypeSystem:
         # If type_or_name is a:
         # - a string name of an unknown type (maybe a complex where base type is unknown type factory)
 
+        # If we're here, this is a string type name that we don't know anything about, so go find it.
+        self._load_registered_type_sources(type_or_name)
+
+        # If we've loaded everything and we still can't find it then there's a configuration error somewhere
+        if not (self.is_known_type(type_or_name) or (is_complex and base_type in self.type_factories)):
+            raise ArgumentError("get_proxy_for_type called on unknown type", type=type_or_name, failed_external_sources=[x[0] for x in self.failed_sources])
+
+        return self.get_proxy_for_type(type_or_name)
+
+    def _load_registered_type_sources(self, type_name):
         base_type, is_complex, subtypes = self.split_type(type_name)
 
-        # If we're here, this is a type that we don't know anything about, so go find it.
         i = 0
         for i, (source, name) in enumerate(self._lazy_type_sources):
             if isinstance(source, str):
@@ -386,12 +395,6 @@ class TypeSystem:
                 break
 
         self._lazy_type_sources = self._lazy_type_sources[i:]
-
-        # If we've loaded everything and we still can't find it then there's a configuration error somewhere
-        if not (self.is_known_type(type_name) or (is_complex and base_type in self.type_factories)):
-            raise ArgumentError("get_type called on unknown type", type=type_name, failed_external_sources=[x[0] for x in self.failed_sources])
-
-        return self.get_proxy_for_type(type_name)
 
     def is_known_format(self, type, format):
         """
