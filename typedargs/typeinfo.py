@@ -230,23 +230,29 @@ class TypeSystem:
             return True
         return False
 
-    def split_type(self, typename):
+    def split_type(self, type_or_name):
         """
         Given a potentially complex type, split it into its base type and specializers
         """
+        if isinstance(type_or_name, str):
+            name = self._canonicalize_type(type_or_name)
+            if '(' not in name:
+                return name, False, []
 
-        name = self._canonicalize_type(typename)
-        if '(' not in name:
-            return name, False, []
+            base, sub = name.split('(')
+            if len(sub) == 0 or sub[-1] != ')':
+                raise ArgumentError("syntax error in complex type, no matching ) found", passed_type=type_or_name, basetype=base, subtype_string=sub)
 
-        base, sub = name.split('(')
-        if len(sub) == 0 or sub[-1] != ')':
-            raise ArgumentError("syntax error in complex type, no matching ) found", passed_type=typename, basetype=base, subtype_string=sub)
+            sub = sub[:-1]
 
-        sub = sub[:-1]
-
-        subs = sub.split(',')
-        return base, True, subs
+            subs = sub.split(',')
+            return base, True, subs
+        elif utils.is_class_from_typing(type_or_name):
+            base = getattr(typing, type_or_name.__name__)
+            subs = type_or_name.__args__ if type_or_name.__args__ else []
+            return base, bool(subs), subs
+        else:
+            raise ArgumentError('Cannot split the given type.', type_or_name=type_or_name)
 
     def instantiate_type(self, typename, base, subtypes):
         """Instantiate a complex type."""
