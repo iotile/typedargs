@@ -226,9 +226,8 @@ class TypeSystem:
         Returns:
             bool: True if the type is a known instantiated simple type, False otherwise
         """
-        if type_or_name in self.known_types or type_or_name in self.mapped_builtin_types:
+        if type_or_name in self.known_types or type_or_name in self.mapped_builtin_types or type_or_name in self._complex_type_proxies:
             return True
-
         return False
 
     def split_type(self, typename):
