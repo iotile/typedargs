@@ -1,5 +1,6 @@
 """Utility functions that are only used internally inside typedargs."""
 import inspect
+import typing
 
 from .exceptions import ValidationError
 from .metadata import AnnotatedMetadata
@@ -118,3 +119,10 @@ def find_all(container):
             built_context[name] = obj
 
     return built_context
+
+
+def is_class_from_typing(type_class):
+    """Check if the given type_class object is a class from typing module."""
+    if inspect.isclass(type_class) and inspect.getmodule(type_class) == typing:
+        return True
+    return False
