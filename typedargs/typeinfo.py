@@ -287,6 +287,26 @@ class TypeSystem:
 
         return False
 
+    def _get_known_type_factory(self, type_or_name):
+        if type_or_name in self.type_factories:
+            return self.type_factories[type_or_name]
+        if type_or_name in self.mapped_complex_types:
+            return self.mapped_complex_types[type_or_name]
+        raise ArgumentError('Type factory not found.', type_or_name=type_or_name)
+
+    def _get_proxy_for_known_type(self, type_or_name):
+        """
+        Returns:
+            type proxy object or None
+        """
+        if type_or_name in self.known_types:
+            return self.known_types[type_or_name]
+        if type_or_name in self.mapped_builtin_types:
+            return self.mapped_builtin_types[type_or_name]
+        if type_or_name in self._complex_type_proxies:
+            return self._complex_type_proxies[type_or_name]
+        raise ArgumentError('Proxy object not found.', type_or_name=type_or_name)
+
     def get_proxy_for_type(self, type_or_name):
         """Return the type object corresponding to a type name.
 
