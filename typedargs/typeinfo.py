@@ -215,6 +215,11 @@ class TypeSystem:
         if not hasattr(typeobj, "default_formatter"):
             raise ArgumentError("type is invalid, does not have default_formatter function", type=typeobj, methods=dir(typeobj))
 
+    def _is_known_type_factory(self, class_or_name):
+        if class_or_name in self.type_factories or class_or_name in self.mapped_complex_types:
+            return True
+        return False
+
     def is_known_type(self, type_or_name):
         """Check if type is known to the type system.
 
