@@ -38,6 +38,7 @@ class TypeSystem:
         self.known_types = {}
         self.type_factories = {}
         self.mapped_builtin_types = {}
+        self.mapped_complex_types = {}
         self.logger = logging.getLogger(__name__)
 
         for arg in args:
@@ -363,6 +364,11 @@ class TypeSystem:
             if name in self.type_factories:
                 raise ArgumentError("attempted to inject a complex type factory that is already defined", type=name)
             self.type_factories[name] = typeobj
+
+            mapped_complex_type = getattr(typeobj, 'MAPPED_COMPLEX_TYPE', None)
+            if mapped_complex_type:
+                self.mapped_complex_types[mapped_complex_type] = typeobj
+
         elif inspect.isclass(typeobj):
             self.known_types[name] = typeobj
         else:
