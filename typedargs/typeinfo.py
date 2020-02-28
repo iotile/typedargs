@@ -259,8 +259,8 @@ class TypeSystem:
             subs = sub.split(',')
             return base, True, subs
         elif utils.is_class_from_typing(type_or_name):
-            base = getattr(typing, type_or_name.__name__)
-            subs = type_or_name.__args__ if type_or_name.__args__ else []
+            base = getattr(typing, utils.get_typing_type_name(type_or_name))
+            subs = utils.get_typing_type_args(type_or_name)
             return base, bool(subs), subs
         else:
             raise ArgumentError('Cannot split the given type.', type_or_name=type_or_name)
