@@ -615,8 +615,11 @@
         <span class="c1"># If the validation fails, they will raise an exception that we convert to</span>
         <span class="c1"># an instance of ValidationError</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">checker_type</span> <span class="o">=</span> <span class="n">typeinfo</span><span class="o">.</span><span class="n">type_system</span><span class="o">.</span><span class="n">get_proxy_for_type</span><span class="p">(</span><span class="n">arg_type</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">checker_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># arg_type could be: string | builtin type | complex type from typing module | user defined type class</span>
+            <span class="c1"># Last one is not allowed to pass to type_system.get_proxy_for_type()</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg_type</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="n">typeinfo</span><span class="o">.</span><span class="n">type_system</span><span class="o">.</span><span class="n">is_known_type</span><span class="p">(</span><span class="n">arg_type</span><span class="p">)</span> <span class="ow">or</span> <span class="n">utils</span><span class="o">.</span><span class="n">is_class_from_typing</span><span class="p">(</span><span class="n">arg_type</span><span class="p">):</span>
+                <span class="n">checker_type</span> <span class="o">=</span> <span class="n">typeinfo</span><span class="o">.</span><span class="n">type_system</span><span class="o">.</span><span class="n">get_proxy_for_type</span><span class="p">(</span><span class="n">arg_type</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
                 <span class="n">checker_type</span> <span class="o">=</span> <span class="n">arg_type</span>
 
             <span class="k">for</span> <span class="n">validator_name</span><span class="p">,</span> <span class="n">extra_args</span> <span class="ow">in</span> <span class="n">validators</span><span class="p">:</span>
@@ -625,7 +628,7 @@
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">validator</span><span class="p">):</span>
                     <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="s2">&quot;Could not find validator specified for argument&quot;</span><span class="p">,</span>
                                           <span class="n">argument</span><span class="o">=</span><span class="n">arg_name</span><span class="p">,</span> <span class="n">validator_name</span><span class="o">=</span><span class="n">validator_name</span><span class="p">,</span> <span class="n">arg_type</span><span class="o">=</span><span class="n">arg_type</span><span class="p">,</span>
-                                          <span class="n">method</span><span class="o">=</span><span class="nb">dir</span><span class="p">(</span><span class="n">check_spec</span><span class="p">),</span> <span class="n">augmented_Type</span><span class="o">=</span><span class="n">checker_type</span><span class="p">)</span>
+                                          <span class="n">method</span><span class="o">=</span><span class="nb">dir</span><span class="p">(</span><span class="n">checker_type</span><span class="p">),</span> <span class="n">augmented_Type</span><span class="o">=</span><span class="n">checker_type</span><span class="p">)</span>
 
                 <span class="n">validator</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="o">*</span><span class="n">extra_args</span><span class="p">)</span>
         <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>

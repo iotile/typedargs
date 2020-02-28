@@ -209,6 +209,15 @@
 <tr class="row-odd"><td><a class="reference internal" href="#typedargs.utils.find_all" title="typedargs.utils.find_all"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_all</span></code></a></td>
 <td>Find all annotated function inside of a container.</td>
 </tr>
+<tr class="row-even"><td><a class="reference internal" href="#typedargs.utils.get_typing_type_args" title="typedargs.utils.get_typing_type_args"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_typing_type_args</span></code></a></td>
+<td>type_class must be type from typing module.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#typedargs.utils.get_typing_type_name" title="typedargs.utils.get_typing_type_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_typing_type_name</span></code></a></td>
+<td>type_class must be type from typing module.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#typedargs.utils.is_class_from_typing" title="typedargs.utils.is_class_from_typing"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_class_from_typing</span></code></a></td>
+<td>Check if the given type_class object is a class from typing module.</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -253,6 +262,26 @@
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="function">
+<dt id="typedargs.utils.is_class_from_typing">
+<code class="descclassname">typedargs.utils.</code><code class="descname">is_class_from_typing</code><span class="sig-paren">(</span><em>type_class</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/utils.html#is_class_from_typing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.utils.is_class_from_typing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if the given type_class object is a class from typing module.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="typedargs.utils.get_typing_type_name">
+<code class="descclassname">typedargs.utils.</code><code class="descname">get_typing_type_name</code><span class="sig-paren">(</span><em>type_class</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/utils.html#get_typing_type_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.utils.get_typing_type_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>type_class must be type from typing module.
+It is checked for supporting only List and Dict types.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="typedargs.utils.get_typing_type_args">
+<code class="descclassname">typedargs.utils.</code><code class="descname">get_typing_type_args</code><span class="sig-paren">(</span><em>type_class</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/utils.html#get_typing_type_args"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.utils.get_typing_type_args" title="Permalink to this definition">¶</a></dt>
+<dd><p>type_class must be type from typing module.
+It is checked for supporting only List and Dict types.</p>
 </dd></dl>
 
 </div>

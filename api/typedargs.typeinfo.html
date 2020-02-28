@@ -310,21 +310,27 @@ And format, if given, must specify a valid formatting option for the specified t
 
 <dl class="method">
 <dt id="typedargs.typeinfo.TypeSystem.split_type">
-<code class="descname">split_type</code><span class="sig-paren">(</span><em>typename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/typeinfo.html#TypeSystem.split_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.typeinfo.TypeSystem.split_type" title="Permalink to this definition">¶</a></dt>
+<code class="descname">split_type</code><span class="sig-paren">(</span><em>type_or_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/typeinfo.html#TypeSystem.split_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.typeinfo.TypeSystem.split_type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a potentially complex type, split it into its base type and specializers</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="typedargs.typeinfo.TypeSystem.instantiate_type">
-<code class="descname">instantiate_type</code><span class="sig-paren">(</span><em>typename</em>, <em>base</em>, <em>subtypes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/typeinfo.html#TypeSystem.instantiate_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.typeinfo.TypeSystem.instantiate_type" title="Permalink to this definition">¶</a></dt>
+<code class="descname">instantiate_type</code><span class="sig-paren">(</span><em>type_or_name</em>, <em>base</em>, <em>subtypes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/typeinfo.html#TypeSystem.instantiate_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.typeinfo.TypeSystem.instantiate_type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Instantiate a complex type.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="typedargs.typeinfo.TypeSystem.get_proxy_for_type">
 <code class="descname">get_proxy_for_type</code><span class="sig-paren">(</span><em>type_or_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/typeinfo.html#TypeSystem.get_proxy_for_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.typeinfo.TypeSystem.get_proxy_for_type" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the type object corresponding to a type name.</p>
-<p>If type_name is not found, this triggers the loading of
+<dd><p>Return the type object corresponding to a given type_or_name.</p>
+<p>type_or_name could be:
+- a simple builtin type like str, int, etc
+- a string name of a known type
+- a string name of an unknown complex type where base type is a known type factory
+- a complex type class from typing module: Dict[T, T] or List[T]
+- a string name of an unknown type (maybe a complex where base type is unknown type factory)</p>
+<p>If type_or_name is a string type name and it is not found in known types, this triggers the loading of
 external types until a matching type is found or until there
 are no more external type sources.</p>
 </dd></dl>
@@ -338,9 +344,10 @@ are no more external type sources.</p>
 
 <dl class="method">
 <dt id="typedargs.typeinfo.TypeSystem.inject_type">
-<code class="descname">inject_type</code><span class="sig-paren">(</span><em>name</em>, <em>typeobj</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/typeinfo.html#TypeSystem.inject_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.typeinfo.TypeSystem.inject_type" title="Permalink to this definition">¶</a></dt>
+<code class="descname">inject_type</code><span class="sig-paren">(</span><em>type_or_name</em>, <em>typeobj</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/typeinfo.html#TypeSystem.inject_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.typeinfo.TypeSystem.inject_type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a module-like object that defines a type, add it to our type system so that
 it can be used with the iotile tool and with other annotated API functions.</p>
+<p>type_or_name could be a string name or a type from typing module</p>
 </dd></dl>
 
 <dl class="method">

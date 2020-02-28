@@ -7,7 +7,7 @@ typedargs.utils module
 .. currentmodule:: typedargs.utils
 
 .. automodule:: typedargs.utils
-    :members: BasicContext, call_with_optional_arg, context_name, find_all
+    :members: BasicContext, call_with_optional_arg, context_name, find_all, get_typing_type_args, get_typing_type_name, is_class_from_typing
     :undoc-members:
     :show-inheritance:
     :member-order: bysource
@@ -30,6 +30,9 @@ typedargs.utils module
         call_with_optional_arg
         context_name
         find_all
+        get_typing_type_args
+        get_typing_type_name
+        is_class_from_typing
 
 
 
