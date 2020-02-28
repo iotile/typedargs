@@ -118,7 +118,7 @@ class TypeSystem:
         if isinstance(type_or_name, str) and isinstance(value, bytearray):
             return self.convert_from_binary(value, type_or_name, **kwargs)
 
-        if type_obj is not None:
+        if type_obj is not None and not utils.is_class_from_typing(type_obj):
             # When we have a proper modern type class that supports isinstance()
             # checks, we can just verify if we actually need to do anything
             if value is None or isinstance(value, type_obj):
