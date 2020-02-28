@@ -9,9 +9,7 @@
 import sys
 from binascii import unhexlify, hexlify
 
-
 MAPPED_BUILTIN_TYPE = bytes
-
 
 def convert(arg, **kwargs):
     if isinstance(arg, bytearray):

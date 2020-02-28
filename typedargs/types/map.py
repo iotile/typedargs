@@ -10,9 +10,12 @@
 
 # map.py
 # a complex type wrapping a python dictionary
+from typing import Dict
 
 
 class map:  # pylint: disable=C0103
+    MAPPED_COMPLEX_TYPE = Dict
+
     def __init__(self, keytype, valuetype, **kwargs):
 
         self.keytype = keytype

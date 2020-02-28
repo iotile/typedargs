@@ -9,8 +9,7 @@ from typedargs.exceptions import ValidationError, ArgumentError
 from typedargs.doc_annotate import parse_docstring
 from typedargs.doc_parser import ParsedDocstring
 from typedargs.basic_structures import ParameterInfo
-from typing import Any
-
+from typing import Any, List, Dict
 
 DOCSTRING1 = """Do something.
 
@@ -37,6 +36,7 @@ Args:
 Returns:
     map(string, int): A generic struct
 """
+
 
 def test_docannotate_basic():
     """Make sure we can docannotate a function."""
@@ -520,10 +520,10 @@ def test_custom_type_class():
     assert ret_value == DemoInteger(1)
 
     # check argument validation
-    with pytest.raises(ValidationError) as exc:
+    with pytest.raises(ValidationError) as exc_info:
         func('-1')
 
-    assert 'Object value is not positive.' in str(exc)
+    assert 'Object value is not positive.' in exc_info.value.msg
 
     # check formatting return value
     assert func.metadata.format_returnvalue(ret_value) == '0x1'
@@ -587,3 +587,53 @@ def test_docstring_validators_validation():
     # check "range" validator
     with pytest.raises(ValidationError):
         func('10')
+
+
+def test_type_annotations_type_mapping():
+    """Make sure we map simple builtin types to our internal type classes.
+
+    If we have a builtin type in a function type annotations then
+    we should use mapped internal type class.
+    It should work for builtin types: str, int, float, bytes, bool, dict
+    """
+
+    @docannotate
+    def func(arg1: str, arg2: int, arg3: float, arg4: bytes, arg5: bool, arg6: dict):
+        pass
+
+    # trigger type info parsing
+    _ = func.metadata.returns_data()
+
+    for arg_info in func.metadata.annotated_params.values():
+        internal_type_class = type_system.get_proxy_for_type(arg_info.type_class)
+        assert internal_type_class is not None
+
+
+def test_annotations_complex_types():
+    """Make sure @docannotate supports complex types in a function type annotations."""
+
+    @docannotate
+    def func_list(arg: List[int]) -> List[int]:
+        return arg
+
+    @docannotate
+    def func_dict(arg: Dict[str, int]) -> Dict[str, int]:
+        return arg
+
+    # trigger type info parsing
+    _ = func_list.metadata.returns_data()
+    _ = func_dict.metadata.returns_data()
+
+    # check if original function behaviour is not broken, we can pass an argument of expected type
+    assert [1, 2, 3] == func_list([1, 2, 3])
+    assert {"foo": 1} == func_dict({"foo": 1})
+
+    # check conversion from string
+    assert [1, 2, 3] == func_list("[1, 2, 3]")
+    # assert {"foo": 1} == func_dict('{"foo": 1}')  # not supported yet by typedargs/types/map.py:map
+
+    # check default formatting
+    assert '1\n2\n3' == func_list.metadata.format_returnvalue([1, 2, 3])
+    assert "foo: 1" == func_dict.metadata.format_returnvalue({"foo": 1})
+
+

@@ -8,3 +8,4 @@
 
 
 from . import extra_type as new_pkg_type
+from . import new_type
