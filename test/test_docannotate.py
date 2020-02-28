@@ -9,8 +9,7 @@ from typedargs.exceptions import ValidationError, ArgumentError
 from typedargs.doc_annotate import parse_docstring
 from typedargs.doc_parser import ParsedDocstring
 from typedargs.basic_structures import ParameterInfo
-from typing import Any
-
+from typing import Any, List, Dict
 
 DOCSTRING1 = """Do something.
 
@@ -567,3 +566,33 @@ def test_type_annotations_type_mapping():
     for arg_info in func.metadata.annotated_params.values():
         internal_type_class = type_system.get_proxy_for_type(arg_info.type_class)
         assert internal_type_class is not None
+
+
+def test_annotations_complex_types():
+    """Make sure @docannotate supports complex types in a function type annotations."""
+
+    @docannotate
+    def func_list(arg: List[int]) -> List[int]:
+        return arg
+
+    @docannotate
+    def func_dict(arg: Dict[str, int]) -> Dict[str, int]:
+        return arg
+
+    # trigger type info parsing
+    _ = func_list.metadata.returns_data()
+    _ = func_dict.metadata.returns_data()
+
+    # check if original function behaviour is not broken, we can pass an argument of expected type
+    assert [1, 2, 3] == func_list([1, 2, 3])
+    assert {"foo": 1} == func_dict({"foo": 1})
+
+    # check conversion from string
+    assert [1, 2, 3] == func_list("[1, 2, 3]")
+    # assert {"foo": 1} == func_dict('{"foo": 1}')  # not supported yet by typedargs/types/map.py:map
+
+    # check default formatting
+    assert '1\n2\n3' == func_list.metadata.format_returnvalue([1, 2, 3])
+    assert "foo: 1" == func_dict.metadata.format_returnvalue({"foo": 1})
+
+

@@ -16,10 +16,11 @@ import inspect
 import os.path
 import importlib
 import logging
-
 import sys
+import typing
+
 from typedargs.exceptions import ValidationError, ArgumentError, KeyValueException
-from typedargs import types
+from typedargs import types, utils
 
 
 class TypeSystem:
@@ -37,7 +38,9 @@ class TypeSystem:
         self.interactive = False
         self.known_types = {}
         self.type_factories = {}
-        self.mapped_builtin_types = {}
+        self._mapped_builtin_types = {}
+        self._mapped_complex_types = {}
+        self._complex_type_proxies = {}
         self.logger = logging.getLogger(__name__)
 
         for arg in args:
@@ -74,6 +77,31 @@ class TypeSystem:
 
         self._lazy_type_sources.append((source, name))
 
+    def _get_type_and_proxy(self, type_or_name):
+        """
+        Normally, we expect that the type objects contain a certain set of methods
+        to support validation, conversion and formatting.  However, for certain
+        internal types like int, dict, etc, typing.List[t], typing.Dict[t, t] we provide a separate augmentation
+        class that contains the converters.
+        """
+        if isinstance(type_or_name, str):
+            type_obj = None
+            proxy_obj = self.get_proxy_for_type(type_or_name)
+        elif utils.is_class_from_typing(type_or_name):
+            type_obj = type_or_name
+            proxy_obj = self.get_proxy_for_type(type_obj)
+        elif inspect.isclass(type_or_name):
+            type_obj = type_or_name
+
+            if self.is_known_type(type_or_name):
+                proxy_obj = self.get_proxy_for_type(type_or_name)
+            else:
+                proxy_obj = None
+        else:
+            raise ValidationError("Unknown object passed to convert_to_type", type_or_name=type_or_name)
+
+        return type_obj, proxy_obj
+
     def convert_to_type(self, value, type_or_name, **kwargs):
         """
         Convert value to type 'type_or_name'
@@ -82,22 +110,7 @@ class TypeSystem:
         modify the conversion process, \\**kwargs is passed
         through to the underlying conversion function
         """
-
-        # TODO: this can all be refactored into a routine `self.get_type_and_proxy(type_or_name)`
-        if isinstance(type_or_name, str):
-            type_obj = None
-            proxy_obj = self.get_proxy_for_type(type_or_name)
-        elif inspect.isclass(type_or_name):
-            type_obj = type_or_name
-
-            # Normally, we expect that the type objects contain a certain set of methods
-            # to support validation, conversion and formatting.  However, for certain
-            # internal types like int, dict, etc, we provide a separate augmentation
-            # class that contains the converters.
-
-            proxy_obj = self.mapped_builtin_types.get(type_obj)
-        else:
-            raise ValidationError("Unknown object passed to convert_to_type", type_or_name=type_or_name)
+        type_obj, proxy_obj = self._get_type_and_proxy(type_or_name)
 
         # Legacy types supported conversion from binary
         # so make sure that remains functional.  This behavior is deprecated so
@@ -105,7 +118,7 @@ class TypeSystem:
         if isinstance(type_or_name, str) and isinstance(value, bytearray):
             return self.convert_from_binary(value, type_or_name, **kwargs)
 
-        if type_obj is not None:
+        if type_obj is not None and not utils.is_class_from_typing(type_obj):
             # When we have a proper modern type class that supports isinstance()
             # checks, we can just verify if we actually need to do anything
             if value is None or isinstance(value, type_obj):
@@ -117,7 +130,7 @@ class TypeSystem:
                 raise ValidationError("Value was not the right type and was not a string",
                                       expected_type=type_obj, value=value)
 
-            return _try_convert_from_string(value, type_obj, proxy_obj)
+            return self._try_convert_from_string(value, type_obj, proxy_obj)
 
         # This is the legacy case, we have no type object, so we rely on the
         # legacy behavior that the proxy object has a `convert` function that
@@ -173,7 +186,7 @@ class TypeSystem:
 
         typed_val = self.convert_to_type(value, type_or_name, **kwargs)
 
-        if isinstance(type_or_name, str) or self.is_known_type(type_or_name):
+        if isinstance(type_or_name, str) or self.is_known_type(type_or_name) or utils.is_class_from_typing(type_or_name):
             typeobj = self.get_proxy_for_type(type_or_name)
         else:
             typeobj = type_or_name
@@ -213,52 +226,65 @@ class TypeSystem:
         if not hasattr(typeobj, "default_formatter"):
             raise ArgumentError("type is invalid, does not have default_formatter function", type=typeobj, methods=dir(typeobj))
 
+    def _is_known_type_factory(self, class_or_name):
+        if class_or_name in self.type_factories or class_or_name in self._mapped_complex_types:
+            return True
+        return False
+
     def is_known_type(self, type_or_name):
         """Check if type is known to the type system.
 
         Returns:
             bool: True if the type is a known instantiated simple type, False otherwise
         """
-        if type_or_name in self.known_types or type_or_name in self.mapped_builtin_types:
+        if type_or_name in self.known_types or type_or_name in self._mapped_builtin_types or type_or_name in self._complex_type_proxies:
             return True
-
         return False
 
-    def split_type(self, typename):
+    def split_type(self, type_or_name):
         """
         Given a potentially complex type, split it into its base type and specializers
         """
+        if isinstance(type_or_name, str):
+            name = self._canonicalize_type(type_or_name)
+            if '(' not in name:
+                return name, False, []
 
-        name = self._canonicalize_type(typename)
-        if '(' not in name:
-            return name, False, []
+            base, sub = name.split('(')
+            if len(sub) == 0 or sub[-1] != ')':
+                raise ArgumentError("syntax error in complex type, no matching ) found", passed_type=type_or_name, basetype=base, subtype_string=sub)
 
-        base, sub = name.split('(')
-        if len(sub) == 0 or sub[-1] != ')':
-            raise ArgumentError("syntax error in complex type, no matching ) found", passed_type=typename, basetype=base, subtype_string=sub)
+            sub = sub[:-1]
 
-        sub = sub[:-1]
+            subs = sub.split(',')
+            return base, True, subs
+        elif utils.is_class_from_typing(type_or_name):
+            base = getattr(typing, utils.get_typing_type_name(type_or_name))
+            subs = utils.get_typing_type_args(type_or_name)
+            return base, bool(subs), subs
+        else:
+            raise ArgumentError('Cannot split the given type.', type_or_name=type_or_name)
 
-        subs = sub.split(',')
-        return base, True, subs
-
-    def instantiate_type(self, typename, base, subtypes):
+    def instantiate_type(self, type_or_name, base, subtypes):
         """Instantiate a complex type."""
 
-        if base not in self.type_factories:
-            raise ArgumentError("unknown complex base type specified", passed_type=typename, base_type=base)
+        if isinstance(type_or_name, str):
+            type_or_name = self._canonicalize_type(type_or_name)
 
-        base_type = self.type_factories[base]
+        if not self._is_known_type_factory(base):
+            raise ArgumentError("unknown complex base type specified", passed_type=type_or_name, base_type=base)
 
-        #Make sure all of the subtypes are valid
+        base_type = self._get_known_type_factory(base)
+
+        # Make sure all of the subtypes are valid
         for sub_type in subtypes:
             try:
                 self.get_proxy_for_type(sub_type)
             except KeyValueException as exc:
-                raise ArgumentError("could not instantiate subtype for complex type", passed_type=typename, sub_type=sub_type, error=exc)
+                raise ArgumentError("could not instantiate subtype for complex type", passed_type=type_or_name, sub_type=sub_type, error=exc)
 
         typeobj = base_type.Build(*subtypes, type_system=self)
-        self.inject_type(typename, typeobj)
+        self.inject_type(type_or_name, typeobj)
 
     @classmethod
     def _canonicalize_type(cls, typename):
@@ -275,30 +301,74 @@ class TypeSystem:
 
         return False
 
-    def get_proxy_for_type(self, type_or_name):
-        """Return the type object corresponding to a type name.
+    def _get_known_type_factory(self, type_or_name):
+        if type_or_name in self.type_factories:
+            return self.type_factories[type_or_name]
+        if type_or_name in self._mapped_complex_types:
+            return self._mapped_complex_types[type_or_name]
+        raise ArgumentError('Type factory not found.', type_or_name=type_or_name)
 
-        If type_name is not found, this triggers the loading of
+    def _get_proxy_for_known_type(self, type_or_name):
+        """
+        Returns:
+            type proxy object or None
+        """
+        if type_or_name in self.known_types:
+            return self.known_types[type_or_name]
+        if type_or_name in self._mapped_builtin_types:
+            return self._mapped_builtin_types[type_or_name]
+        if type_or_name in self._complex_type_proxies:
+            return self._complex_type_proxies[type_or_name]
+        raise ArgumentError('Proxy object not found.', type_or_name=type_or_name)
+
+    def get_proxy_for_type(self, type_or_name):
+        """Return the type object corresponding to a given type_or_name.
+
+        type_or_name could be:
+        - a simple builtin type like str, int, etc
+        - a string name of a known type
+        - a string name of an unknown complex type where base type is a known type factory
+        - a complex type class from typing module: Dict[T, T] or List[T]
+        - a string name of an unknown type (maybe a complex where base type is unknown type factory)
+
+        If type_or_name is a string type name and it is not found in known types, this triggers the loading of
         external types until a matching type is found or until there
         are no more external type sources.
         """
-        if type_or_name in self.mapped_builtin_types:
-            return self.mapped_builtin_types[type_or_name]
+        if isinstance(type_or_name, str):
+            type_or_name = self._canonicalize_type(type_or_name)
 
-        if not isinstance(type_or_name, str):
-            return type_or_name
+        # If type_or_name is a:
+        # - a simple builtin type like str, int, etc
+        # - a string name of a known type
+        if self.is_known_type(type_or_name):
+            return self._get_proxy_for_known_type(type_or_name)
 
-        type_name = self._canonicalize_type(type_or_name)
+        # here type_or_name could be a string name or a complex type class from typing module
+        base_type, is_complex, subtypes = self.split_type(type_or_name)
 
-        if self.is_known_type(type_name):
-            return self.known_types[type_name]
+        # If type_or_name is a:
+        # - a string name of an unknown complex type where base type is a known type factory
+        # - a complex type class from typing module: Dict[T, T] or List[T]
+        if is_complex and self._is_known_type_factory(base_type):
+            self.instantiate_type(type_or_name, base_type, subtypes)
+            return self.get_proxy_for_type(type_or_name)
 
+        # If type_or_name is a:
+        # - a string name of an unknown type (maybe a complex where base type is unknown type factory)
+
+        # If we're here, this is a string type name that we don't know anything about, so go find it.
+        self._load_registered_type_sources(type_or_name)
+
+        # If we've loaded everything and we still can't find it then there's a configuration error somewhere
+        if not (self.is_known_type(type_or_name) or (is_complex and base_type in self.type_factories)):
+            raise ArgumentError("get_proxy_for_type called on unknown type", type=type_or_name, failed_external_sources=[x[0] for x in self.failed_sources])
+
+        return self.get_proxy_for_type(type_or_name)
+
+    def _load_registered_type_sources(self, type_name):
         base_type, is_complex, subtypes = self.split_type(type_name)
-        if is_complex and base_type in self.type_factories:
-            self.instantiate_type(type_name, base_type, subtypes)
-            return self.known_types[type_name]
 
-        # If we're here, this is a type that we don't know anything about, so go find it.
         i = 0
         for i, (source, name) in enumerate(self._lazy_type_sources):
             if isinstance(source, str):
@@ -326,12 +396,6 @@ class TypeSystem:
 
         self._lazy_type_sources = self._lazy_type_sources[i:]
 
-        # If we've loaded everything and we still can't find it then there's a configuration error somewhere
-        if not (self.is_known_type(type_name) or (is_complex and base_type in self.type_factories)):
-            raise ArgumentError("get_type called on unknown type", type=type_name, failed_external_sources=[x[0] for x in self.failed_sources])
-
-        return self.get_proxy_for_type(type_name)
-
     def is_known_format(self, type, format):
         """
         Check if format is known for given type.
@@ -347,13 +411,21 @@ class TypeSystem:
 
         return True
 
-    def inject_type(self, name, typeobj):
+    def inject_type(self, type_or_name, typeobj):
         """
         Given a module-like object that defines a type, add it to our type system so that
         it can be used with the iotile tool and with other annotated API functions.
-        """
 
-        name = self._canonicalize_type(name)
+        type_or_name could be a string name or a type from typing module
+        """
+        # if type_or_name is a type from typing module
+        if not isinstance(type_or_name, str):
+            if type_or_name in self._complex_type_proxies:
+                raise ArgumentError("attempting to inject a type that is already defined", type=type_or_name)
+            self._complex_type_proxies[type_or_name] = typeobj
+            return
+
+        name = self._canonicalize_type(type_or_name)
         _, is_complex, _ = self.split_type(name)
 
         if self.is_known_type(name):
@@ -363,6 +435,11 @@ class TypeSystem:
             if name in self.type_factories:
                 raise ArgumentError("attempted to inject a complex type factory that is already defined", type=name)
             self.type_factories[name] = typeobj
+
+            mapped_complex_type = getattr(typeobj, 'MAPPED_COMPLEX_TYPE', None)
+            if mapped_complex_type:
+                self._mapped_complex_types[mapped_complex_type] = typeobj
+
         elif inspect.isclass(typeobj):
             self.known_types[name] = typeobj
         else:
@@ -370,7 +447,7 @@ class TypeSystem:
 
             actual_type = getattr(typeobj, 'MAPPED_BUILTIN_TYPE', None)
             if actual_type is not None:
-                self.mapped_builtin_types[actual_type] = typeobj
+                self._mapped_builtin_types[actual_type] = typeobj
 
             for alias in getattr(typeobj, 'MAPPED_TYPE_NAMES', []):
                 self.known_types[alias] = typeobj
@@ -411,6 +488,40 @@ class TypeSystem:
 
         self.load_type_module(mod)
 
+    def _try_convert_from_string(self, value: str, type_obj, proxy_obj):
+        """Attempt to convert a string value to a given type.
+
+        Returns:
+            instance of type_obj
+        """
+
+        # If there is a proxy object that should be used instead of the actual type
+        # then use that.  Otherwise, we expect the type itself to have a FromString
+        # method.
+        converting_obj = proxy_obj
+        if converting_obj is None:
+            converting_obj = type_obj
+
+        if inspect.isclass(converting_obj) and type_obj not in self._complex_type_proxies:
+            return converting_obj.FromString(value)
+
+        if not hasattr(converting_obj, 'convert'):
+            raise ValidationError("Type did not have a convert function for string conversion",
+                                  type_obj=type_obj, augmented_type=proxy_obj)
+
+        try:
+            converted_value = converting_obj.convert(value)
+        except (ValueError, TypeError) as err:
+            raise ValidationError("Error converting value from string", message=str(err),
+                                  value=value)
+
+        if type_obj is not None and not isinstance(converted_value, type_obj):
+            raise ValidationError("Conversion from string did not produce the expected type",
+                                  string_value=value, converted_value=repr(converted_value),
+                                  expected_type=repr(type_obj))
+
+        return converted_value
+
 
 def iprint(stringable):
     """
@@ -428,36 +539,3 @@ def iprint(stringable):
 type_system = TypeSystem(types)  # pylint: disable=invalid-name
 
 
-def _try_convert_from_string(value: str, type_obj, proxy_obj):
-    """Attempt to convert a string value to a given type.
-
-    Returns:
-        instance of type_obj
-    """
-
-    # If there is a proxy object that should be used instead of the actual type
-    # then use that.  Otherwise, we expect the type itself to have a FromString
-    # method.
-    converting_obj = proxy_obj
-    if converting_obj is None:
-        converting_obj = type_obj
-
-    if inspect.isclass(converting_obj):
-        return converting_obj.FromString(value)
-
-    if not hasattr(converting_obj, 'convert'):
-        raise ValidationError("Type did not have a convert function for string conversion",
-                              type_obj=type_obj, augmented_type=proxy_obj)
-
-    try:
-        converted_value = converting_obj.convert(value)
-    except (ValueError, TypeError) as err:
-        raise ValidationError("Error converting value from string", message=str(err),
-                              value=value)
-
-    if type_obj is not None and not isinstance(converted_value, type_obj):
-        raise ValidationError("Conversion from string did not produce the expected type",
-                              string_value=value, converted_value=repr(converted_value),
-                              expected_type=repr(type_obj))
-
-    return converted_value

@@ -1,5 +1,7 @@
 """Utility functions that are only used internally inside typedargs."""
 import inspect
+import sys
+import typing
 
 from .exceptions import ValidationError
 from .metadata import AnnotatedMetadata
@@ -118,3 +120,35 @@ def find_all(container):
             built_context[name] = obj
 
     return built_context
+
+
+def is_class_from_typing(type_class):
+    """Check if the given type_class object is a class from typing module."""
+    if inspect.getmodule(type_class) == typing:
+        return True
+
+    return False
+
+
+def get_typing_type_name(type_class):
+    """
+    type_class must be type from typing module.
+    It is checked for supporting only List and Dict types.
+    """
+    if sys.version_info.minor < 7:
+        return type_class.__name__
+
+    return type_class._name
+
+
+def get_typing_type_args(type_class):
+    """
+    type_class must be type from typing module.
+    It is checked for supporting only List and Dict types.
+    """
+    if sys.version_info.minor < 7:
+        args = type_class.__args__ if type_class.__args__ else ()
+    else:
+        args = [arg for arg in type_class.__args__ if not isinstance(arg, typing.TypeVar)]
+
+    return tuple(args)
