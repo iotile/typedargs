@@ -330,11 +330,15 @@ class TypeSystem:
         - a string name of an unknown complex type where base type is a known type factory
         - a complex type class from typing module: Dict[T, T] or List[T]
         - a string name of an unknown type (maybe a complex where base type is unknown type factory)
+        If type_or_name does not fit these criteria then None would be returned.
 
         If type_or_name is a string type name and it is not found in known types, this triggers the loading of
         external types until a matching type is found or until there
         are no more external type sources.
         """
+        if not isinstance(type_or_name, str) and not self.is_known_type(type_or_name) and not utils.is_class_from_typing(type_or_name):
+            return None
+
         if isinstance(type_or_name, str):
             type_or_name = self._canonicalize_type(type_or_name)
 
@@ -537,5 +541,3 @@ def iprint(stringable):
 #information
 
 type_system = TypeSystem(types)  # pylint: disable=invalid-name
-
-
