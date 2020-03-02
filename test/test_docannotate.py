@@ -223,7 +223,7 @@ def test_return_value_formatter():
     ret_value_1 = func_1()
     ret_value_2 = func_2()
     ret_value_noformatter = func_noformatter()
-    # import pdb; pdb.set_trace()
+
     assert func_1.metadata.format_returnvalue(ret_value_1) == 'foo bar'
     assert func_2.metadata.format_returnvalue(ret_value_2) == 'foo bar'
     with pytest.raises(ValidationError):
@@ -252,45 +252,26 @@ def test_return_value_formatter_string():
     assert func_string.metadata.format_returnvalue(ret_value) == 'foo\nbar'
 
 
-# todo: split the test
 def test_recursive_parsing_formatters():
-    """Make sure we can parse recursive return value formatters"""
+    """Make sure we can parse recursive return value formatters."""
 
     class User:
         def __init__(self, short_name):
             self.short_name = short_name
 
-        def format_short_name(self):
-            return self.short_name
-
-    class Option:
-        def __init__(self, value):
-            self.value = value
-
-        def __str__(self):
-            return '<{}>'.format(str(self.value))
+        @classmethod
+        def format_short_name(cls, obj):
+            return obj.short_name
 
     @docannotate
-    def func1():
+    def func() -> Dict[User, int]:
         """
         Returns:
-            Dict[User, Option] show-as one_line[short_name, string]: value description
-        """
-        return {User('john'): Option('1'), User('bob'): Option('2')}
-
-    @docannotate
-    def func2():
-        """
-        Returns:
-            Dict[str, int] show-as one_line[repr, hex]: value description
+            dict show-as one_line[short_name, hex]: value description
         """
         return {User('john'): 15, User('bob'): 100}
 
-    ret_value1 = func1()
-    ret_value2 = func2()
-
-    assert func1.metadata.format_returnvalue(ret_value1) == 'john: <1>; bob: <2>;'
-    assert func2.metadata.format_returnvalue(ret_value2) == 'john: 0xF; bob: 0x64;'
+    assert func.metadata.format_returnvalue(func()) == 'bob: 0x64; john: 0xF;'
 
 
 def test_func_type_annotation(caplog):
