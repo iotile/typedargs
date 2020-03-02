@@ -176,7 +176,7 @@ class TypeSystem:
 
         return 0
 
-    def format_value(self, value, type_or_name, format=None, **kwargs):
+    def format_value(self, value, type_or_name, formatter=None, sub_formatters=None, **kwargs):
         """
         Convert value to type specified by type_or_name and format it as a string.
 
@@ -192,20 +192,21 @@ class TypeSystem:
 
         # Allow types to specify default formatting functions as 'default_formatter'
         # otherwise if no format is specified, just convert the value to a string
-        if format in (None, 'default', 'str', 'string'):
+        if formatter in (None, 'default', 'str', 'string'):
             if hasattr(typeobj, 'default_formatter'):
                 format_func = getattr(typeobj, 'default_formatter')
                 return format_func(typed_val, **kwargs)
 
             return str(typed_val)
 
-        formatter = "format_%s" % str(format)
-        format_func = getattr(typeobj, formatter, None)
+        format_func = "format_%s" % str(formatter)
+        format_func = getattr(typeobj, format_func, None)
 
         if not callable(format_func):
-            raise ArgumentError("Unknown format for type", type=type_or_name, format=format, formatter_function=formatter)
+            raise ArgumentError("Unknown format for type", type=type_or_name, formatter=formatter, formatter_function=format_func)
 
-        return format_func(typed_val, **kwargs)
+        sub_formatters = sub_formatters if sub_formatters else []
+        return format_func(typed_val, *sub_formatters, **kwargs)
 
     @classmethod
     def _validate_type(cls, typeobj):
