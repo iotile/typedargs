@@ -9,6 +9,7 @@
 - Support type classes in type annotations for converting argument from string 
   and formatting return value  
 - Support specifying validators in docstrings (Issue #65)
+- Support specifying complex return value formatters in docstrings (Issue #61)
 
 
 ## 1.0.2
