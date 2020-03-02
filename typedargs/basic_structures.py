@@ -1,5 +1,5 @@
 """Basic structures used to describe parameters and return values."""
-from typing import Optional, Union
+from typing import Optional
 
 
 class ParameterInfo:
