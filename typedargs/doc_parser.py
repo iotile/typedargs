@@ -407,7 +407,7 @@ def _parse_return_value_formatter(formatter: str) -> Tuple[str, List[str]]:
     """
     base, _br, subs = [item.strip() for item in formatter.partition('[')]
     if _br:
-        if ']' not in subs:
+        if not subs.endswith(']'):
             raise ValidationError('Malformed formatter notation.', formatter=formatter)
 
         subs = subs[:-1]
