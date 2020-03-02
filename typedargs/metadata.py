@@ -465,11 +465,9 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
         # If the validation fails, they will raise an exception that we convert to
         # an instance of ValidationError
         try:
-            # arg_type could be: string | builtin type | complex type from typing module | user defined type class
-            # Last one is not allowed to pass to type_system.get_proxy_for_type()
-            if isinstance(arg_type, str) or typeinfo.type_system.is_known_type(arg_type) or utils.is_class_from_typing(arg_type):
-                checker_type = typeinfo.type_system.get_proxy_for_type(arg_type)
-            else:
+            # arg_type here could be: string | builtin type | complex type from typing module | user defined type class
+            checker_type = typeinfo.type_system.get_proxy_for_type(arg_type)
+            if checker_type is None:
                 checker_type = arg_type
 
             for validator_name, extra_args in validators:

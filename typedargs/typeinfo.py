@@ -186,9 +186,8 @@ class TypeSystem:
 
         typed_val = self.convert_to_type(value, type_or_name, **kwargs)
 
-        if isinstance(type_or_name, str) or self.is_known_type(type_or_name) or utils.is_class_from_typing(type_or_name):
-            typeobj = self.get_proxy_for_type(type_or_name)
-        else:
+        typeobj = self.get_proxy_for_type(type_or_name)
+        if typeobj is None:
             typeobj = type_or_name
 
         # Allow types to specify default formatting functions as 'default_formatter'
