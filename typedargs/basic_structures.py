@@ -1,5 +1,5 @@
 """Basic structures used to describe parameters and return values."""
-from typing import Optional
+from typing import Optional, Union
 
 
 class ParameterInfo:
@@ -41,7 +41,7 @@ class ReturnInfo:
         is_data: True if annotated function returns any data
         desc: parameter description
     """
-    def __init__(self, type_class: Optional[type], type_name: Optional[str], formatter: Optional[str], is_data: Optional[bool], desc: Optional[str]):
+    def __init__(self, type_class: Optional[type], type_name: Optional[str], formatter: Optional[tuple], is_data: Optional[bool], desc: Optional[str]):
 
         self.type_class = type_class
         self.type_name = type_name
