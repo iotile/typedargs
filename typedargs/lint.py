@@ -19,7 +19,6 @@ import astroid.scoped_nodes
 import astroid.node_classes
 from pylint.checkers import BaseChecker
 from pylint.interfaces import IAstroidChecker
-from .metadata import ParameterInfo, ReturnInfo
 
 
 AnnotationList = namedtuple("AnnotationList", ['params', 'returns', 'use_doc'])
