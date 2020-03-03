@@ -44,3 +44,22 @@ class map:  # pylint: disable=C0103
             forms.append("%s: %s" % (keyform, valform))
 
         return "\n".join(forms)
+
+    def format_one_line(self, value: dict, key_formatter: str = None, val_formatter: str = None, **kwargs) -> str:
+        """Get string representation for the passed dict object.
+
+        Args:
+            value: dict object to translate to string.
+            key_formatter: formatter for dict keys
+            val_formatter: formatter for dict values
+
+        Returns:
+            string representation of arg
+        """
+
+        str_items = []
+        for key, val in value.items():
+            keyform = self.type_system.format_value(key, self.keytype, key_formatter)
+            valform = self.type_system.format_value(val, self.valuetype, val_formatter)
+            str_items.append("{}: {};".format(keyform, valform))
+        return ' '.join(sorted(str_items))

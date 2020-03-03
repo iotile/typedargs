@@ -188,11 +188,14 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
             formatter (str): An optional name of a formatting function specified
                 for the type given in type_name.
         """
+        if formatter is not None:
+            formatter = (formatter, [])
+
         self.return_info = ReturnInfo(None, type_name, formatter, True, None)
 
     def string_returnvalue(self):
         """Mark the return value as data that should be converted with str."""
-        self.return_info = ReturnInfo(None, None, str, True, None)
+        self.return_info = ReturnInfo(None, None, (str, []), True, None)
 
     def custom_returnvalue(self, printer, desc=None):
         """Use a custom function to print the return value.
@@ -202,7 +205,7 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
                 value and convert it to a string.
             desc (str): An optional description of the return value.
         """
-        self.return_info = ReturnInfo(None, None, printer, True, desc)
+        self.return_info = ReturnInfo(None, None, (printer, []), True, desc)
 
     def has_varargs(self):
         """Check if this function supports variable arguments."""
@@ -331,21 +334,23 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
         validation_err = ValidationError('Cannot convert return value to string', value=value)
 
         # If the return value is typed, use the type_system to format it
-        if self.return_info.type_class:
+        if self.return_info.type_class is not None:
             value_type = self.return_info.type_class
         else:
             value_type = self.return_info.type_name
 
+        formatter, sub_formatters = self.return_info.formatter if self.return_info.formatter else (None, [])
+
         if value_type is not None:
-            return typeinfo.type_system.format_value(value, value_type, self.return_info.formatter)
+            return typeinfo.type_system.format_value(value, value_type, formatter, sub_formatters)
 
         # Otherwise convert this value to a string with formatter function
-        if self.return_info.formatter in (None, 'default', 'str', 'string'):
+        if formatter in (None, 'default', 'str', 'string'):
             formatter = str
-        elif callable(self.return_info.formatter):
-            formatter = self.return_info.formatter
-        elif isinstance(self.return_info.formatter, str):
-            formatter_name = 'format_{}'.format(self.return_info.formatter)
+        elif callable(formatter):
+            formatter = formatter
+        elif isinstance(formatter, str):
+            formatter_name = 'format_{}'.format(formatter)
             if hasattr(value, formatter_name) and callable(getattr(value, formatter_name)):
                 formatter = getattr(value, formatter_name)
             else:
@@ -356,7 +361,7 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
         if formatter is str:
             return str(value)
 
-        return utils.call_with_optional_arg(formatter, value)
+        return utils.call_with_optional_arg(formatter, value, *sub_formatters)
 
     def convert_positional_argument(self, index, arg_value):
         """Convert and validate a positional argument.
@@ -465,11 +470,9 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
         # If the validation fails, they will raise an exception that we convert to
         # an instance of ValidationError
         try:
-            # arg_type could be: string | builtin type | complex type from typing module | user defined type class
-            # Last one is not allowed to pass to type_system.get_proxy_for_type()
-            if isinstance(arg_type, str) or typeinfo.type_system.is_known_type(arg_type) or utils.is_class_from_typing(arg_type):
-                checker_type = typeinfo.type_system.get_proxy_for_type(arg_type)
-            else:
+            # arg_type here could be: string | builtin type | complex type from typing module | user defined type class
+            checker_type = typeinfo.type_system.get_proxy_for_type(arg_type)
+            if checker_type is None:
                 checker_type = arg_type
 
             for validator_name, extra_args in validators:

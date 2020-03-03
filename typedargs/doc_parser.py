@@ -401,6 +401,22 @@ def _parse_param_validators(param_desc: str) -> List[Tuple[str, list]]:
     return result_list
 
 
+def _parse_return_value_formatter(formatter: str) -> Tuple[str, List[str]]:
+    """
+    formatter examples: hex, string, one_line[string, str]
+    """
+    base, _br, subs = [item.strip() for item in formatter.partition('[')]
+    if _br:
+        if not subs.endswith(']'):
+            raise ValidationError('Malformed formatter notation.', formatter=formatter)
+
+        subs = subs[:-1]
+        subs = [s.strip() for s in subs.split(',') if s.strip()]
+        return base, subs
+
+    return base, []
+
+
 def parse_param(param, include_desc=False, validate_type=True):
     """Parse a single typed parameter statement."""
 
@@ -454,9 +470,9 @@ def parse_return(return_line, include_desc=False, validate_type=True):
 
     if ret_def and 'show-as' in ret_def:
         ret_type, _showas, show_type = ret_def.partition('show-as')
-        show_type = show_type.strip()
+        show_type = _parse_return_value_formatter(show_type)
 
-        if show_type == 'context':
+        if show_type[0] == 'context':
             return ReturnInfo(None, None, None, False, desc)
 
         return ReturnInfo(None, None, show_type, True, desc)
@@ -464,7 +480,7 @@ def parse_return(return_line, include_desc=False, validate_type=True):
     if ret_def and 'format-as' in ret_def:
         ret_type, _showas, formatter = ret_def.partition('format-as')
         ret_type = ret_type.strip()
-        formatter = formatter.strip()
+        formatter = _parse_return_value_formatter(formatter)
 
         return ReturnInfo(None, ret_type, formatter, True, desc)
 

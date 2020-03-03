@@ -61,11 +61,11 @@ def _parse_validators(valids):
     return outvals
 
 
-def call_with_optional_arg(func, arg):
+def call_with_optional_arg(func, *args):
     """If func takes an argument, return func, otherwise return wrapped func to ignore the argument."""
 
     if inspect.signature(func).parameters:
-        return func(arg)
+        return func(*args)
 
     return func()
 

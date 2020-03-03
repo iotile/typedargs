@@ -1,9 +1,12 @@
 # pylint: disable=unused-argument,missing-docstring
 
 import json
+from typedargs.exceptions import ValidationError
+
 
 MAPPED_BUILTIN_TYPE = dict
 MAPPED_TYPE_NAMES = ('dict', )
+
 
 def convert(arg, **kwargs):
     if arg is None:

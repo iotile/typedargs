@@ -116,10 +116,10 @@ def test_return_parsing():
     """Make sure we can parse a show-as and format-as line."""
 
     _params, retinfo = parse_docstring(DOCSTRING_SHOWAS)
-    assert retinfo == (None, None, 'string', True, None)
+    assert retinfo == (None, None, ('string', []), True, None)
 
     _params, retinfo = parse_docstring(DOCSTRING_FORMATAS)
-    assert retinfo == (None, "integer", "hex", True, None)
+    assert retinfo == (None, "integer", ("hex", []), True, None)
 
     _params, retinfo = parse_docstring(DOCSTRING_CONTEXT)
     assert retinfo == (None, None, None, False, None)
@@ -223,7 +223,7 @@ def test_return_value_formatter():
     ret_value_1 = func_1()
     ret_value_2 = func_2()
     ret_value_noformatter = func_noformatter()
-    # import pdb; pdb.set_trace()
+
     assert func_1.metadata.format_returnvalue(ret_value_1) == 'foo bar'
     assert func_2.metadata.format_returnvalue(ret_value_2) == 'foo bar'
     with pytest.raises(ValidationError):
@@ -250,6 +250,28 @@ def test_return_value_formatter_string():
 
     ret_value = func_string()
     assert func_string.metadata.format_returnvalue(ret_value) == 'foo\nbar'
+
+
+def test_recursive_parsing_formatters():
+    """Make sure we can parse recursive return value formatters."""
+
+    class User:
+        def __init__(self, short_name):
+            self.short_name = short_name
+
+        @classmethod
+        def format_short_name(cls, obj):
+            return obj.short_name
+
+    @docannotate
+    def func() -> Dict[User, int]:
+        """
+        Returns:
+            dict show-as one_line[short_name, hex]: value description
+        """
+        return {User('john'): 15, User('bob'): 100}
+
+    assert func.metadata.format_returnvalue(func()) == 'bob: 0x64; john: 0xF;'
 
 
 def test_func_type_annotation(caplog):

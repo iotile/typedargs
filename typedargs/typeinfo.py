@@ -176,7 +176,7 @@ class TypeSystem:
 
         return 0
 
-    def format_value(self, value, type_or_name, format=None, **kwargs):
+    def format_value(self, value, type_or_name, formatter=None, sub_formatters=None, **kwargs):
         """
         Convert value to type specified by type_or_name and format it as a string.
 
@@ -186,27 +186,27 @@ class TypeSystem:
 
         typed_val = self.convert_to_type(value, type_or_name, **kwargs)
 
-        if isinstance(type_or_name, str) or self.is_known_type(type_or_name) or utils.is_class_from_typing(type_or_name):
-            typeobj = self.get_proxy_for_type(type_or_name)
-        else:
+        typeobj = self.get_proxy_for_type(type_or_name)
+        if typeobj is None:
             typeobj = type_or_name
 
         # Allow types to specify default formatting functions as 'default_formatter'
         # otherwise if no format is specified, just convert the value to a string
-        if format in (None, 'default', 'str', 'string'):
+        if formatter in (None, 'default', 'str', 'string'):
             if hasattr(typeobj, 'default_formatter'):
                 format_func = getattr(typeobj, 'default_formatter')
                 return format_func(typed_val, **kwargs)
 
             return str(typed_val)
 
-        formatter = "format_%s" % str(format)
-        format_func = getattr(typeobj, formatter, None)
+        format_func = "format_%s" % str(formatter)
+        format_func = getattr(typeobj, format_func, None)
 
         if not callable(format_func):
-            raise ArgumentError("Unknown format for type", type=type_or_name, format=format, formatter_function=formatter)
+            raise ArgumentError("Unknown format for type", type=type_or_name, formatter=formatter, formatter_function=format_func)
 
-        return format_func(typed_val, **kwargs)
+        sub_formatters = sub_formatters if sub_formatters else []
+        return format_func(typed_val, *sub_formatters, **kwargs)
 
     @classmethod
     def _validate_type(cls, typeobj):
@@ -330,11 +330,15 @@ class TypeSystem:
         - a string name of an unknown complex type where base type is a known type factory
         - a complex type class from typing module: Dict[T, T] or List[T]
         - a string name of an unknown type (maybe a complex where base type is unknown type factory)
+        If type_or_name does not fit these criteria then None would be returned.
 
         If type_or_name is a string type name and it is not found in known types, this triggers the loading of
         external types until a matching type is found or until there
         are no more external type sources.
         """
+        if not isinstance(type_or_name, str) and not self.is_known_type(type_or_name) and not utils.is_class_from_typing(type_or_name):
+            return None
+
         if isinstance(type_or_name, str):
             type_or_name = self._canonicalize_type(type_or_name)
 
@@ -537,5 +541,3 @@ def iprint(stringable):
 #information
 
 type_system = TypeSystem(types)  # pylint: disable=invalid-name
-
-
