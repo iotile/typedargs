@@ -326,7 +326,7 @@
 
         <span class="k">return</span> <span class="mi">0</span></div>
 
-<div class="viewcode-block" id="TypeSystem.format_value"><a class="viewcode-back" href="../../api/typedargs.typeinfo.html#typedargs.typeinfo.TypeSystem.format_value">[docs]</a>    <span class="k">def</span> <span class="nf">format_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">type_or_name</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="TypeSystem.format_value"><a class="viewcode-back" href="../../api/typedargs.typeinfo.html#typedargs.typeinfo.TypeSystem.format_value">[docs]</a>    <span class="k">def</span> <span class="nf">format_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">type_or_name</span><span class="p">,</span> <span class="n">formatter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sub_formatters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Convert value to type specified by type_or_name and format it as a string.</span>
 
@@ -336,27 +336,27 @@
 
         <span class="n">typed_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert_to_type</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">type_or_name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">type_or_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_known_type</span><span class="p">(</span><span class="n">type_or_name</span><span class="p">)</span> <span class="ow">or</span> <span class="n">utils</span><span class="o">.</span><span class="n">is_class_from_typing</span><span class="p">(</span><span class="n">type_or_name</span><span class="p">):</span>
-            <span class="n">typeobj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_proxy_for_type</span><span class="p">(</span><span class="n">type_or_name</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
+        <span class="n">typeobj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_proxy_for_type</span><span class="p">(</span><span class="n">type_or_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">typeobj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">typeobj</span> <span class="o">=</span> <span class="n">type_or_name</span>
 
         <span class="c1"># Allow types to specify default formatting functions as &#39;default_formatter&#39;</span>
         <span class="c1"># otherwise if no format is specified, just convert the value to a string</span>
-        <span class="k">if</span> <span class="nb">format</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;default&#39;</span><span class="p">,</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="s1">&#39;string&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">formatter</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;default&#39;</span><span class="p">,</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="s1">&#39;string&#39;</span><span class="p">):</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">typeobj</span><span class="p">,</span> <span class="s1">&#39;default_formatter&#39;</span><span class="p">):</span>
                 <span class="n">format_func</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typeobj</span><span class="p">,</span> <span class="s1">&#39;default_formatter&#39;</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">format_func</span><span class="p">(</span><span class="n">typed_val</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
             <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">typed_val</span><span class="p">)</span>
 
-        <span class="n">formatter</span> <span class="o">=</span> <span class="s2">&quot;format_</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">format</span><span class="p">)</span>
-        <span class="n">format_func</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typeobj</span><span class="p">,</span> <span class="n">formatter</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">format_func</span> <span class="o">=</span> <span class="s2">&quot;format_</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+        <span class="n">format_func</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typeobj</span><span class="p">,</span> <span class="n">format_func</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">format_func</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">ArgumentError</span><span class="p">(</span><span class="s2">&quot;Unknown format for type&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">type_or_name</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span> <span class="n">formatter_function</span><span class="o">=</span><span class="n">formatter</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ArgumentError</span><span class="p">(</span><span class="s2">&quot;Unknown format for type&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">type_or_name</span><span class="p">,</span> <span class="n">formatter</span><span class="o">=</span><span class="n">formatter</span><span class="p">,</span> <span class="n">formatter_function</span><span class="o">=</span><span class="n">format_func</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">format_func</span><span class="p">(</span><span class="n">typed_val</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+        <span class="n">sub_formatters</span> <span class="o">=</span> <span class="n">sub_formatters</span> <span class="k">if</span> <span class="n">sub_formatters</span> <span class="k">else</span> <span class="p">[]</span>
+        <span class="k">return</span> <span class="n">format_func</span><span class="p">(</span><span class="n">typed_val</span><span class="p">,</span> <span class="o">*</span><span class="n">sub_formatters</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">_validate_type</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">typeobj</span><span class="p">):</span>
@@ -480,11 +480,15 @@
 <span class="sd">        - a string name of an unknown complex type where base type is a known type factory</span>
 <span class="sd">        - a complex type class from typing module: Dict[T, T] or List[T]</span>
 <span class="sd">        - a string name of an unknown type (maybe a complex where base type is unknown type factory)</span>
+<span class="sd">        If type_or_name does not fit these criteria then None would be returned.</span>
 
 <span class="sd">        If type_or_name is a string type name and it is not found in known types, this triggers the loading of</span>
 <span class="sd">        external types until a matching type is found or until there</span>
 <span class="sd">        are no more external type sources.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">type_or_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_known_type</span><span class="p">(</span><span class="n">type_or_name</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">utils</span><span class="o">.</span><span class="n">is_class_from_typing</span><span class="p">(</span><span class="n">type_or_name</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">type_or_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">type_or_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_canonicalize_type</span><span class="p">(</span><span class="n">type_or_name</span><span class="p">)</span>
 
@@ -687,8 +691,6 @@
 <span class="c1">#information</span>
 
 <span class="n">type_system</span> <span class="o">=</span> <span class="n">TypeSystem</span><span class="p">(</span><span class="n">types</span><span class="p">)</span>  <span class="c1"># pylint: disable=invalid-name</span>
-
-
 </pre></div>
 
            </div>

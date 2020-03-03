@@ -169,7 +169,6 @@
 <span class="kn">import</span> <span class="nn">astroid.node_classes</span>
 <span class="kn">from</span> <span class="nn">pylint.checkers</span> <span class="kn">import</span> <span class="n">BaseChecker</span>
 <span class="kn">from</span> <span class="nn">pylint.interfaces</span> <span class="kn">import</span> <span class="n">IAstroidChecker</span>
-<span class="kn">from</span> <span class="nn">.metadata</span> <span class="kn">import</span> <span class="n">ParameterInfo</span><span class="p">,</span> <span class="n">ReturnInfo</span>
 
 
 <span class="n">AnnotationList</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;AnnotationList&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">,</span> <span class="s1">&#39;returns&#39;</span><span class="p">,</span> <span class="s1">&#39;use_doc&#39;</span><span class="p">])</span>

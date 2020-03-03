@@ -338,11 +338,14 @@
 <span class="sd">            formatter (str): An optional name of a formatting function specified</span>
 <span class="sd">                for the type given in type_name.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">formatter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">formatter</span> <span class="o">=</span> <span class="p">(</span><span class="n">formatter</span><span class="p">,</span> <span class="p">[])</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span> <span class="o">=</span> <span class="n">ReturnInfo</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">type_name</span><span class="p">,</span> <span class="n">formatter</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="AnnotatedMetadata.string_returnvalue"><a class="viewcode-back" href="../../api/typedargs.metadata.html#typedargs.metadata.AnnotatedMetadata.string_returnvalue">[docs]</a>    <span class="k">def</span> <span class="nf">string_returnvalue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Mark the return value as data that should be converted with str.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span> <span class="o">=</span> <span class="n">ReturnInfo</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span> <span class="o">=</span> <span class="n">ReturnInfo</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="p">[]),</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="AnnotatedMetadata.custom_returnvalue"><a class="viewcode-back" href="../../api/typedargs.metadata.html#typedargs.metadata.AnnotatedMetadata.custom_returnvalue">[docs]</a>    <span class="k">def</span> <span class="nf">custom_returnvalue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">printer</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Use a custom function to print the return value.</span>
@@ -352,7 +355,7 @@
 <span class="sd">                value and convert it to a string.</span>
 <span class="sd">            desc (str): An optional description of the return value.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span> <span class="o">=</span> <span class="n">ReturnInfo</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">printer</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span> <span class="o">=</span> <span class="n">ReturnInfo</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">(</span><span class="n">printer</span><span class="p">,</span> <span class="p">[]),</span> <span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="AnnotatedMetadata.has_varargs"><a class="viewcode-back" href="../../api/typedargs.metadata.html#typedargs.metadata.AnnotatedMetadata.has_varargs">[docs]</a>    <span class="k">def</span> <span class="nf">has_varargs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Check if this function supports variable arguments.&quot;&quot;&quot;</span>
@@ -481,21 +484,23 @@
         <span class="n">validation_err</span> <span class="o">=</span> <span class="n">ValidationError</span><span class="p">(</span><span class="s1">&#39;Cannot convert return value to string&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
 
         <span class="c1"># If the return value is typed, use the type_system to format it</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">type_class</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">type_class</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">value_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">type_class</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">value_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">type_name</span>
 
+        <span class="n">formatter</span><span class="p">,</span> <span class="n">sub_formatters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">formatter</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">formatter</span> <span class="k">else</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="p">[])</span>
+
         <span class="k">if</span> <span class="n">value_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">typeinfo</span><span class="o">.</span><span class="n">type_system</span><span class="o">.</span><span class="n">format_value</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">value_type</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">formatter</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">typeinfo</span><span class="o">.</span><span class="n">type_system</span><span class="o">.</span><span class="n">format_value</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">value_type</span><span class="p">,</span> <span class="n">formatter</span><span class="p">,</span> <span class="n">sub_formatters</span><span class="p">)</span>
 
         <span class="c1"># Otherwise convert this value to a string with formatter function</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">formatter</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;default&#39;</span><span class="p">,</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="s1">&#39;string&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">formatter</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;default&#39;</span><span class="p">,</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="s1">&#39;string&#39;</span><span class="p">):</span>
             <span class="n">formatter</span> <span class="o">=</span> <span class="nb">str</span>
-        <span class="k">elif</span> <span class="n">callable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">formatter</span><span class="p">):</span>
-            <span class="n">formatter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">formatter</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">formatter</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">formatter_name</span> <span class="o">=</span> <span class="s1">&#39;format_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">return_info</span><span class="o">.</span><span class="n">formatter</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">callable</span><span class="p">(</span><span class="n">formatter</span><span class="p">):</span>
+            <span class="n">formatter</span> <span class="o">=</span> <span class="n">formatter</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">formatter</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">formatter_name</span> <span class="o">=</span> <span class="s1">&#39;format_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">formatter_name</span><span class="p">)</span> <span class="ow">and</span> <span class="n">callable</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">formatter_name</span><span class="p">)):</span>
                 <span class="n">formatter</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">formatter_name</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -506,7 +511,7 @@
         <span class="k">if</span> <span class="n">formatter</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">utils</span><span class="o">.</span><span class="n">call_with_optional_arg</span><span class="p">(</span><span class="n">formatter</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">utils</span><span class="o">.</span><span class="n">call_with_optional_arg</span><span class="p">(</span><span class="n">formatter</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="o">*</span><span class="n">sub_formatters</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="AnnotatedMetadata.convert_positional_argument"><a class="viewcode-back" href="../../api/typedargs.metadata.html#typedargs.metadata.AnnotatedMetadata.convert_positional_argument">[docs]</a>    <span class="k">def</span> <span class="nf">convert_positional_argument</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">arg_value</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Convert and validate a positional argument.</span>
@@ -615,11 +620,9 @@
         <span class="c1"># If the validation fails, they will raise an exception that we convert to</span>
         <span class="c1"># an instance of ValidationError</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># arg_type could be: string | builtin type | complex type from typing module | user defined type class</span>
-            <span class="c1"># Last one is not allowed to pass to type_system.get_proxy_for_type()</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg_type</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="n">typeinfo</span><span class="o">.</span><span class="n">type_system</span><span class="o">.</span><span class="n">is_known_type</span><span class="p">(</span><span class="n">arg_type</span><span class="p">)</span> <span class="ow">or</span> <span class="n">utils</span><span class="o">.</span><span class="n">is_class_from_typing</span><span class="p">(</span><span class="n">arg_type</span><span class="p">):</span>
-                <span class="n">checker_type</span> <span class="o">=</span> <span class="n">typeinfo</span><span class="o">.</span><span class="n">type_system</span><span class="o">.</span><span class="n">get_proxy_for_type</span><span class="p">(</span><span class="n">arg_type</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># arg_type here could be: string | builtin type | complex type from typing module | user defined type class</span>
+            <span class="n">checker_type</span> <span class="o">=</span> <span class="n">typeinfo</span><span class="o">.</span><span class="n">type_system</span><span class="o">.</span><span class="n">get_proxy_for_type</span><span class="p">(</span><span class="n">arg_type</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">checker_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">checker_type</span> <span class="o">=</span> <span class="n">arg_type</span>
 
             <span class="k">for</span> <span class="n">validator_name</span><span class="p">,</span> <span class="n">extra_args</span> <span class="ow">in</span> <span class="n">validators</span><span class="p">:</span>

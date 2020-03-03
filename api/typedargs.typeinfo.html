@@ -286,7 +286,7 @@ type. Return 0 if the size is not known.</p>
 
 <dl class="method">
 <dt id="typedargs.typeinfo.TypeSystem.format_value">
-<code class="descname">format_value</code><span class="sig-paren">(</span><em>value</em>, <em>type_or_name</em>, <em>format=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/typeinfo.html#TypeSystem.format_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.typeinfo.TypeSystem.format_value" title="Permalink to this definition">¶</a></dt>
+<code class="descname">format_value</code><span class="sig-paren">(</span><em>value</em>, <em>type_or_name</em>, <em>formatter=None</em>, <em>sub_formatters=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/typedargs/typeinfo.html#TypeSystem.format_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#typedargs.typeinfo.TypeSystem.format_value" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert value to type specified by type_or_name and format it as a string.</p>
 <p>type_or_name must be a known type in the type system or a type class.
 And format, if given, must specify a valid formatting option for the specified type.</p>
@@ -329,7 +329,8 @@ And format, if given, must specify a valid formatting option for the specified t
 - a string name of a known type
 - a string name of an unknown complex type where base type is a known type factory
 - a complex type class from typing module: Dict[T, T] or List[T]
-- a string name of an unknown type (maybe a complex where base type is unknown type factory)</p>
+- a string name of an unknown type (maybe a complex where base type is unknown type factory)
+If type_or_name does not fit these criteria then None would be returned.</p>
 <p>If type_or_name is a string type name and it is not found in known types, this triggers the loading of
 external types until a matching type is found or until there
 are no more external type sources.</p>

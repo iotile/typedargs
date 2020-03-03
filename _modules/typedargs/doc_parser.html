@@ -551,6 +551,22 @@
     <span class="k">return</span> <span class="n">result_list</span>
 
 
+<span class="k">def</span> <span class="nf">_parse_return_value_formatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    formatter examples: hex, string, one_line[string, str]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">base</span><span class="p">,</span> <span class="n">_br</span><span class="p">,</span> <span class="n">subs</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">formatter</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">&#39;[&#39;</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="n">_br</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">subs</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;]&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ValidationError</span><span class="p">(</span><span class="s1">&#39;Malformed formatter notation.&#39;</span><span class="p">,</span> <span class="n">formatter</span><span class="o">=</span><span class="n">formatter</span><span class="p">)</span>
+
+        <span class="n">subs</span> <span class="o">=</span> <span class="n">subs</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">subs</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">subs</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span>
+        <span class="k">return</span> <span class="n">base</span><span class="p">,</span> <span class="n">subs</span>
+
+    <span class="k">return</span> <span class="n">base</span><span class="p">,</span> <span class="p">[]</span>
+
+
 <div class="viewcode-block" id="parse_param"><a class="viewcode-back" href="../../api/typedargs.doc_parser.html#typedargs.doc_parser.parse_param">[docs]</a><span class="k">def</span> <span class="nf">parse_param</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">include_desc</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">validate_type</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Parse a single typed parameter statement.&quot;&quot;&quot;</span>
 
@@ -604,9 +620,9 @@
 
     <span class="k">if</span> <span class="n">ret_def</span> <span class="ow">and</span> <span class="s1">&#39;show-as&#39;</span> <span class="ow">in</span> <span class="n">ret_def</span><span class="p">:</span>
         <span class="n">ret_type</span><span class="p">,</span> <span class="n">_showas</span><span class="p">,</span> <span class="n">show_type</span> <span class="o">=</span> <span class="n">ret_def</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">&#39;show-as&#39;</span><span class="p">)</span>
-        <span class="n">show_type</span> <span class="o">=</span> <span class="n">show_type</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">show_type</span> <span class="o">=</span> <span class="n">_parse_return_value_formatter</span><span class="p">(</span><span class="n">show_type</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">show_type</span> <span class="o">==</span> <span class="s1">&#39;context&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">show_type</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;context&#39;</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">ReturnInfo</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">desc</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">ReturnInfo</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">show_type</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="p">)</span>
@@ -614,7 +630,7 @@
     <span class="k">if</span> <span class="n">ret_def</span> <span class="ow">and</span> <span class="s1">&#39;format-as&#39;</span> <span class="ow">in</span> <span class="n">ret_def</span><span class="p">:</span>
         <span class="n">ret_type</span><span class="p">,</span> <span class="n">_showas</span><span class="p">,</span> <span class="n">formatter</span> <span class="o">=</span> <span class="n">ret_def</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">&#39;format-as&#39;</span><span class="p">)</span>
         <span class="n">ret_type</span> <span class="o">=</span> <span class="n">ret_type</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-        <span class="n">formatter</span> <span class="o">=</span> <span class="n">formatter</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">formatter</span> <span class="o">=</span> <span class="n">_parse_return_value_formatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">ReturnInfo</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">ret_type</span><span class="p">,</span> <span class="n">formatter</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">desc</span><span class="p">)</span>
 
