@@ -112,12 +112,6 @@ class TypeSystem:
         """
         type_obj, proxy_obj = self._get_type_and_proxy(type_or_name)
 
-        # Legacy types supported conversion from binary
-        # so make sure that remains functional.  This behavior is deprecated so
-        # it is only used if the type name is passed in via a string.
-        if isinstance(type_or_name, str) and isinstance(value, bytearray):
-            return self.convert_from_binary(value, type_or_name, **kwargs)
-
         if type_obj is not None and not utils.is_class_from_typing(type_obj):
             # When we have a proper modern type class that supports isinstance()
             # checks, we can just verify if we actually need to do anything
@@ -142,39 +136,6 @@ class TypeSystem:
         except (ValueError, TypeError) as exc:
             raise ValidationError("Could not convert value", type=type_or_name, value=value,
                                   error_message=str(exc))
-
-    def convert_from_binary(self, binvalue, type, **kwargs):
-        """
-        Convert binary data to type 'type'.
-
-        'type' must have a convert_binary function.  If 'type'
-        supports size checking, the size function is called to ensure
-        that binvalue is the correct size for deserialization
-        """
-
-        size = self.get_type_size(type)
-        if size > 0 and len(binvalue) != size:
-            raise ArgumentError("Could not convert type from binary since the data was not the correct size", required_size=size, actual_size=len(binvalue), type=type)
-
-        typeobj = self.get_proxy_for_type(type)
-
-        if not hasattr(typeobj, 'convert_binary'):
-            raise ArgumentError("Type does not support conversion from binary", type=type)
-
-        return typeobj.convert_binary(binvalue, **kwargs)
-
-    def get_type_size(self, type):
-        """
-        Get the size of this type for converting a hex string to the
-        type. Return 0 if the size is not known.
-        """
-
-        typeobj = self.get_proxy_for_type(type)
-
-        if hasattr(typeobj, 'size'):
-            return typeobj.size()
-
-        return 0
 
     def format_value(self, value, type_or_name, formatter=None, sub_formatters=None, **kwargs):
         """
@@ -214,14 +175,14 @@ class TypeSystem:
         Validate that all required type methods are implemented.
 
         At minimum a type must have:
-        - a convert() or convert_binary() function
+        - a convert() function
         - a default_formatter() function
 
         Raises an ArgumentError if the type is not valid
         """
 
-        if not (hasattr(typeobj, "convert") or hasattr(typeobj, "convert_binary")):
-            raise ArgumentError("type is invalid, does not have convert or convert_binary function", type=typeobj, methods=dir(typeobj))
+        if not hasattr(typeobj, "convert"):
+            raise ArgumentError("type is invalid, does not have convert function", type=typeobj, methods=dir(typeobj))
 
         if not hasattr(typeobj, "default_formatter"):
             raise ArgumentError("type is invalid, does not have default_formatter function", type=typeobj, methods=dir(typeobj))
