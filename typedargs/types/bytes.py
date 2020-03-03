@@ -3,13 +3,14 @@
 
 # pylint: disable=unused-argument,missing-docstring
 
-#bytes.py
-#Simple bytearray type
+# bytes.py
+# Simple bytearray type
 
-import sys
 from binascii import unhexlify, hexlify
 
+
 MAPPED_BUILTIN_TYPE = bytes
+
 
 def convert(arg, **kwargs):
     if isinstance(arg, bytearray):
@@ -25,10 +26,6 @@ def convert(arg, **kwargs):
         return arg
 
     raise TypeError("You must create a bytes object from bytes, bytearray or a hex string")
-
-
-def convert_binary(arg, **kwargs):
-    return bytearray(arg)
 
 
 def default_formatter(arg, **kwargs):
