@@ -1,6 +1,6 @@
 # `typedargs`
 
-## HEAD
+## 1.1.0
 
 - Fix docstrings parsing (Issues #47, #34) 
 - Extend docannotate `show-as` return annotation to support more options (Issue #60)
@@ -10,11 +10,12 @@
   and formatting return value  
 - Support specifying validators in docstrings (Issue #65)
 - Support specifying complex return value formatters in docstrings (Issue #61)
+- Support recursive function annotations
 
 
 ## 1.0.2
 
-- Fix deprecation warnings for `imp` and `collections`
+- Fix deprecation warnings for `imp` and `collections` #86
 
 ## 1.0.1
 
