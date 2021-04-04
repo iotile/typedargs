@@ -15,13 +15,18 @@
 #   http://calvinx.com/tag/readline/
 
 
+from distutils.util import convert_path
 from setuptools import setup, find_packages
-from version import version
+
+version = {}
+
+with open(convert_path("typedargs/version.py")) as fp:
+    exec(fp.read(), version)
 
 setup(
     name="typedargs",
     packages=find_packages(exclude=("test",)),
-    version=version,
+    version=version["__version__"],
     license="LGPLv3",
     install_requires=[
         "decorator>=4.3.0",

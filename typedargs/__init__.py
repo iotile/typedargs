@@ -13,3 +13,4 @@
 from typedargs.annotate import (docannotate, param, returns, context, finalizer,
                                 takes_cmdline, annotated, return_type, stringable)
 from typedargs.typeinfo import type_system, iprint
+from .version import __version__
