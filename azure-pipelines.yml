@@ -10,7 +10,7 @@ jobs:
 
 - job: 'Test_Linux'
   pool:
-    vmImage: 'Ubuntu-16.04'
+    vmImage: 'Ubuntu-20.04'
   strategy:
     matrix:
       Python35:
@@ -19,6 +19,8 @@ jobs:
         python.version: '3.6'
       Python37:
         python.version: '3.7'
+      Python38:
+        python.version: '3.8'
     maxParallel: 3
 
   steps:
@@ -43,7 +45,7 @@ jobs:
 
 - job: 'Test_OSX'
   pool:
-    vmImage: 'macOS-10.13'
+    vmImage: 'macOS-10.15'
   strategy:
     matrix:
       Python35:
@@ -52,6 +54,8 @@ jobs:
         python.version: '3.6'
       Python37:
         python.version: '3.7'
+      Python38:
+        python.version: '3.8'
     maxParallel: 3
 
   steps:
@@ -85,6 +89,8 @@ jobs:
         python.version: '3.6'
       Python37:
         python.version: '3.7'
+      Python38:
+        python.version: '3.8'
     maxParallel: 3
 
   steps:

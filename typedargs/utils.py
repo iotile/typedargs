@@ -26,7 +26,7 @@ def _check_and_execute(func, *args, **kwargs):
         convargs.append(val)
 
     convkw = {}
-    for key, val in kwargs:
+    for key, val in kwargs.items():
         convkw[key] = func.metadata.convert_argument(key, val)
 
     if not func.metadata.spec_filled(convargs, convkw):
