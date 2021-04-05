@@ -29,6 +29,7 @@ Submodules
     ~typedargs.type_annotations_parser
     ~typedargs.typeinfo
     ~typedargs.utils
+    ~typedargs.version
 
 
 Subpackages
