@@ -66,6 +66,7 @@ def build_parser():
     """Create an argument parser."""
     parser = argparse.ArgumentParser(description=DESCRIPTION, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('path', default='.', nargs="?", help="The path to the component that we should release")
+    parser.add_argument('-n', '--name', default="typedargs", help="component name")
     parser.add_argument('-c', '--compat', default="universal", choices=['universal', 'python2', 'python3'], help="The python version we should release for")
     parser.add_argument('-e', '--expected', required=True, help="The expected version of the component")
     parser.add_argument('-s', '--slack', help="Optional slack web hook URL")
@@ -154,10 +155,10 @@ def send_slack_message(webhook, message_json):
         raise ExternalError("slack webhook", "Could not post message to slack channel: response=%d" % resp.status_code)
 
 
-def check_component(path, expected_version):
+def check_component(name, path, expected_version):
     """Make sure the package version in setuptools matches what we expect it to be."""
 
-    actual_version = get_version(path)
+    actual_version = get_version(path, name)
 
     if actual_version != expected_version:
         raise MismatchError("component version in version.py", expected_version, actual_version)
@@ -244,7 +245,7 @@ def main(argv=None):
 
         print("\n ---- Verifying component information is correct ----\n")
 
-        check_component(args.path, args.expected)
+        check_component(args.name, args.path, args.expected)
         release_notes = get_release_notes(args.path, args.expected)
 
         print("Release Notes:")

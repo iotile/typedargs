@@ -55,10 +55,23 @@ def build_parser():
     return parser
 
 
-def get_version(path):
+def get_version(path, name=None):
     """Get the version of package."""
 
     compath = os.path.realpath(os.path.abspath(path))
+
+    if name is not None:
+        version = {}
+        try:
+            with open(os.path.join(compath, name, "version.py")) as fp:
+                exec(fp.read(), version)
+        except Exception as e:
+            raise ExternalError("version.py", "Missing version.py file containing a __version__ = \"X.Y.Z\" line") from e
+
+        if "__version__" not in version:
+            raise ExternalError("version.py", "File is missing a __version__ = \"X.Y.Z\" line")
+
+        return version["__version__"]
 
     if sys.path[0] != compath:
         sys.path.insert(0, compath)
