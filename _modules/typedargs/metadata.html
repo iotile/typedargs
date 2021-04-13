@@ -212,14 +212,13 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">load_from_doc</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_doc_parsed</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_annotations_parsed</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_docstring</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="vm">__doc__</span> <span class="k">if</span> <span class="n">func</span><span class="o">.</span><span class="vm">__doc__</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_class_name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="s1">&#39;class_name&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_class_docstring</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="s1">&#39;class_docstring&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_ensure_loaded</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_annotations_parsed</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_from_doc</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_doc_parsed</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_from_doc</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_doc_parsed</span><span class="p">:</span>
             <span class="k">return</span>
 
         <span class="n">type_info_ann</span> <span class="o">=</span> <span class="p">()</span>
@@ -228,8 +227,6 @@
         <span class="c1"># Parse type annotations</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type_annotations</span><span class="p">:</span>
             <span class="n">type_info_ann</span> <span class="o">=</span> <span class="n">parse_annotations</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_type_annotations</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_annotations_parsed</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="c1"># Parse docstring types info</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_from_doc</span><span class="p">:</span>
