@@ -54,14 +54,13 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
 
         self.load_from_doc = False
         self._doc_parsed = False
-        self._annotations_parsed = False
         self._docstring = func.__doc__ if func.__doc__ else ''
         self._class_name = getattr(func, 'class_name', '')
         self._class_docstring = getattr(func, 'class_docstring', '')
 
     def _ensure_loaded(self):
 
-        if self._annotations_parsed and self.load_from_doc and self._doc_parsed:
+        if not self.load_from_doc or self._doc_parsed:
             return
 
         type_info_ann = ()
@@ -70,8 +69,6 @@ class AnnotatedMetadata: #pylint: disable=R0902; These instance variables are re
         # Parse type annotations
         if self._type_annotations:
             type_info_ann = parse_annotations(self._type_annotations)
-
-        self._annotations_parsed = True
 
         # Parse docstring types info
         if self.load_from_doc:
