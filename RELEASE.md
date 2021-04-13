@@ -1,5 +1,8 @@
 # `typedargs`
 
+## 1.1.1
+- Bugfix release: fix `@docannotate` with python's type-annotated parameters
+
 ## 1.1.0
 
 - Fix docstrings parsing (Issues #47, #34) 
@@ -11,7 +14,6 @@
 - Support specifying validators in docstrings (Issue #65)
 - Support specifying complex return value formatters in docstrings (Issue #61)
 - Support recursive function annotations
-
 
 ## 1.0.2
 
