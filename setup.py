@@ -32,7 +32,7 @@ setup(
         "decorator>=4.3.0",
         "pyreadline>=2.1.0;platform_system==\"Windows\""
     ],
-    python_requires=">=3.5,<4",
+    python_requires=">=3.6,<4",
     description="A typechecking and shell generation program for python APIs",
     author="Arch",
     author_email="info@arch-iot.com",
@@ -41,10 +41,10 @@ setup(
     classifiers=[
         "Programming Language :: Python",
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
         "Development Status :: 5 - Production/Stable",
         "License :: OSI Approved :: GNU Library or Lesser General Public License (LGPL)",
         "Operating System :: OS Independent",
