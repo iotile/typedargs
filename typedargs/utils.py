@@ -141,11 +141,14 @@ def get_typing_type_name(type_class):
     return type_class._name
 
 
-def get_typing_type_args(type_class):
+def get_typing_type_args(type_class) -> tuple:
     """
     type_class must be type from typing module.
     It is checked for supporting only List and Dict types.
     """
+    if not hasattr(type_class, '__args__'):
+        return ()
+
     if sys.version_info.minor < 7:
         args = type_class.__args__ if type_class.__args__ else ()
     else:

@@ -1,5 +1,9 @@
 # `typedargs`
 
+## 1.1.2
+- Dropped Python 3.5 support due to EOL
+- Added Python 3.9 support
+
 ## 1.1.1
 - Bugfix release: fix `@docannotate` with python's type-annotated parameters
 
