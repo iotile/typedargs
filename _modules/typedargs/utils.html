@@ -299,11 +299,14 @@
     <span class="k">return</span> <span class="n">type_class</span><span class="o">.</span><span class="n">_name</span></div>
 
 
-<div class="viewcode-block" id="get_typing_type_args"><a class="viewcode-back" href="../../api/typedargs.utils.html#typedargs.utils.get_typing_type_args">[docs]</a><span class="k">def</span> <span class="nf">get_typing_type_args</span><span class="p">(</span><span class="n">type_class</span><span class="p">):</span>
+<div class="viewcode-block" id="get_typing_type_args"><a class="viewcode-back" href="../../api/typedargs.utils.html#typedargs.utils.get_typing_type_args">[docs]</a><span class="k">def</span> <span class="nf">get_typing_type_args</span><span class="p">(</span><span class="n">type_class</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    type_class must be type from typing module.</span>
 <span class="sd">    It is checked for supporting only List and Dict types.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">type_class</span><span class="p">,</span> <span class="s1">&#39;__args__&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">()</span>
+
     <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="o">.</span><span class="n">minor</span> <span class="o">&lt;</span> <span class="mi">7</span><span class="p">:</span>
         <span class="n">args</span> <span class="o">=</span> <span class="n">type_class</span><span class="o">.</span><span class="n">__args__</span> <span class="k">if</span> <span class="n">type_class</span><span class="o">.</span><span class="n">__args__</span> <span class="k">else</span> <span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
