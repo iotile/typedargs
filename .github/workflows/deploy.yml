@@ -1,0 +1,81 @@
+name: "Build and Publish to PyPI"
+
+on:
+  release:
+    types:
+      - published
+
+env:
+  PYTHON_VERSION: 3.7  # ast breaks in 3.8
+
+jobs:
+  upload_pypi:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Cancel duplicate jobs
+        uses: styfle/cancel-workflow-action@0.9.0
+        if: ${{ !env.ACT }}
+
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: pip install -r requirements_build.txt -r requirements_doc.txt
+
+      - name: Build package
+        run: python setup.py sdist bdist_wheel
+      
+      - name: Install self
+        run: pip install ./
+
+      - name: Build docs
+        run: python .multipackage/scripts/build_documentation.py
+
+      - name: Validate package
+        id: validate
+        run: python scripts/validate_and_get_relnotes.py >> $GITHUB_ENV
+        env:
+          EVENT: ${{ toJSON(github.event) }}
+
+      - uses: peaceiris/actions-gh-pages@v3
+        if: ${{ !env.ACT }}
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: built_docs
+
+      - uses: pypa/gh-action-pypi-publish@v1.4.2
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          # Uncomment these for debugging and publishing to test PyPI
+          # repository_url: https://test.pypi.org/legacy/
+          # skip_existing: true
+          verbose: true
+
+      - name: Spam slack (#ci-releases)
+        if: always()
+        uses: 8398a7/action-slack@v3
+        with:
+          status: custom
+          custom_payload: |
+            {
+              text: "Publishing *${{ github.event.release.tag_name }}* to PyPI..",
+              attachments: [
+                {
+                  color: '${{ job.status }}' === 'success' ? 'good' : '${{ job.status }}' === 'failure' ? 'danger' : 'warning',
+                  fallback: "what happened",
+                  text: `*${{ job.status }}* in ${process.env.AS_TOOK} (${process.env.AS_JOB}). ${process.env.AS_REPO}@${process.env.AS_COMMIT} by ${process.env.AS_AUTHOR}`,
+                },
+                {
+                  fallback: "release notes",
+                  pretext: "Release notes for ${{ github.event.release.tag_name }}:",
+                  text: "${{ env.changelog }}"
+                },
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_CI_RELEASES_WEBHOOK }}
+          MATRIX_CONTEXT: ${{ toJSON(matrix) }}
