@@ -52,7 +52,7 @@ def _main():
 
     version_from_file = _get_module_version(module)
     if version_from_file != version:
-        print(f"error=Version mismatch. Expected `{version}`, got `{version_from_file}` in version.py")
+        print(f"error=Version mismatch. Expected `{version}`, got `{version_from_file}` from version.py")
         return 1
 
     error, release_notes = _get_relnotes(module, version)
