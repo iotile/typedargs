@@ -44,24 +44,23 @@ def _main():
     try:
         tag = event["release"]["tag_name"]
     except KeyError:
-        print("Invalid github event payload:")
-        print(json.dumps(event, indent=2))
+        print("VALIDATION_NOTES=Invalid github event payload, see logs.")
+        sys.stderr.write(json.dumps(event, indent=2))
         return 1
 
     module, version = tag.rsplit("-", 1)
 
     version_from_file = _get_module_version(module)
     if version_from_file != version:
-        print(f"error=Version mismatch. Expected `{version}`, got `{version_from_file}` from version.py")
+        print(f"VALIDATION_NOTES=Version mismatch. Expecting `{version}`, got `{version_from_file}` from version.py")
         return 1
 
     error, release_notes = _get_relnotes(module, version)
     if error:
-        print(f"error={error}")
+        print(f"VALIDATION_NOTES={error}")
         return 1
 
-    print(f"changelog={release_notes}")
-
+    print(f"VALIDATION_NOTES={release_notes}")
     return 0
 
 
