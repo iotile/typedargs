@@ -6,6 +6,7 @@ import sys
 
 RELNOTES = "RELEASE.md"
 
+
 def _get_module_version(module):
     with open(os.path.join(module, "version.py"), "r") as f:
         tmp_dict = {}
@@ -32,29 +33,29 @@ def _get_relnotes(module, version, separator="\n"):
     if not found:
         error = f"Release notes for version `{version}` not found in `{RELNOTES}`!"
     if not output:
-        error=f"Release notes for version `{version}` exist in `{RELNOTES}`, but are empty!"
+        error = f"Release notes for version `{version}` exist in `{RELNOTES}`, but are empty!"
 
     return error, separator.join(output)
 
 
 def _main():
-    event=json.loads(os.environ["EVENT"])
+    event = json.loads(os.environ["EVENT"])
 
     try:
-        tag=event["release"]["tag_name"]
+        tag = event["release"]["tag_name"]
     except KeyError:
         print("Invalid github event payload:")
         print(json.dumps(event, indent=2))
         return 1
 
-    module, version=tag.rsplit("-", 1)
+    module, version = tag.rsplit("-", 1)
 
-    version_from_file=_get_module_version(module)
+    version_from_file = _get_module_version(module)
     if version_from_file != version:
         print(f"error=ERROR: Version mismatch. Expected: `{version}`, in version.py: `{version_from_file}`")
         return 1
 
-    error, release_notes=_get_relnotes(module, version, r"\n")
+    error, release_notes = _get_relnotes(module, version, r"\n")
     if error:
         print(f"error={error}")
         return 1
