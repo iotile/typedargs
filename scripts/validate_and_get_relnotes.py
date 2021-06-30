@@ -14,7 +14,7 @@ def _get_module_version(module):
         return tmp_dict["__version__"]
 
 
-def _get_relnotes(module, version, separator="\n"):
+def _get_relnotes(module, version):
     with open(RELNOTES, "r") as f:
         output = []
         version_regex = r"##\s*[vV]?" + version.replace(".", r"\.")
@@ -35,7 +35,7 @@ def _get_relnotes(module, version, separator="\n"):
     if not output:
         error = f"Release notes for version `{version}` exist in `{RELNOTES}`, but are empty!"
 
-    return error, separator.join(output)
+    return error, r"\n".join(output)
 
 
 def _main():
@@ -52,10 +52,10 @@ def _main():
 
     version_from_file = _get_module_version(module)
     if version_from_file != version:
-        print(f"error=ERROR: Version mismatch. Expected: `{version}`, in version.py: `{version_from_file}`")
+        print(f"error=Version mismatch. Expected `{version}`, got `{version_from_file}` in version.py")
         return 1
 
-    error, release_notes = _get_relnotes(module, version, r"\n")
+    error, release_notes = _get_relnotes(module, version)
     if error:
         print(f"error={error}")
         return 1
