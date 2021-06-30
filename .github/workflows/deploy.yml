@@ -6,7 +6,7 @@ on:
       - published
 
 env:
-  PYTHON_VERSION: 3.7  # ast breaks in 3.8
+  PYTHON_VERSION: 3.7 # ast breaks in 3.8
 
 jobs:
   upload_pypi:
@@ -28,7 +28,7 @@ jobs:
 
       - name: Build package
         run: python setup.py sdist bdist_wheel
-      
+
       - name: Install self
         run: pip install ./
 
@@ -62,20 +62,21 @@ jobs:
           status: custom
           custom_payload: |
             {
-              text: "Publishing *${{ github.event.release.tag_name }}* to PyPI..",
+              text: "Publishing `${{ github.event.release.tag_name }}` to PyPI..",
               attachments: [
                 {
                   color: '${{ job.status }}' === 'success' ? 'good' : '${{ job.status }}' === 'failure' ? 'danger' : 'warning',
                   fallback: "what happened",
-                  text: `*${{ job.status }}* in ${process.env.AS_TOOK} (${process.env.AS_JOB}). ${process.env.AS_REPO}@${process.env.AS_COMMIT} by ${process.env.AS_AUTHOR}`,
+                  text: `*${{ job.status }}* in ${process.env.AS_TOOK} (${process.env.AS_JOB}) pushing ${process.env.AS_REPO}@${process.env.AS_COMMIT}`,
                 },
                 {
                   fallback: "release notes",
-                  pretext: "Release notes for ${{ github.event.release.tag_name }}:",
-                  text: "${{ env.changelog }}"
+                  pretext: "${{ env.error }}" === "" ? "Release notes for" : "Error in" + " `${{ github.event.release.tag_name }}`:",
+                  title: "${{ env.error }}",
+                  text: "${{ env.error }}" === "" ? "${{ env.changelog }}" : "",
                 },
               ]
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_CI_RELEASES_WEBHOOK }}
-          MATRIX_CONTEXT: ${{ toJSON(matrix) }}
+          MATRIX_CONTEXT: ${{ toJson(matrix) }}
