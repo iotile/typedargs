@@ -1,5 +1,8 @@
 # `typedargs`
 
+## 1.1.3
+- No code changes - just testing the new PyPI publishing pipeline.
+
 ## 1.1.2
 - Dropped Python 3.5 support due to EOL
 - Added Python 3.9 support
