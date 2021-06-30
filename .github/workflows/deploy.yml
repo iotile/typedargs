@@ -17,16 +17,6 @@ jobs:
         uses: styfle/cancel-workflow-action@0.9.0
         if: ${{ !env.ACT }}
 
-      - name: Dump matrix context
-        env:
-          MATRIX_CONTEXT: ${{ toJson(matrix) }}
-        run: echo "$MATRIX_CONTEXT"
-
-      - name: Dump matrix context another way
-        env:
-          MATRIX_CONTEXT: ${{ toJSON(matrix) }}
-        run: echo "$MATRIX_CONTEXT"
-
       - uses: actions/checkout@v2
 
       - uses: actions/setup-python@v2
@@ -69,7 +59,6 @@ jobs:
         if: always()
         uses: 8398a7/action-slack@v3
         env:
-          MATRIX_CONTEXT: ${{ toJson(matrix) }}
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_CI_RELEASES_WEBHOOK }}
         with:
           status: custom
@@ -80,12 +69,12 @@ jobs:
                 {
                   color: '${{ job.status }}' === 'success' ? 'good' : '${{ job.status }}' === 'failure' ? 'danger' : 'warning',
                   fallback: "what happened",
-                  text: `*${{ job.status }}* in ${process.env.AS_TOOK} (${process.env.AS_JOB}) pushing ${process.env.AS_REPO}@${process.env.AS_COMMIT}`,
+                  text: `*${{ job.status }}* publishing ${process.env.AS_REPO}@${process.env.AS_COMMIT}`,
                 },
                 {
                   fallback: "release notes",
-                  pretext: "${{ env.error }}" === "" ? "Release notes for" : "Error in" + " `${{ github.event.release.tag_name }}`:",
-                  text: "${{ env.error }}" === "" ? "${{ env.changelog }}" : "${{ env.error }}",
+                  pretext: "Notes for `${{ github.event.release.tag_name }}`:",
+                  text: "${{ env.VALIDATION_NOTES }}",
                 },
               ]
             }
