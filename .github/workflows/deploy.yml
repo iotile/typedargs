@@ -17,6 +17,16 @@ jobs:
         uses: styfle/cancel-workflow-action@0.9.0
         if: ${{ !env.ACT }}
 
+      - name: Dump matrix context
+        env:
+          MATRIX_CONTEXT: ${{ toJson(matrix) }}
+        run: echo "$MATRIX_CONTEXT"
+
+      - name: Dump matrix context another way
+        env:
+          MATRIX_CONTEXT: ${{ toJSON(matrix) }}
+        run: echo "$MATRIX_CONTEXT"
+
       - uses: actions/checkout@v2
 
       - uses: actions/setup-python@v2
@@ -58,6 +68,9 @@ jobs:
       - name: Spam slack (#ci-releases)
         if: always()
         uses: 8398a7/action-slack@v3
+        env:
+          MATRIX_CONTEXT: ${{ toJson(matrix) }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_CI_RELEASES_WEBHOOK }}
         with:
           status: custom
           custom_payload: |
@@ -72,11 +85,7 @@ jobs:
                 {
                   fallback: "release notes",
                   pretext: "${{ env.error }}" === "" ? "Release notes for" : "Error in" + " `${{ github.event.release.tag_name }}`:",
-                  title: "${{ env.error }}",
-                  text: "${{ env.error }}" === "" ? "${{ env.changelog }}" : "",
+                  text: "${{ env.error }}" === "" ? "${{ env.changelog }}" : "${{ env.error }}",
                 },
               ]
             }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_CI_RELEASES_WEBHOOK }}
-          MATRIX_CONTEXT: ${{ toJson(matrix) }}
